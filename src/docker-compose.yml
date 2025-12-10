@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  issuer:
+    build:
+      context: ./WebApi.Issuer
+      dockerfile: Dockerfile
+    container_name: webapi-issuer
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - DOTNET_RUNNING_IN_CONTAINER=true
+
+  service:
+    build:
+      context: ./WebApi.Service
+      dockerfile: Dockerfile
+    container_name: webapi-service
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      # Point JWT validation to issuer container
+      - Authentication__Authority=http://issuer:80
+      - Authentication__Audience=webapi-client
+    depends_on:
+      - issuer
