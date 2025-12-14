@@ -1,11 +1,15 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY . .
-RUN dotnet restore WebApi.Issuer.csproj
-RUN dotnet publish WebApi.Issuer.csproj -c Release -o /app/publish
+RUN dotnet restore WebApi.sln
+WORKDIR /src/WebApi.Issuer
+RUN dotnet publish WebApi.Issuer.csproj -c Release -o /publish /p:DebugType=none /p:DebugSymbols=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+COPY --from=build /src/setup/extra-runtime-setup.sh /usr/local/bin/extra-runtime-setup.sh
+RUN chmod +x /usr/local/bin/extra-runtime-setup.sh
 WORKDIR /app
-COPY --from=build /app/publish .
-ENV ASPNETCORE_URLS=http://+:80
-ENTRYPOINT ["dotnet", "WebApi.Issuer.dll"]
+COPY --from=build /publish .
+ENTRYPOINT ["bash","-c","extra-runtime-setup.sh https/cert.crt && exec dotnet WebApi.Issuer.dll"]

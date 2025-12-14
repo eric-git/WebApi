@@ -1,6 +1,0 @@
-@WebApi.Service_HostAddress = http://localhost:5104
-
-GET {{WebApi.Service_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

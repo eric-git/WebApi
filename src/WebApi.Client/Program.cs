@@ -1,58 +1,67 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using Microsoft.IdentityModel.Tokens;
+﻿using System.Net.Http.Headers;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using WebApi.Client;
+using WebApi.Common;
+using static WebApi.Common.SecurityExtensions;
 
-// === CONFIG ===
-var issuerUrl = "https://localhost:5001"; // WebApi.Issuer
-var tokenEndpoint = $"{issuerUrl}/connect/token";
-var serviceUrl = "https://localhost:5002/WeatherForecast"; // WebApi.Service
-var clientId = "webapi-client";
-var kid = "client-key-1";
+var host = Host.CreateDefaultBuilder(args)
+    .ConfigureAppConfiguration((context, config) =>
+    {
+        config.Sources.Clear();
+        var environment = context.HostingEnvironment.EnvironmentName;
+        config.AddJsonFile("appsettings.json", false, true)
+            .AddJsonFile($"appsettings.{environment}.json", true, true)
+            .AddEnvironmentVariables()
+            .AddCommandLine(args);
+    })
+    .ConfigureLogging((context, logging) =>
+    {
+        logging.AddConfiguration(context.Configuration.GetSection("Logging"));
+        logging.AddConsole();
+    })
+    .ConfigureServices((context, services) =>
+    {
+        services.AddMemoryCache()
+            .AddScoped<IServiceClient, ServiceClient>()
+            .AddScoped<ITokenService, AccessTokenService>(provider =>
+            {
+                AccessTokenService accessTokenService = new(
+                    context.Configuration["API_ID"]!,
+                    context.Configuration["CLIENT_ID"]!,
+                    provider.GetRequiredService<IHttpClientFactory>(),
+                    provider.GetRequiredService<IMemoryCache>());
+                return accessTokenService;
+            })
+            .AddScoped<AccessTokenHandler>()
+            .AddTransient<LoggingHandler>()
+            .AddScoped<ClientTest>();
+        services.AddHttpClient(ServiceClient.HttpClientName, client =>
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.BaseAddress = new Uri(context.Configuration["API_BASE_URL"]!);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = CertificateValidationCallback
+            })
+            .AddHttpMessageHandler<AccessTokenHandler>()
+            .AddHttpMessageHandler<LoggingHandler>();
+        services.AddHttpClient(AccessTokenService.HttpClientName, client =>
+            {
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.BaseAddress = new Uri(context.Configuration["ISSUER_BASE_URL"]!);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = CertificateValidationCallback
+            })
+            .AddHttpMessageHandler<LoggingHandler>();
+    })
+    .Build();
 
-// === STEP 1: Generate client_assertion JWT ===
-using var rsa = RSA.Create(2048); // In real use, load your private key instead
-var signingCredentials = new SigningCredentials(new RsaSecurityKey(rsa)
-{
-    KeyId = kid
-}, SecurityAlgorithms.RsaSha256);
-
-var handler = new JwtSecurityTokenHandler();
-var descriptor = new SecurityTokenDescriptor
-{
-    Issuer = clientId,
-    Subject = new ClaimsIdentity(new[] { new Claim("sub", clientId) }),
-    Audience = tokenEndpoint,
-    Expires = DateTime.UtcNow.AddMinutes(5),
-    SigningCredentials = signingCredentials
-};
-
-var clientAssertion = handler.CreateEncodedJwt(descriptor);
-
-// === STEP 2: Request token from issuer ===
-using var http = new HttpClient();
-var form = new Dictionary<string, string>
-{
-    ["grant_type"] = "client_credentials",
-    ["client_id"] = clientId,
-    ["scope"] = "api.read",
-    ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-    ["client_assertion"] = clientAssertion
-};
-
-var tokenResponse = await http.PostAsync(tokenEndpoint, new FormUrlEncodedContent(form));
-var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
-Console.WriteLine("Token response:");
-Console.WriteLine(tokenJson);
-
-// Extract access_token
-var accessToken = System.Text.Json.JsonDocument.Parse(tokenJson)
-    .RootElement.GetProperty("access_token").GetString();
-
-// === STEP 3: Call WeatherForecast API ===
-http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-var forecastResponse = await http.GetStringAsync(serviceUrl);
-
-Console.WriteLine("\nWeather forecast:");
-Console.WriteLine(forecastResponse);
+var clientTest = host.Services.GetRequiredService<ClientTest>();
+await clientTest.TestAsync();

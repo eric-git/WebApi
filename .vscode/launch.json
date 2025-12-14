@@ -1,0 +1,76 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Issuer (Development)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-issuer",
+            "program": "${workspaceFolder}/src/WebApi.Issuer/bin/Debug/net10.0/WebApi.Issuer.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/WebApi.Issuer",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bhttps://localhost:5003\\b",
+                "uriFormat": "https://localhost:5003/"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_Kestrel__Certificates__Default__Path": "./https/cert.crt",
+                "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./https/key.pem",
+                "ISSUER_BASE_URL": "https://localhost:5003",
+                "TOKEN_LIFETIME_MINUTES": "30",
+                "checkForDevCert": "false"
+            }
+        },
+        {
+            "name": "Api (Development)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-api",
+            "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/WebApi.Service",
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bhttps://localhost:5004\\b",
+                "uriFormat": "https://localhost:5004/"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_Kestrel__Certificates__Default__Path": "./https/cert.crt",
+                "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./https/key.pem",
+                "ISSUER_BASE_URL": "https://localhost:5003",
+                "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+                "checkForDevCert": "false"
+            }
+        },
+        {
+            "name": "Client (Development)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-client",
+            "program": "${workspaceFolder}/src/WebApi.Client/bin/Debug/net10.0/WebApi.Client.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/WebApi.Client",
+            "console": "integratedTerminal",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ISSUER_BASE_URL": "https://localhost:5003",
+                "API_BASE_URL": "https://localhost:5004",
+                "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+                "CLIENT_ID": "088f6a2e-8f00-4340-b32d-49de4acde03c"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug All (Issuer+Api+Client)",
+            "configurations": [
+                "Issuer (Development)",
+                "Api (Development)",
+                "Client (Development)"
+            ]
+        }
+    ]
+}

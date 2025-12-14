@@ -1,5 +1,6 @@
 {
-    "cSpell.words": [
-        "ASPNETCORE"
-    ]
+    "cSpell.words": [],
+    "workbench.colorTheme": "Abyss",
+    "workbench.iconTheme": "material-icon-theme",
+    "debug.hideSlowPreLaunchWarning": true
 }
