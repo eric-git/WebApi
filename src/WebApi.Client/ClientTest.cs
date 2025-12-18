@@ -9,7 +9,7 @@ public class ClientTest(IHostEnvironment hostEnvironment, IServiceClient service
     {
         WriteTitle($"Runtime: {hostEnvironment.EnvironmentName}", false);
         WriteTitle("(1/5) Test creating a record...", false);
-        WriteWarning("This is the first time invoking the service, you are expected to see an Access Token block...");
+        WriteWarning("On the first invocation of the service, you should expect to see an access token request and response block.");
         var newGame = GetNewGameData();
         var id = await serviceClient.CreateGameAsync(newGame);
 
@@ -62,8 +62,7 @@ public class ClientTest(IHostEnvironment hostEnvironment, IServiceClient service
                 Player = new Player
                 {
                     Name = "Mario",
-                    Position = 1,
-                    LapsCompleted = 2
+                    Health = 100
                 }
             },
             Relations =
