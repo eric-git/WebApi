@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Client (Development)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ISSUER_BASE_URL": "https://localhost:5003",
+        "API_BASE_URL": "https://localhost:5004",
+        "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+        "CLIENT_ID": "088f6a2e-8f00-4340-b32d-49de4acde03c",
+        "checkForDevCert": "false"
+      }
+    }
+  }
+}

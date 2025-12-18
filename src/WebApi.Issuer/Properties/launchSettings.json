@@ -1,22 +1,16 @@
 ﻿{
-  "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "http": {
+    "Issuer (Development)": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": false,
-      "applicationUrl": "http://localhost:5103",
+      "applicationUrl": "https://localhost:5003",
+      "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "https": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": false,
-      "applicationUrl": "https://localhost:7250;http://localhost:5103",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./https/cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./https/key.pem",
+        "ISSUER_BASE_URL": "https://localhost:5003",
+        "TOKEN_LIFETIME_MINUTES": "30"
       }
     }
   }

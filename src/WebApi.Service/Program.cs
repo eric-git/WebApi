@@ -1,48 +1,35 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-
+using WebApi.Service;
+using static WebApi.Common.MiddlewareExtensions;
+using static WebApi.Common.SecurityExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add controllers
-builder.Services.AddControllers();
-
-// Configure JWT bearer authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Configuration.AddEnvironmentVariables();
+var (_, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemFile("./signing/issuer-public.pem");
+builder.Services.AddAuthorization()
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opts =>
     {
-        // Authority = issuer URL from WebApi.Issuer
-        options.Authority = "https://localhost:5001"; // adjust if containerized differently
-        options.Audience = "webapi-client";           // must match client_id or aud claim
-        options.RequireHttpsMetadata = false;         // for local dev
-
-        options.TokenValidationParameters = new TokenValidationParameters
+        opts.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = "https://localhost:5001/",
+            ValidIssuer = builder.Configuration["ISSUER_BASE_URL"],
             ValidateAudience = true,
-            ValidAudience = "webapi-client",
+            ValidAudience = builder.Configuration["API_ID"],
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = rsaSecurityKey
         };
     });
-
-builder.Services.AddAuthorization();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseAuthentication()
+    .UseAuthorization();
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
+app.ProvideFavIcon()
+    .MapStatus(
+        Assembly.GetEntryAssembly()!,
+        bool.TryParse(app.Configuration["DOTNET_RUNNING_IN_CONTAINER"], out var inContainer) && inContainer)
+    .MapGame();
 app.Run();

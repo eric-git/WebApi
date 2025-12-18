@@ -1,29 +1,77 @@
-version: "3.9"
-
+name: webapi-suite
 services:
   issuer:
+    labels:
+      - "tier=backend"
+      - "purpose=authentication and authorization server"
     build:
-      context: ./WebApi.Issuer
-      dockerfile: Dockerfile
-    container_name: webapi-issuer
+      context: .
+      dockerfile: ./WebApi.Issuer/Dockerfile
+    image: webapi-suite/issuer:latest
     ports:
-      - "5001:80"
+      - "5001:5001"
     environment:
-      - ASPNETCORE_URLS=http://+:80
-      - DOTNET_RUNNING_IN_CONTAINER=true
-
-  service:
+      - DOTNET_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:5001
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/https/cert.crt
+      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/https/key.pem
+      - ISSUER_BASE_URL=https://issuer:5001
+      - TOKEN_LIFETIME_MINUTES=30
+    volumes:
+      - ./WebApi.Issuer/signing:/app/signing:ro
+      - ./WebApi.Issuer/https:/app/https:ro
+      - ./WebApi.Issuer/data:/app/data:rw
+    networks:
+      - public
+  api:
+    labels:
+      - "tier=backend"
+      - "purpose=protected Web API service"
     build:
-      context: ./WebApi.Service
-      dockerfile: Dockerfile
-    container_name: webapi-service
+      context: .
+      dockerfile: ./WebApi.Service/Dockerfile
+    image: webapi-suite/api:latest
     ports:
-      - "5002:80"
+      - "5002:5002"
     environment:
-      - ASPNETCORE_URLS=http://+:80
-      - DOTNET_RUNNING_IN_CONTAINER=true
-      # Point JWT validation to issuer container
-      - Authentication__Authority=http://issuer:80
-      - Authentication__Audience=webapi-client
+      - DOTNET_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:5002
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/https/cert.crt
+      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/https/key.pem
+      - ISSUER_BASE_URL=https://issuer:5001
+      - API_ID=af2157c0-3280-42e7-b327-33e5aa3ec76e
+    volumes:
+      - ./WebApi.Service/signing:/app/signing:ro
+      - ./WebApi.Service/https:/app/https:ro
+      - ./WebApi.Service/data:/app/data:rw
+    networks:
+      - public
     depends_on:
       - issuer
+  client:
+    labels:
+      - "tier=frontend"
+      - "purpose=client application consuming the Web API"
+    build:
+      context: .
+      dockerfile: ./WebApi.Client/Dockerfile
+    image: webapi-suite/client:latest
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      - ISSUER_BASE_URL=https://issuer:5001
+      - API_BASE_URL=https://api:5002
+      - CLIENT_ID=088f6a2e-8f00-4340-b32d-49de4acde03c
+      - API_ID=af2157c0-3280-42e7-b327-33e5aa3ec76e
+    volumes:
+      - ./WebApi.Client/signing:/app/signing:ro
+      - ./WebApi.Client/https:/app/https:ro
+    networks:
+      - public
+    depends_on:
+      - issuer
+      - api
+networks:
+  public:
+    labels:
+      - "purpose=publicly accessible network for the suite of Web API services"
+    driver: bridge

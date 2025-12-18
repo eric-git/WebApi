@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csdevkit",
+        "streetsidesoftware.code-spell-checker",
+        "ms-azuretools.vscode-containers",
+        "editorconfig.editorconfig",
+        "pkief.material-icon-theme",
+        "ms-vscode.powershell",
+        "mads-hartmann.bash-ide-vscode"
+    ]
+}
