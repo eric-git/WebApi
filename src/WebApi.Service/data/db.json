@@ -17,7 +17,7 @@
           "name": "Free the Divine Beast Vah Ruta",
           "attributes": {
             "status": "Completed",
-            "reward": "Mipha\u0027s Grace"
+            "reward": "Mipha's Grace"
           }
         },
         {
@@ -32,11 +32,11 @@
         {
           "id": "e9c1a4b3-6d7e-4f8a-9b0c-1d2e3f4a5b6c",
           "type": "Equipment",
-          "name": "Champion\u0027s Gear",
+          "name": "Champion's Gear",
           "attributes": {
             "weapon": "Master Sword",
             "shield": "Hylian Shield",
-            "armor": "Champion\u0027s Tunic"
+            "armor": "Champion's Tunic"
           }
         }
       ]
@@ -78,6 +78,47 @@
             "weapon": "Iron Sword",
             "tool": "Wooden Pickaxe",
             "armor": "Leather Tunic"
+          }
+        }
+      ]
+    },
+    {
+      "id": "caa147db-f090-413a-91ae-eb797ecef10d",
+      "type": "Game",
+      "name": "Mario Kart 8 Deluxe",
+      "attributes": {
+        "player": {
+          "name": "Mario",
+          "health": 100
+        }
+      },
+      "relations": [
+        {
+          "id": "ee3a41bb-b0b4-4756-8df5-76d10688c893",
+          "type": "Quest",
+          "name": "Win Rainbow Road",
+          "attributes": {
+            "status": "In Progress",
+            "reward": "Gold Trophy"
+          }
+        },
+        {
+          "id": "9fb6af70-02f6-4809-88e2-b832b3d55495",
+          "type": "Quest",
+          "name": "Collect 50 Coins",
+          "attributes": {
+            "status": "Completed",
+            "reward": "Speed Boost"
+          }
+        },
+        {
+          "id": "ab29300c-f660-416d-866a-9a714307667e",
+          "type": "Equipment",
+          "name": "Kart Setup",
+          "attributes": {
+            "vehicle": "Standard Kart",
+            "tires": "Monster Tires",
+            "glider": "Super Glider"
           }
         }
       ]

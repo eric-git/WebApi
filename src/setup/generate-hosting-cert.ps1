@@ -43,15 +43,20 @@ begin {
     $ErrorActionPreference = "Stop"
     $scriptDir = Split-Path -Path $PSCommandPath -Parent
     $generatedFilePath = "$scriptDir/hosting"
-    $projectDir = ""
     $alternateName = $Mode.ToLower()
     switch ($Mode) {
-        "API"    { $projectDir = "WebApi.Service" }
-        "ISSUER" { $projectDir = "WebApi.Issuer" }
-        default  { throw "Invalid mode specified. Use 'API' or 'ISSUER'." }
+        "API" {
+            $projectDir = "WebApi.Service"
+            $commonName = "Web API" 
+        }
+        "ISSUER" {
+            $projectDir = "WebApi.Issuer"
+            $commonName = "Token Issuer" 
+        }
+        default { throw "Invalid mode specified. Use 'API' or 'ISSUER'." }
     }
     $generatedCertPath = "$generatedFilePath/$alternateName-cert.crt"
-    $generatedKeyPath  = "$generatedFilePath/$alternateName-key.pem"
+    $generatedKeyPath = "$generatedFilePath/$alternateName-key.pem"
     Write-Host "Generating self-signed hosting certificate..."
 }
 process {
@@ -62,12 +67,17 @@ process {
         -out "$generatedCertPath" `
         -keyout "$generatedKeyPath" `
         -days $ValidDays `
-        -subj "/CN=$alternateName" `
-        -addext "subjectAltName=DNS:localhost,DNS:$alternateName"
+        -subj "/C=AU/ST=ACT/L=Canberra/O=Project ERIC/OU=Web API Suite/CN=$commonName" `
+        -addext "subjectAltName=DNS:localhost,DNS:$alternateName" `
+        -addext "extendedKeyUsage=serverAuth"
+
 
     Copy-Item -Path $generatedCertPath -Destination "$scriptDir/../$projectDir/https/cert.crt" -Force
     Copy-Item -Path $generatedKeyPath  -Destination "$scriptDir/../$projectDir/https/key.pem" -Force
     Copy-Item -Path $generatedCertPath -Destination "$scriptDir/../WebApi.Client/https/$alternateName-cert.crt" -Force
+    if ($Mode -eq "ISSUER") {
+        Copy-Item -Path $generatedCertPath -Destination "$scriptDir/../WebApi.Service/https/$alternateName-cert.crt" -Force
+    }
 }
 end {
     Write-Host "Certificate generated."

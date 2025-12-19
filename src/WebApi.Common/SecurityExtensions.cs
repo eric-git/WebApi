@@ -9,7 +9,7 @@ public static class SecurityExtensions
 {
     public static Func<HttpRequestMessage, X509Certificate2?, X509Chain?, SslPolicyErrors, bool> CertificateValidationCallback { get; } = (_, cert, chain, errors) =>
     {
-        if (errors == SslPolicyErrors.None)
+        if (errors is SslPolicyErrors.None)
         {
             return true;
         }
@@ -20,7 +20,7 @@ public static class SecurityExtensions
         return chain.Build(cert!);
     };
 
-    public static async Task<(RSA Rsa, RsaSecurityKey RsaSecurityKey)> CreateRsaSecurityKeyFromPemFile(string pemFilePath)
+    public static async Task<(RSA Rsa, RsaSecurityKey RsaSecurityKey)> CreateRsaSecurityKeyFromPemFileAsync(string pemFilePath)
     {
         var pem = await File.ReadAllTextAsync(pemFilePath);
         var rsa = RSA.Create();

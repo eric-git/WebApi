@@ -12,4 +12,4 @@ COPY --from=build /src/setup/extra-runtime-setup.sh /usr/local/bin/extra-runtime
 RUN chmod +x /usr/local/bin/extra-runtime-setup.sh
 WORKDIR /app
 COPY --from=build /publish .
-ENTRYPOINT ["bash","-c","extra-runtime-setup.sh https/cert.crt && exec dotnet WebApi.Issuer.dll"]
+ENTRYPOINT ["bash","-c","extra-runtime-setup.sh && exec dotnet WebApi.Issuer.dll"]

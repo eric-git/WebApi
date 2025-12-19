@@ -42,7 +42,6 @@ begin {
     $ErrorActionPreference = "Stop"
     $scriptDir = Split-Path -Path $PSCommandPath -Parent
     $issuerProjectDir = "WebApi.Issuer"
-    $apiProjectDir = "WebApi.Service"
     $clientProjectDir = "WebApi.Client"
     switch ($Mode) {
         "ISSUER" {
@@ -66,7 +65,6 @@ process {
         "ISSUER" {
             Copy-Item -Path $privatePemFilePath -Destination "$scriptDir/../$issuerProjectDir/signing/private.pem" -Force
             Copy-Item -Path $publicPemFilePath -Destination "$scriptDir/../$issuerProjectDir/signing/public.pem" -Force
-            Copy-Item -Path $publicPemFilePath -Destination "$scriptDir/../$apiProjectDir/signing/issuer-public.pem" -Force
         }
         "CLIENT" {
             Copy-Item -Path $privatePemFilePath -Destination "$scriptDir/../$clientProjectDir/signing/private.pem" -Force

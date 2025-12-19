@@ -8,8 +8,7 @@ public class ClientTest(IHostEnvironment hostEnvironment, IServiceClient service
     public async Task TestAsync()
     {
         WriteTitle($"Runtime: {hostEnvironment.EnvironmentName}", false);
-        WriteTitle("(1/5) Test creating a record...", false);
-        WriteWarning("On the first invocation of the service, you should expect to see an access token request and response block.");
+        WriteTitle("(1/5) Test creating a record...");
         var newGame = GetNewGameData();
         var id = await serviceClient.CreateGameAsync(newGame);
 
@@ -34,11 +33,6 @@ public class ClientTest(IHostEnvironment hostEnvironment, IServiceClient service
         WriteText(text, "\e[1m\e[32m", wait);
     }
 
-    private static void WriteWarning(string text, bool wait = true)
-    {
-        WriteText(text, "\e[33m", wait);
-    }
-
     private static void WriteText(string text, string settings, bool wait)
     {
         Console.WriteLine($"{settings}{text}\e[0m");
@@ -47,7 +41,7 @@ public class ClientTest(IHostEnvironment hostEnvironment, IServiceClient service
             return;
         }
 
-        Console.WriteLine("Press any key to continue, or terminate...");
+        Console.WriteLine("\e[33mPress any key to continue, or terminate...\e[0m");
         Console.ReadKey();
     }
 

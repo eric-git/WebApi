@@ -1,5 +1,8 @@
 namespace WebApi.Issuer.Model;
 
-public record ServiceAccess(
-    string Id,
-    string[] Scopes);
+public class ServiceAccess
+{
+    public string? Id { get; set; }
+
+    public List<string>? Scopes { get; set; }
+}

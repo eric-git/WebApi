@@ -12,4 +12,4 @@ COPY --from=build /src/setup/extra-runtime-setup.sh /usr/local/bin/extra-runtime
 RUN chmod +x /usr/local/bin/extra-runtime-setup.sh
 WORKDIR /app
 COPY --from=build /publish .
-ENTRYPOINT ["sh","-c","extra-runtime-setup.sh https/api-cert.crt https/issuer-cert.crt && exec sleep infinity"]
+ENTRYPOINT ["sh","-c","extra-runtime-setup.sh && exec sleep infinity"]

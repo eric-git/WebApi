@@ -2,7 +2,7 @@
 set -eu
 
 show_help() {
-  cat <<'EOF'
+  cat <<EOF
 SYNOPSIS
     Generates RSA security key pairs for either the Issuer or a Client project.
 
@@ -33,14 +33,14 @@ EXAMPLES
         Generates client keys and copies them into WebApi.Client and WebApi.Issuer.
 EOF
 }
-if [[ "${1:-}" == "--help" ]]; then
+if [ "${1:-}" = "--help" ]; then
   show_help
   exit 0
 fi
 
 MODE="ISSUER"
-CLIENT_ID="088f6a2e-8f00-4340-b32d-49de4acde03c"
-while [[ $# -gt 0 ]]; do
+CLIENT_ID=""
+while [ $# -gt 0 ]; do
   case "$1" in
     --mode)
       MODE="$2"
@@ -58,16 +58,15 @@ while [[ $# -gt 0 ]]; do
 done
 MODE_UPPER=$(echo "$MODE" | tr '[:lower:]' '[:upper:]')
 MODE_LOWER=$(echo "$MODE" | tr '[:upper:]' '[:lower:]')
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ISSUER_PROJECT_DIR="WebApi.Issuer"
-API_PROJECT_DIR="WebApi.Service"
 CLIENT_PROJECT_DIR="WebApi.Client"
 case "$MODE_UPPER" in
   ISSUER)
     PREFIX="issuer"
     ;;
   CLIENT)
-    if [[ -z "$CLIENT_ID" || "$CLIENT_ID" =~ ^[[:space:]]*$ ]]; then
+    if [ -z "$CLIENT_ID" ]; then
       echo "Error: CLIENT mode requires a non-empty ClientId"
       exit 1
     fi
@@ -87,10 +86,9 @@ openssl genrsa -out "$PRIVATE_PEM" 2048
 openssl rsa -in "$PRIVATE_PEM" -pubout -out "$PUBLIC_PEM"
 case "$MODE_UPPER" in
   ISSUER)
-    mkdir -p "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing" "$SCRIPT_DIR/../$API_PROJECT_DIR/signing"
+    mkdir -p "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing"
     cp -f "$PRIVATE_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing/private.pem"
     cp -f "$PUBLIC_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing/public.pem"
-    cp -f "$PUBLIC_PEM" "$SCRIPT_DIR/../$API_PROJECT_DIR/signing/issuer-public.pem"
     ;;
   CLIENT)
     mkdir -p "$SCRIPT_DIR/../$CLIENT_PROJECT_DIR/signing" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing"

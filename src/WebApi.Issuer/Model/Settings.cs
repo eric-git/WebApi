@@ -1,5 +1,8 @@
 namespace WebApi.Issuer.Model;
 
-public record Settings(
-    Service[] Services,
-    Client[] Clients);
+public class Settings
+{
+    public List<Service>? Services { get; set; }
+
+    public List<Client>? Clients { get; set; }
+}

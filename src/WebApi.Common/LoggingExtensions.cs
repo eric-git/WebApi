@@ -46,7 +46,7 @@ public static class LoggingExtensions
 
     extension(HttpContent? httpContent)
     {
-        private async Task<string> Format()
+        private async Task<string> FormatAsync()
         {
             if (httpContent is null)
             {
@@ -79,14 +79,14 @@ public static class LoggingExtensions
 
     extension(HttpRequestMessage httpRequestMessage)
     {
-        public async Task Log(ILogger logger)
+        public async Task LogAsync(ILogger logger)
         {
             if (!logger.IsEnabled(LogLevel.Information))
             {
                 return;
             }
 
-            var content = await httpRequestMessage.Content.Format();
+            var content = await httpRequestMessage.Content.FormatAsync();
             StringBuilder stringBuilder = new();
             stringBuilder.AppendLine("=== Request ===");
             stringBuilder.AppendLine($"{httpRequestMessage.Method} {httpRequestMessage.RequestUri}");
@@ -100,14 +100,14 @@ public static class LoggingExtensions
 
     extension(HttpResponseMessage httpResponseMessage)
     {
-        public async Task Log(ILogger logger)
+        public async Task LogAsync(ILogger logger)
         {
             if (!logger.IsEnabled(LogLevel.Information))
             {
                 return;
             }
 
-            var content = await httpResponseMessage.Content.Format();
+            var content = await httpResponseMessage.Content.FormatAsync();
             StringBuilder stringBuilder = new();
             stringBuilder.AppendLine("=== Response ===");
             stringBuilder.AppendLine($"Status: {httpResponseMessage.StatusCode}");

@@ -2,7 +2,7 @@
 set -eu
 
 show_help() {
-  cat <<'EOF'
+  cat <<EOF
 SYNOPSIS
     Reset data files for either ISSUER or API mode by copying the appropriate JSON
     from the local data directory into the target WebApi project’s data folder.
@@ -27,14 +27,18 @@ ARGUMENTS
             API    - reset API data
 EOF
 }
-if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 {ISSUER|API}"
+if [ "${1:-}" = "--help" ]; then
+  show_help
+  exit 0
+fi
+if [ $# -lt 1 ]; then
+  echo "Error: MODE argument required (ISSUER or API)"
   exit 1
 fi
 
 MODE="$1"
 MODE_LOWER=$(echo "$MODE" | tr '[:upper:]' '[:lower:]')
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SOURCE_FILE="$SCRIPT_DIR/data/${MODE_LOWER}-db.json"
 case "$MODE" in
   ISSUER)
