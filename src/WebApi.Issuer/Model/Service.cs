@@ -1,5 +1,8 @@
 namespace WebApi.Issuer.Model;
 
-public record Service(
-    string Id,
-    string Name);
+public class Service
+{
+    public string? Id { get; set; }
+
+    public string? Name { get; set; }
+}

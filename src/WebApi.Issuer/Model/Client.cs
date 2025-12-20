@@ -1,5 +1,8 @@
 namespace WebApi.Issuer.Model;
 
-public record Client(
-    string Id,
-    ServiceAccess[] Services);
+public class Client
+{
+    public string? Id { get; set; }
+
+    public List<ServiceAccess>? Services { get; set; }
+}

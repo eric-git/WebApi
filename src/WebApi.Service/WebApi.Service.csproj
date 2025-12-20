@@ -30,9 +30,6 @@
     <None Include="data\db.json" />
   </ItemGroup>
   <ItemGroup Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' != 'true'">
-    <Content Include="signing\issuer-public.pem">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Update="data\db.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -7,10 +7,12 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://+:5003",
         "ASPNETCORE_Kestrel__Certificates__Default__Path": "./https/cert.crt",
         "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./https/key.pem",
-        "ISSUER_BASE_URL": "https://localhost:5003",
-        "TOKEN_LIFETIME_MINUTES": "30"
+        "ISSUER_BASE_URL": "https://localhost:5003/connect",
+        "TOKEN_LIFETIME_MINUTES": "30",
+        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-ddHH:mm:ss:fff"
       }
     }
   }

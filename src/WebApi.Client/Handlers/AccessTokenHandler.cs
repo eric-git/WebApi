@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
+using WebApi.Client.Services;
 
-namespace WebApi.Common;
+namespace WebApi.Client.Handlers;
 
 public class AccessTokenHandler(ITokenService tokenService) : DelegatingHandler
 {

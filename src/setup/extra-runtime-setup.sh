@@ -1,16 +1,12 @@
 #!/bin/sh
 set -eu
 
-if [ "$#" -eq 0 ]; then
-    exit 1
-fi
+SRC_DIR="/app/https"
+DST_DIR="/usr/local/share/ca-certificates"
 UPDATED=0
-for CERT_SRC in "$@"; do
+for CERT_SRC in "$SRC_DIR"/*.crt; do
     CERT_BASENAME="$(basename "$CERT_SRC")"
-    CERT_DST="/usr/local/share/ca-certificates/$CERT_BASENAME"
-    if [ ! -f "$CERT_SRC" ]; then
-        exit 1
-    fi
+    CERT_DST="$DST_DIR/$CERT_BASENAME"
     if [ -f "$CERT_DST" ] && cmp -s "$CERT_SRC" "$CERT_DST"; then
         continue
     fi

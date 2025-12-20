@@ -1,5 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
 using WebApi.Service.Model;
+using static WebApi.Common.TypeExtensions;
 
 namespace WebApi.Service;
 
@@ -10,7 +12,8 @@ public static class ApiEndpoints
 
     private static readonly JsonSerializerOptions DataSerializationOptions = new(JsonSerializerDefaults.Web)
     {
-        WriteIndented = true
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     private static async Task<GameData> GetGameDataAsync()
@@ -38,7 +41,7 @@ public static class ApiEndpoints
             endpointRouteBuilder.MapGet($"{GamesPath}/{{id}}", async (string id) =>
                 {
                     var gameData = await GetGameDataAsync();
-                    var game = gameData.Games.SingleOrDefault(x => x.Id == id);
+                    var game = gameData.Games!.SingleOrDefault(x => GuidsEqual(x.Id, id));
                     return game is null ? Results.NotFound() : Results.Json(game);
                 }
             ).RequireAuthorization();
@@ -51,14 +54,14 @@ public static class ApiEndpoints
                     relation.Id = Guid.NewGuid().ToString("D");
                 }
 
-                gameData.Games.Add(game);
+                gameData.Games!.Add(game);
                 await SaveGameDataAsync(gameData);
                 return Results.Created($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/{GamesPath}/{game.Id}", game.Id);
             }).RequireAuthorization();
             endpointRouteBuilder.MapPatch(GamesPath, async (Game game) =>
             {
                 var gameData = await GetGameDataAsync();
-                var index = gameData.Games.FindIndex(x => x.Id == game.Id);
+                var index = gameData.Games!.FindIndex(x => GuidsEqual(x.Id, game.Id));
                 if (index is -1)
                 {
                     return Results.NotFound();
@@ -71,7 +74,7 @@ public static class ApiEndpoints
             endpointRouteBuilder.MapDelete($"{GamesPath}/{{id}}", async (string id) =>
             {
                 var gameData = await GetGameDataAsync();
-                var index = gameData.Games.FindIndex(x => x.Id == id);
+                var index = gameData.Games!.FindIndex(x => GuidsEqual(x.Id, id));
                 if (index is -1)
                 {
                     return Results.NotFound();

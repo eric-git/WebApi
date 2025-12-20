@@ -33,7 +33,7 @@ REQUIREMENTS
     OpenSSL must be installed and available in PATH.
 EOF
 }
-if [[ "${1:-}" == "--help" ]]; then
+if [ "${1:-}" = "--help" ]; then
   show_help
   exit 0
 fi
@@ -41,7 +41,7 @@ fi
 MODE="API"
 VALID_DAYS=365
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   case "$1" in
     --mode)
       MODE="$2"
@@ -60,14 +60,16 @@ done
 
 MODE_UPPER=$(echo "$MODE" | tr '[:lower:]' '[:upper:]')
 MODE_LOWER=$(echo "$MODE" | tr '[:upper:]' '[:lower:]')
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GENERATED_DIR="$SCRIPT_DIR/hosting"
 case "$MODE_UPPER" in
   API)
     PROJECT_DIR="WebApi.Service"
+    COMMON_NAME="Web API"
     ;;
   ISSUER)
     PROJECT_DIR="WebApi.Issuer"
+    COMMON_NAME="Token Issuer"
     ;;
   *)
     echo "Invalid mode specified. Use 'API' or 'ISSUER'."
@@ -86,11 +88,15 @@ openssl req \
   -out "$CERT_PATH" \
   -keyout "$KEY_PATH" \
   -days "$VALID_DAYS" \
-  -subj "/CN=$MODE_LOWER" \
-  -addext "subjectAltName=DNS:localhost,DNS:$MODE_LOWER"
+  -subj "/C=AU/ST=ACT/L=Canberra/O=Project ERIC/OU=Web API Suite/CN=$COMMON_NAME" \
+  -addext "subjectAltName=DNS:localhost,DNS:$MODE_LOWER" \
+  -addext "extendedKeyUsage=serverAuth"
 DEST_DIR="$SCRIPT_DIR/../$PROJECT_DIR/https"
 mkdir -p "$DEST_DIR"
 cp -f "$CERT_PATH" "$DEST_DIR/cert.crt"
 cp -f "$KEY_PATH" "$DEST_DIR/key.pem"
 cp -f "$CERT_PATH" "$SCRIPT_DIR/../WebApi.Client/https/${MODE_LOWER}-cert.crt"
+if [ "$MODE_UPPER" = "ISSUER" ]; then
+  cp -f "$CERT_PATH" "$SCRIPT_DIR/../WebApi.Service/https/${MODE_LOWER}-cert.crt"
+fi
 echo "Certificate generated at $DEST_DIR"
