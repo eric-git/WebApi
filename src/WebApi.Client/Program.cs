@@ -1,85 +1,92 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
-using System.Security.Claims;
+﻿using System.Net.Http.Headers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Client;
 using WebApi.Client.Handlers;
 using WebApi.Client.Services;
+using WebApi.Common;
 using static WebApi.Common.SecurityExtensions;
+using static WebApi.Common.Constants;
 
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((context, config) =>
-    {
-        config.Sources.Clear();
-        config.AddEnvironmentVariables();
-        config.AddCommandLine(args);
-    })
-    .ConfigureLogging((context, logging) =>
-    {
-        logging.AddConfiguration(context.Configuration.GetSection("Logging"));
-        logging.AddConsole();
-    })
-    .ConfigureServices((context, services) =>
-    {
-        services.AddSingleton<IConfidentialClientApplication>(provider =>
+var builder = Host.CreateApplicationBuilder(args);
+if (builder.Environment.IsDevelopment())
+{
+    CertificateStore.Load();
+}
+
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+builder.Logging.AddConsole();
+
+builder.Services.AddSingleton<IConfidentialClientApplication>(serviceProvider =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var issuer = configuration["ISSUER_BASE_URL"]!;
+    var clientId = configuration["CLIENT_ID"]!;
+    var apiId = configuration["API_ID"]!;
+    return ConfidentialClientApplicationBuilder
+        .Create(clientId)
+        .WithOidcAuthority(issuer)
+        .WithHttpClientFactory(serviceProvider.GetRequiredService<IMsalHttpClientFactory>())
+        .WithClientAssertion(async (CancellationToken _) =>
         {
-            var issuer = context.Configuration["ISSUER_BASE_URL"]!;
-            var clientId = context.Configuration["CLIENT_ID"]!;
-            var confidentialClientApplication = ConfidentialClientApplicationBuilder
-                .Create(clientId)
-                .WithOidcAuthority(issuer)
-                .WithHttpClientFactory(provider.GetRequiredService<IMsalHttpClientFactory>())
-                .WithClientAssertion(async (CancellationToken _) =>
+            var fileName = Path.Combine(KeyStoreRootPath, "private.pem");
+            var (_, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync(fileName);
+            var now = DateTime.UtcNow;
+            SecurityTokenDescriptor securityTokenDescriptor = new()
+            {
+                Issuer = issuer,
+                Audience = apiId,
+                Claims = new Dictionary<string, object>
                 {
-                    var (_, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync("./signing/private.pem");
-                    SigningCredentials signingCredentials = new(rsaSecurityKey, SecurityAlgorithms.RsaSha256);
-                    var now = DateTime.UtcNow;
-                    JwtSecurityToken jwtSecurityToken = new(
-                        issuer,
-                        context.Configuration["API_ID"]!,
-                        [
-                            new Claim(JwtRegisteredClaimNames.Sub, clientId),
-                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
-                        ],
-                        now,
-                        now.AddMinutes(5),
-                        signingCredentials
-                    );
-                    var clientAssertion = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-                    return clientAssertion;
-                })
-                .Build();
-            return confidentialClientApplication;
-        });
-        services.AddScoped<ITokenService, MsalTokenService>();
-        services.AddScoped<IMsalHttpClientFactory, MsalHttpClientFactory>();
-        services.AddScoped<IServiceClient, ServiceClient>();
-        services.AddScoped<LoggingHandler>();
-        services.AddScoped<AccessTokenHandler>();
-        services.AddHttpClient(ServiceClient.HttpClientName, client =>
-            {
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                client.BaseAddress = new Uri(context.Configuration["API_BASE_URL"]!);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = CertificateValidationCallback
-            })
-            .AddHttpMessageHandler<AccessTokenHandler>()
-            .AddHttpMessageHandler<LoggingHandler>();
-        services.AddHttpClient(MsalHttpClientFactory.HttpClientName)
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = CertificateValidationCallback
-            });
-        services.AddScoped<ClientTest>();
-    })
-    .Build();
+                    [JwtRegisteredClaimNames.Sub] = clientId,
+                    [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString("N")
+                },
+                NotBefore = now,
+                Expires = now.AddMinutes(5),
+                SigningCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
+            };
+            JsonWebTokenHandler jsonWebTokenHandler = new();
+            var jwt = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
+            return jwt;
+        })
+        .Build();
+});
 
-var clientTest = host.Services.GetRequiredService<ClientTest>();
-await clientTest.TestAsync();
+builder.Services.AddHttpClient(ServiceClient.HttpClientName, (serviceProvider, httpClient) =>
+    {
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+        httpClient.BaseAddress = new Uri($"{configuration["API_BASE_URL"]}/");
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    })
+    .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+    {
+        var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
+        return hostEnvironment.IsDevelopment()
+            ? new HttpClientHandler { ServerCertificateCustomValidationCallback = CertificateValidationCallback }
+            : new HttpClientHandler();
+    })
+    .AddHttpMessageHandler<AccessTokenHandler>()
+    .AddHttpMessageHandler<LoggingHandler>();
+builder.Services.AddHttpClient(MsalHttpClientFactory.HttpClientName)
+    .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+    {
+        var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
+        return hostEnvironment.IsDevelopment()
+            ? new HttpClientHandler { ServerCertificateCustomValidationCallback = CertificateValidationCallback }
+            : new HttpClientHandler();
+    });
+
+builder.Services.AddSingleton<ITokenService, MsalTokenService>();
+builder.Services.AddSingleton<IMsalHttpClientFactory, MsalHttpClientFactory>();
+builder.Services.AddSingleton<IServiceClient, ServiceClient>();
+builder.Services.AddTransient<LoggingHandler>();
+builder.Services.AddTransient<AccessTokenHandler>();
+builder.Services.AddTransient<ClientTest>();
+
+var app = builder.Build();
+await app.Services.GetRequiredService<ClientTest>().TestAsync();

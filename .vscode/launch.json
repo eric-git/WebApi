@@ -17,8 +17,8 @@
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://+:5003",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./https/cert.crt",
-        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./https/key.pem",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./assets/https/cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./assets/https/key.pem",
         "ISSUER_BASE_URL": "https://localhost:5003/connect",
         "TOKEN_LIFETIME_MINUTES": "30",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-ddHH:mm:ss:fff"
@@ -40,8 +40,8 @@
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://+:5004",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./https/cert.crt",
-        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./https/key.pem",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./assets/https/cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./assets/https/key.pem",
         "ISSUER_BASE_URL": "https://localhost:5003/connect",
         "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-ddHH:mm:ss:fff"
@@ -57,7 +57,7 @@
       "cwd": "${workspaceFolder}/src/WebApi.Client",
       "console": "integratedTerminal",
       "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
         "ISSUER_BASE_URL": "https://localhost:5003/connect",
         "API_BASE_URL": "https://localhost:5004",
         "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",

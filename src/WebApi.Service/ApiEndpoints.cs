@@ -1,20 +1,14 @@
-﻿using System.Text.Encodings.Web;
-using System.Text.Json;
+﻿using System.Text.Json;
 using WebApi.Service.Model;
 using static WebApi.Common.TypeExtensions;
+using static WebApi.Common.Constants;
 
 namespace WebApi.Service;
 
 public static class ApiEndpoints
 {
-    private const string DataFilePath = "./data/db.json";
     private const string GamesPath = "games";
-
-    private static readonly JsonSerializerOptions DataSerializationOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
+    private static readonly string DataFilePath = Path.Combine(DataStoreRootPath, "db.json");
 
     private static async Task<GameData> GetGameDataAsync()
     {
@@ -38,6 +32,7 @@ public static class ApiEndpoints
                 var gameData = await GetGameDataAsync();
                 return Results.Json(gameData.Games);
             }).RequireAuthorization();
+
             endpointRouteBuilder.MapGet($"{GamesPath}/{{id}}", async (string id) =>
                 {
                     var gameData = await GetGameDataAsync();
@@ -45,6 +40,7 @@ public static class ApiEndpoints
                     return game is null ? Results.NotFound() : Results.Json(game);
                 }
             ).RequireAuthorization();
+
             endpointRouteBuilder.MapPost(GamesPath, async (Game game, HttpContext httpContext) =>
             {
                 var gameData = await GetGameDataAsync();
@@ -58,6 +54,7 @@ public static class ApiEndpoints
                 await SaveGameDataAsync(gameData);
                 return Results.Created($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/{GamesPath}/{game.Id}", game.Id);
             }).RequireAuthorization();
+
             endpointRouteBuilder.MapPatch(GamesPath, async (Game game) =>
             {
                 var gameData = await GetGameDataAsync();
@@ -71,6 +68,7 @@ public static class ApiEndpoints
                 await SaveGameDataAsync(gameData);
                 return Results.Ok();
             }).RequireAuthorization();
+
             endpointRouteBuilder.MapDelete($"{GamesPath}/{{id}}", async (string id) =>
             {
                 var gameData = await GetGameDataAsync();

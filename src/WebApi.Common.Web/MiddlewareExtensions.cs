@@ -1,18 +1,20 @@
 using System.Reflection;
-using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
+using static WebApi.Common.Constants;
 
-namespace WebApi.Common;
+namespace WebApi.Common.Web;
 
 public static class MiddlewareExtensions
 {
     extension(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        public IEndpointRouteBuilder MapStatus(Assembly assembly, bool runInContainer)
+        public IEndpointRouteBuilder MapStatus(IConfiguration configuration)
         {
-            ArgumentNullException.ThrowIfNull(assembly);
+            var assembly = Assembly.GetEntryAssembly()!;
+            var runInContainer = bool.TryParse(configuration["DOTNET_RUNNING_IN_CONTAINER"], out var value) && value;
             endpointRouteBuilder.MapGet("/", () => Results.Json(new
             {
                 status = $"Running{(runInContainer ? " in container" : null)}",
@@ -22,17 +24,18 @@ public static class MiddlewareExtensions
                 informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion,
                 version = assembly.GetName().Version?.ToString(),
                 timestamp = DateTime.UtcNow
-            }, new JsonSerializerOptions { WriteIndented = true }));
+            }, DataSerializationOptions));
             return endpointRouteBuilder;
         }
 
-        public IEndpointRouteBuilder ProvideFavIcon()
+        public IEndpointRouteBuilder MapFavIcon()
         {
-            endpointRouteBuilder.MapGet("/favicon.ico", async context =>
-            {
-                context.Response.ContentType = "image/x-icon";
-                await context.Response.SendFileAsync(Path.Combine(AppContext.BaseDirectory, "favicon.ico"));
-            });
+            endpointRouteBuilder.MapGet("/favicon.ico",
+                () =>
+                {
+                    var fileName = Path.Combine(AssetsRootPath, "favicon.ico");
+                    return Results.File(fileName, "image/x-icon");
+                });
             return endpointRouteBuilder;
         }
     }

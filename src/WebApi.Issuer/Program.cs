@@ -1,15 +1,16 @@
-using System.Reflection;
-using WebApi.Common;
+using WebApi.Common.Web;
 using WebApi.Issuer;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
+
 var app = builder.Build();
-app.ProvideFavIcon();
-app.MapStatus(
-    Assembly.GetEntryAssembly()!,
-    bool.TryParse(app.Configuration["DOTNET_RUNNING_IN_CONTAINER"], out var inContainer) && inContainer);
-app.MapIssuer(
-    app.Configuration["ISSUER_BASE_URL"]!,
-    int.Parse(app.Configuration["TOKEN_LIFETIME_MINUTES"]!));
+
+var configuration = app.Services.GetRequiredService<IConfiguration>();
+var issuerBaseUrl = configuration["ISSUER_BASE_URL"]!;
+var tokenLiftTime = configuration["TOKEN_LIFETIME_MINUTES"]!;
+app.MapFavIcon();
+app.MapStatus(configuration);
+app.MapIssuer(issuerBaseUrl, int.Parse(tokenLiftTime));
+
 app.Run();

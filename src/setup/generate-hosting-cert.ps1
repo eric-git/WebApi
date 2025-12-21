@@ -4,8 +4,8 @@ Generates a self-signed hosting certificate for API or ISSUER projects.
 
 .DESCRIPTION
 This script automates the creation of a self-signed certificate and key pair
-using OpenSSL. It places the generated files into a hosting folder and copies
-them into the appropriate project’s https directory. Supports both API and
+using OpenSSL. It places the generated files into https folder and copies
+them into the appropriate project's https directory. Supports both API and
 ISSUER modes with configurable validity period.
 
 .PARAMETER Mode
@@ -40,9 +40,9 @@ param(
 )
 
 begin {
+    Set-StrictMode -Version Latest
     $ErrorActionPreference = "Stop"
-    $scriptDir = Split-Path -Path $PSCommandPath -Parent
-    $generatedFilePath = "$scriptDir/hosting"
+    $generatedFilePath = "$PSScriptRoot/https"
     $alternateName = $Mode.ToLower()
     switch ($Mode) {
         "API" {
@@ -57,9 +57,9 @@ begin {
     }
     $generatedCertPath = "$generatedFilePath/$alternateName-cert.crt"
     $generatedKeyPath = "$generatedFilePath/$alternateName-key.pem"
-    Write-Host "Generating self-signed hosting certificate..."
 }
 process {
+    New-Item -ItemType Directory -Path $generatedFilePath -Force | Out-Null
     & openssl req `
         -x509 `
         -newkey rsa:2048 `
@@ -70,15 +70,16 @@ process {
         -subj "/C=AU/ST=ACT/L=Canberra/O=Project ERIC/OU=Web API Suite/CN=$commonName" `
         -addext "subjectAltName=DNS:localhost,DNS:$alternateName" `
         -addext "extendedKeyUsage=serverAuth"
-
-
-    Copy-Item -Path $generatedCertPath -Destination "$scriptDir/../$projectDir/https/cert.crt" -Force
-    Copy-Item -Path $generatedKeyPath  -Destination "$scriptDir/../$projectDir/https/key.pem" -Force
-    Copy-Item -Path $generatedCertPath -Destination "$scriptDir/../WebApi.Client/https/$alternateName-cert.crt" -Force
+    New-Item -ItemType Directory -Path "$PSScriptRoot/../$projectDir/assets/https" -Force | Out-Null
+    Copy-Item -Path $generatedCertPath -Destination "$PSScriptRoot/../$projectDir/assets/https/cert.crt" -Force
+    Copy-Item -Path $generatedKeyPath  -Destination "$PSScriptRoot/../$projectDir/assets/https/key.pem" -Force
+    New-Item -ItemType Directory -Path "$PSScriptRoot/../WebApi.Client/assets/https" -Force | Out-Null
+    Copy-Item -Path $generatedCertPath -Destination "$PSScriptRoot/../WebApi.Client/assets/https/$alternateName-cert.crt" -Force
     if ($Mode -eq "ISSUER") {
-        Copy-Item -Path $generatedCertPath -Destination "$scriptDir/../WebApi.Service/https/$alternateName-cert.crt" -Force
+        New-Item -ItemType Directory -Path "$PSScriptRoot/../WebApi.Service/assets/https" -Force | Out-Null
+        Copy-Item -Path $generatedCertPath -Destination "$PSScriptRoot/../WebApi.Service/assets/https/$alternateName-cert.crt" -Force
     }
 }
 end {
-    Write-Host "Certificate generated."
+    Write-Host "Certificate for $($Mode.ToLower()) generated."
 }

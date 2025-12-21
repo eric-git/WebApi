@@ -13,13 +13,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.dockerignore = .dockerignore
 		.editorconfig = .editorconfig
-		.filenesting.json = .filenesting.json
 		..\.gitattributes = ..\.gitattributes
 		..\.gitignore = ..\.gitignore
-		docker-commands.ps1 = docker-commands.ps1
+		Directory.Build.targets = Directory.Build.targets
+		..\docker-commands.ps1 = ..\docker-commands.ps1
 		docker-compose.yml = docker-compose.yml
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
+		..\SECURITY.md = ..\SECURITY.md
 		webspi-suite.snk = webspi-suite.snk
 	EndProjectSection
 EndProject
@@ -57,6 +58,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{6DDED610-0
 		setup\data\api-db.json = setup\data\api-db.json
 		setup\data\issuer-db.json = setup\data\issuer-db.json
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Common.Web", "WebApi.Common.Web\WebApi.Common.Web.csproj", "{6AA1C631-EAAA-4102-A17A-3619808B4C0C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -116,6 +119,18 @@ Global
 		{A46358B5-3B46-474B-B239-19A518E1D178}.Release|x64.Build.0 = Release|Any CPU
 		{A46358B5-3B46-474B-B239-19A518E1D178}.Release|x86.ActiveCfg = Release|Any CPU
 		{A46358B5-3B46-474B-B239-19A518E1D178}.Release|x86.Build.0 = Release|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Debug|x64.Build.0 = Debug|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Debug|x86.Build.0 = Debug|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Release|x64.ActiveCfg = Release|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Release|x64.Build.0 = Release|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Release|x86.ActiveCfg = Release|Any CPU
+		{6AA1C631-EAAA-4102-A17A-3619808B4C0C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

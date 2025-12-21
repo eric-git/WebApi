@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
 Resets data files for either ISSUER or API mode by copying the appropriate JSON
-from the local data directory into the target WebApi project’s data folder.
+from the local data directory into the target WebApi project's data folder.
 
 .DESCRIPTION
 This script accepts a single parameter, Mode, which must be either "ISSUER" or "API".
@@ -12,16 +12,16 @@ confirmation message once the reset is complete.
 
 .PARAMETER Mode
 Specifies which project data to reset. Valid values are:
-- ISSUER : Copies issuer-db.json into WebApi.Issuer/data/db.json
-- API    : Copies api-db.json into WebApi.Service/data/db.json
+- ISSUER : Copies issuer-db.json into WebApi.Issuer/assets/data/db.json
+- API    : Copies api-db.json into WebApi.Service/assets/data/db.json
 
 .EXAMPLE
 .\reset-db.ps1 -Mode ISSUER
-Copies issuer-db.json into the WebApi.Issuer project’s data folder.
+Copies issuer-db.json into the WebApi.Issuer project's data folder.
 
 .EXAMPLE
 .\reset-db.ps1 -Mode API
-Copies api-db.json into the WebApi.Service project’s data folder.
+Copies api-db.json into the WebApi.Service project's data folder.
 #>
 
 param(
@@ -30,17 +30,17 @@ param(
     [string]$Mode
 )
 begin {
+    Set-StrictMode -Version Latest
     $ErrorActionPreference = "Stop"
-    $scriptDir = Split-Path -Path $PSCommandPath -Parent
-    $sourceFile = "$scriptDir/data/$($Mode.ToLower())-db.json"
+    $sourceFile = "$PSScriptRoot/data/$($Mode.ToLower())-db.json"
 }
 process {
     switch ($Mode) {
         "ISSUER" {
-            Copy-Item -Path $sourceFile -Destination "$scriptDir/../WebApi.Issuer/data/db.json" -Force
+            Copy-Item -Path $sourceFile -Destination "$PSScriptRoot/../WebApi.Issuer/assets/data/db.json" -Force
         }
         "API" {
-            Copy-Item -Path $sourceFile -Destination "$scriptDir/../WebApi.Service/data/db.json" -Force
+            Copy-Item -Path $sourceFile -Destination "$PSScriptRoot/../WebApi.Service/assets/data/db.json" -Force
         }
         default {
             throw "Invalid mode specified. Use 'ISSUER' or 'CLIENT'."

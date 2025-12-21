@@ -11,37 +11,11 @@
     <AssemblyOriginatorKeyFile>..\webspi-suite.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="favicon.ico" />
-    <Content Include="favicon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\.filenesting.json" Link=".filenesting.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\WebApi.Common.Web\WebApi.Common.Web.csproj" />
     <ProjectReference Include="..\WebApi.Common\WebApi.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' == 'true'">
-    <Content Remove="data\db.json" />
-    <None Include="data\db.json" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' != 'true'">
-    <Content Update="data\db.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="signing\088f6a2e-8f00-4340-b32d-49de4acde03c-public.pem">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="signing\private.pem">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="signing\public.pem">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@ show_help() {
   cat <<EOF
 SYNOPSIS
     Reset data files for either ISSUER or API mode by copying the appropriate JSON
-    from the local data directory into the target WebApi project’s data folder.
+    from the local data directory into the target WebApi project's data folder.
 
 DESCRIPTION
     This script accepts a single argument, MODE, which must be either "ISSUER" or "API".
@@ -16,10 +16,10 @@ DESCRIPTION
 
 USAGE
     $(basename "$0") ISSUER
-        Copies issuer-db.json into WebApi.Issuer/data/db.json
+        Copies issuer-db.json into WebApi.Issuer project's data folder.
 
     $(basename "$0") API
-        Copies api-db.json into WebApi.Service/data/db.json
+        Copies api-db.json into WebApi.Service project's data folder.
 
 ARGUMENTS
     MODE    Must be one of:
@@ -42,10 +42,10 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SOURCE_FILE="$SCRIPT_DIR/data/${MODE_LOWER}-db.json"
 case "$MODE" in
   ISSUER)
-    cp -f "$SOURCE_FILE" "$SCRIPT_DIR/../WebApi.Issuer/data/db.json"
+    cp -f "$SOURCE_FILE" "$SCRIPT_DIR/../WebApi.Issuer/assets/data/db.json"
     ;;
   API)
-    cp -f "$SOURCE_FILE" "$SCRIPT_DIR/../WebApi.Service/data/db.json"
+    cp -f "$SOURCE_FILE" "$SCRIPT_DIR/../WebApi.Service/assets/data/db.json"
     ;;
   *)
     echo "Invalid mode specified. Use 'ISSUER' or 'API'."

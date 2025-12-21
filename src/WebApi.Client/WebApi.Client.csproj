@@ -8,23 +8,19 @@
     <Product>Sample Web API Suite</Product>
     <Company>Project ERIC</Company>
     <Copyright>© 2025 Project ERIC. All rights reserved.</Copyright>
-    <ApplicationIcon>appicon.ico</ApplicationIcon>
+    <ApplicationIcon>assets\appicon.ico</ApplicationIcon>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\webspi-suite.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\.filenesting.json" Link=".filenesting.json" />
-    <None Include="appicon.ico" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.1" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.79.2" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WebApi.Common\WebApi.Common.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(DOTNET_RUNNING_IN_CONTAINER)' != 'true'">
-    <Content Include="signing\private.pem">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>
