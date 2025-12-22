@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <AssetRoot Condition="'$(AssetRoot)' == ''">$(MSBuildProjectDirectory)\assets</AssetRoot>
+    <KeyStoreRoot Condition="'$(KeyStoreRoot)' == ''">$(AssetRoot)\signing</KeyStoreRoot>
+    <CertificateStoreRoot Condition="'$(CertificateStoreRoot)' == ''">$(AssetRoot)\https</CertificateStoreRoot>
+    <DataStoreRoot Condition="'$(DataStoreRoot)' == ''">$(AssetRoot)\data</DataStoreRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssetFiles Include="$(AssetRoot)\**\*" Condition="Exists('$(AssetRoot)')" />
+    <AssetFiles Remove="$(AssetRoot)\appicon.ico" Condition="Exists('$(AssetRoot)\appicon.ico')" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(PublishProfile)' == 'DefaultContainer' Or '$(IsContainerBuild)' == 'true'">
+    <AssetFiles Remove="$(KeyStoreRoot)\**\*" Condition="Exists('$(KeyStoreRoot)')" />
+    <AssetFiles Remove="$(CertificateStoreRoot)\**\*" Condition="Exists('$(CertificateStoreRoot)')" />
+    <AssetFiles Remove="$(DataStoreRoot)\**\*" Condition="Exists('$(DataStoreRoot)')" />
+    <EmptyAssetDirs Include="$(KeyStoreRoot)" Condition="Exists('$(KeyStoreRoot)')" />
+    <EmptyAssetDirs Include="$(CertificateStoreRoot)" Condition="Exists('$(CertificateStoreRoot)')" />
+    <EmptyAssetDirs Include="$(DataStoreRoot)" Condition="Exists('$(DataStoreRoot)')" />
+  </ItemGroup>
+  <Target Name="CopyAssets" AfterTargets="Build" Condition="'@(AssetFiles)' != ''">
+    <Copy SourceFiles="@(AssetFiles)" DestinationFolder="$(OutDir)assets\%(RecursiveDir)" />
+  </Target>
+  <Target Name="CreateEmptyAssetDirs" AfterTargets="CopyAssets" Condition="'@(EmptyAssetDirs)' != ''">
+    <MakeDir Directories="@(EmptyAssetDirs->'$(OutDir)assets\%(RecursiveDir)')" />
+  </Target>
+</Project>

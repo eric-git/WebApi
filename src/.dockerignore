@@ -1,6 +1,5 @@
 **/bin/
 **/obj/
 *.user
-*.log
-.editorconfig
-.filenesting.json
+**/.vs/
+launchSettings.json

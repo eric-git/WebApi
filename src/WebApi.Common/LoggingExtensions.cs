@@ -2,17 +2,13 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using static WebApi.Common.Constants;
 
 namespace WebApi.Common;
 
 public static class LoggingExtensions
 {
     private const string Empty = "<empty>";
-
-    private static readonly JsonSerializerOptions LoggingJsonSerializerOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true
-    };
 
     private static bool TryFormatFormBody(string content, out string? formatted)
     {
@@ -35,7 +31,7 @@ public static class LoggingExtensions
         try
         {
             using var jsonDocument = JsonDocument.Parse(content);
-            formatted = JsonSerializer.Serialize(jsonDocument.RootElement, LoggingJsonSerializerOptions);
+            formatted = JsonSerializer.Serialize(jsonDocument.RootElement, DataSerializationOptions);
             return true;
         }
         catch

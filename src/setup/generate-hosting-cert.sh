@@ -7,9 +7,10 @@ SYNOPSIS
     Generates a self-signed hosting certificate for API or ISSUER projects.
 
 DESCRIPTION
-    Automates the creation of self-signed certificates using OpenSSL.
-    Certificates and keys are placed into the hosting/ folder and copied
-    into the appropriate project https/ directories.
+    This script automates the creation of a self-signed certificate and key pair
+    using OpenSSL. It places the generated files into the https/ folder and copies
+    them into the appropriate project's https/ directory. Supports both API and
+    ISSUER modes with configurable validity period.
 
 OPTIONS
     --mode API|ISSUER
@@ -61,7 +62,7 @@ done
 MODE_UPPER=$(echo "$MODE" | tr '[:lower:]' '[:upper:]')
 MODE_LOWER=$(echo "$MODE" | tr '[:upper:]' '[:lower:]')
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-GENERATED_DIR="$SCRIPT_DIR/hosting"
+GENERATED_DIR="$SCRIPT_DIR/https"
 case "$MODE_UPPER" in
   API)
     PROJECT_DIR="WebApi.Service"
@@ -79,7 +80,6 @@ esac
 CERT_PATH="$GENERATED_DIR/${MODE_LOWER}-cert.crt"
 KEY_PATH="$GENERATED_DIR/${MODE_LOWER}-key.pem"
 
-echo "Generating self-signed hosting certificate for $MODE_UPPER..."
 mkdir -p "$GENERATED_DIR"
 openssl req \
   -x509 \
@@ -91,12 +91,14 @@ openssl req \
   -subj "/C=AU/ST=ACT/L=Canberra/O=Project ERIC/OU=Web API Suite/CN=$COMMON_NAME" \
   -addext "subjectAltName=DNS:localhost,DNS:$MODE_LOWER" \
   -addext "extendedKeyUsage=serverAuth"
-DEST_DIR="$SCRIPT_DIR/../$PROJECT_DIR/https"
+DEST_DIR="$SCRIPT_DIR/../$PROJECT_DIR/assets/https"
 mkdir -p "$DEST_DIR"
 cp -f "$CERT_PATH" "$DEST_DIR/cert.crt"
 cp -f "$KEY_PATH" "$DEST_DIR/key.pem"
-cp -f "$CERT_PATH" "$SCRIPT_DIR/../WebApi.Client/https/${MODE_LOWER}-cert.crt"
+mkdir -p "$SCRIPT_DIR/../WebApi.Client/assets/https"
+cp -f "$CERT_PATH" "$SCRIPT_DIR/../WebApi.Client/assets/https/${MODE_LOWER}-cert.crt"
 if [ "$MODE_UPPER" = "ISSUER" ]; then
-  cp -f "$CERT_PATH" "$SCRIPT_DIR/../WebApi.Service/https/${MODE_LOWER}-cert.crt"
+  mkdir -p "$SCRIPT_DIR/../WebApi.Service/assets/https"
+  cp -f "$CERT_PATH" "$SCRIPT_DIR/../WebApi.Service/assets/https/${MODE_LOWER}-cert.crt"
 fi
-echo "Certificate generated at $DEST_DIR"
+echo "Certificate for $MODE_LOWER generated."

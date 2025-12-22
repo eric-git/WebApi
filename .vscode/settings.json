@@ -2,5 +2,6 @@
   "cSpell.words": [],
   "workbench.colorTheme": "Abyss",
   "workbench.iconTheme": "material-icon-theme",
-  "debug.hideSlowPreLaunchWarning": true
+  "debug.hideSlowPreLaunchWarning": true,
+  "git.decorations.enabled": true
 }

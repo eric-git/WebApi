@@ -15,7 +15,6 @@ Valid values are:
 
 .PARAMETER ClientId
 Specifies the unique identifier for the client when Mode is CLIENT.
-Defaults to "088f6a2e-8f00-4340-b32d-49de4acde03c".
 Ignored when Mode is ISSUER.
 
 .EXAMPLE
@@ -36,19 +35,24 @@ param(
     [ValidateSet("ISSUER", "CLIENT")]
     [string]$Mode = "ISSUER",
     [Parameter()]
-    [string]$ClientId = "088f6a2e-8f00-4340-b32d-49de4acde03c"
+    [string]$ClientId
 )
 begin {
+    Set-StrictMode -Version Latest
     $ErrorActionPreference = "Stop"
-    $scriptDir = Split-Path -Path $PSCommandPath -Parent
     $issuerProjectDir = "WebApi.Issuer"
     $clientProjectDir = "WebApi.Client"
     switch ($Mode) {
         "ISSUER" {
             $generatedFileNamePrefix = "issuer"
+            break
         }
-        { $_ -eq "CLIENT" -and -not [string]::IsNullOrWhiteSpace($ClientId) } {
-            $generatedFileNamePrefix = "$ClientId"
+        "CLIENT" {
+            if ([string]::IsNullOrWhiteSpace($ClientId)) {
+                throw "CLIENT mode requires a non-empty ClientId"
+            }
+            $generatedFileNamePrefix = $ClientId
+            break
         }
         default {
             throw "Invalid mode specified. Use 'ISSUER' or 'CLIENT'."
@@ -57,18 +61,22 @@ begin {
     Write-Host "Generating security keys for $($Mode.ToLower())..."
 }
 process {
-    $privatePemFilePath = "$scriptDir/signing/$generatedFileNamePrefix-private.pem"
-    $publicPemFilePath = "$scriptDir/signing/$generatedFileNamePrefix-public.pem"
+    $privatePemFilePath = "$PSScriptRoot/signing/$generatedFileNamePrefix-private.pem"
+    $publicPemFilePath = "$PSScriptRoot/signing/$generatedFileNamePrefix-public.pem"
+    New-Item -ItemType Directory -Path "$PSScriptRoot/signing" -Force | Out-Null
     & openssl genrsa -out $privatePemFilePath 2048
     & openssl rsa -in $privatePemFilePath -pubout -out $publicPemFilePath
     switch ($Mode) {
         "ISSUER" {
-            Copy-Item -Path $privatePemFilePath -Destination "$scriptDir/../$issuerProjectDir/signing/private.pem" -Force
-            Copy-Item -Path $publicPemFilePath -Destination "$scriptDir/../$issuerProjectDir/signing/public.pem" -Force
+            New-Item -ItemType Directory -Path "$PSScriptRoot/../$issuerProjectDir/assets/signing" -Force | Out-Null
+            Copy-Item -Path $privatePemFilePath -Destination "$PSScriptRoot/../$issuerProjectDir/assets/signing/private.pem" -Force
+            Copy-Item -Path $publicPemFilePath -Destination "$PSScriptRoot/../$issuerProjectDir/assets/signing/public.pem" -Force
         }
         "CLIENT" {
-            Copy-Item -Path $privatePemFilePath -Destination "$scriptDir/../$clientProjectDir/signing/private.pem" -Force
-            Copy-Item -Path $publicPemFilePath -Destination "$scriptDir/../$issuerProjectDir/signing/$ClientId-public.pem" -Force
+            New-Item -ItemType Directory -Path "$PSScriptRoot/../$clientProjectDir/assets/signing" -Force | Out-Null
+            Copy-Item -Path $privatePemFilePath -Destination "$PSScriptRoot/../$clientProjectDir/assets/signing/private.pem" -Force
+            New-Item -ItemType Directory -Path "$PSScriptRoot/../$issuerProjectDir/assets/signing" -Force | Out-Null
+            Copy-Item -Path $publicPemFilePath -Destination "$PSScriptRoot/../$issuerProjectDir/assets/signing/$ClientId-public.pem" -Force
         }
     }
 }

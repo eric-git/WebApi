@@ -1,15 +1,15 @@
 # Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-noble AS build
 WORKDIR /src
 COPY . .
+RUN cat WebApi.Issuer/assets/https/*.crt > /tmp/custom-ca-bundle.crt
 RUN dotnet restore WebApi.sln
 WORKDIR /src/WebApi.Issuer
-RUN dotnet publish WebApi.Issuer.csproj -c Release -o /publish /p:DebugType=none /p:DebugSymbols=false
+RUN dotnet publish WebApi.Issuer.csproj -c Release -o /publish -p:DebugType=none -p:DebugSymbols=false -p:IsContainerBuild=true
 
-# Stage 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
-COPY --from=build /src/setup/extra-runtime-setup.sh /usr/local/bin/extra-runtime-setup.sh
-RUN chmod +x /usr/local/bin/extra-runtime-setup.sh
+# Stage 2 — Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS runtime
+COPY --from=build /tmp/custom-ca-bundle.crt /etc/ssl/certs/ca-certificates.crt
 WORKDIR /app
 COPY --from=build /publish .
-ENTRYPOINT ["bash","-c","extra-runtime-setup.sh && exec dotnet WebApi.Issuer.dll"]
+ENTRYPOINT ["./WebApi.Issuer"]

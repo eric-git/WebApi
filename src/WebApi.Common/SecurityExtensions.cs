@@ -7,18 +7,36 @@ namespace WebApi.Common;
 
 public static class SecurityExtensions
 {
-    public static Func<HttpRequestMessage, X509Certificate2?, X509Chain?, SslPolicyErrors, bool> CertificateValidationCallback { get; } = (_, cert, chain, errors) =>
+    public static bool CertificateValidationCallback(HttpRequestMessage httpRequestMessage, X509Certificate2? x509Certificate2, X509Chain? x509Chain, SslPolicyErrors sslPolicyErrors)
     {
-        if (errors is SslPolicyErrors.None)
+        if (sslPolicyErrors is SslPolicyErrors.None)
         {
             return true;
         }
 
-        chain!.ChainPolicy.ExtraStore.Add(cert!);
-        chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
-        chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-        return chain.Build(cert!);
-    };
+        if (x509Certificate2 is null)
+        {
+            return false;
+        }
+
+        X509Chain chain = new()
+        {
+            ChainPolicy =
+            {
+                RevocationMode = X509RevocationMode.NoCheck,
+                VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority,
+                TrustMode = X509ChainTrustMode.CustomRootTrust
+            }
+        };
+        foreach (var root in CertificateStore.Roots!)
+        {
+            chain.ChainPolicy.CustomTrustStore.Add(root);
+        }
+
+        var result = chain.Build(x509Certificate2);
+        return result;
+    }
+
 
     public static async Task<(RSA Rsa, RsaSecurityKey RsaSecurityKey)> CreateRsaSecurityKeyFromPemFileAsync(string pemFilePath)
     {

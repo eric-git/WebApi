@@ -3,7 +3,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyTitle>Shared components for sample Web API projects</AssemblyTitle>
+    <AssemblyTitle>Shared Web components for sample Web API projects</AssemblyTitle>
     <Product>Sample Web API Suite</Product>
     <Company>Project ERIC</Company>
     <Copyright>© 2025 Project ERIC. All rights reserved.</Copyright>
@@ -11,6 +11,9 @@
     <AssemblyOriginatorKeyFile>..\webspi-suite.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />
+    <ProjectReference Include="..\WebApi.Common\WebApi.Common.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 </Project>

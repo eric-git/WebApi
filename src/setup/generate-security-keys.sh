@@ -67,7 +67,7 @@ case "$MODE_UPPER" in
     ;;
   CLIENT)
     if [ -z "$CLIENT_ID" ]; then
-      echo "Error: CLIENT mode requires a non-empty ClientId"
+      echo "CLIENT mode requires a non-empty ClientId"
       exit 1
     fi
     PREFIX="$CLIENT_ID"
@@ -84,16 +84,16 @@ PUBLIC_PEM="$SCRIPT_DIR/signing/${PREFIX}-public.pem"
 mkdir -p "$SCRIPT_DIR/signing"
 openssl genrsa -out "$PRIVATE_PEM" 2048
 openssl rsa -in "$PRIVATE_PEM" -pubout -out "$PUBLIC_PEM"
+mkdir -p "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/assets/signing"
+mkdir -p "$SCRIPT_DIR/../$CLIENT_PROJECT_DIR/assets/signing"
 case "$MODE_UPPER" in
   ISSUER)
-    mkdir -p "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing"
-    cp -f "$PRIVATE_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing/private.pem"
-    cp -f "$PUBLIC_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing/public.pem"
+    cp -f "$PRIVATE_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/assets/signing/private.pem"
+    cp -f "$PUBLIC_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/assets/signing/public.pem"
     ;;
   CLIENT)
-    mkdir -p "$SCRIPT_DIR/../$CLIENT_PROJECT_DIR/signing" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing"
-    cp -f "$PRIVATE_PEM" "$SCRIPT_DIR/../$CLIENT_PROJECT_DIR/signing/private.pem"
-    cp -f "$PUBLIC_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/signing/${CLIENT_ID}-public.pem"
+    cp -f "$PRIVATE_PEM" "$SCRIPT_DIR/../$CLIENT_PROJECT_DIR/assets/signing/private.pem"
+    cp -f "$PUBLIC_PEM" "$SCRIPT_DIR/../$ISSUER_PROJECT_DIR/assets/signing/${CLIENT_ID}-public.pem"
     ;;
 esac
 echo "Security keys for $MODE_LOWER generated."

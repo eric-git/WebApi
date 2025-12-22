@@ -1,23 +1,16 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text.Encodings.Web;
-using System.Text.Json;
+﻿using System.Text.Json;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Issuer.Model;
 using static WebApi.Common.SecurityExtensions;
 using static WebApi.Common.TypeExtensions;
+using static WebApi.Common.Constants;
 
 namespace WebApi.Issuer;
 
 public static class ApiEndpoints
 {
-    private const string DataFilePath = "./data/db.json";
-
-    private static readonly JsonSerializerOptions DataSerializationOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
+    private static readonly string DataFilePath = Path.Combine(DataStoreRootPath, "db.json");
 
     private static async Task<Settings> GetSettingsDataAsync()
     {
@@ -25,7 +18,6 @@ public static class ApiEndpoints
         var settingsData = await JsonSerializer.DeserializeAsync<Settings>(fileStream, DataSerializationOptions);
         return settingsData ?? new Settings();
     }
-
 
     extension(IEndpointRouteBuilder endpointRouteBuilder)
     {
@@ -39,12 +31,12 @@ public static class ApiEndpoints
                 var clientId = formData["client_id"].ToString();
                 var clientAssertion = formData["client_assertion"].ToString();
                 var scope = formData["scope"].ToString();
-                var (_, rsaPublicSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync($"./signing/{clientId}-public.pem");
-                JwtSecurityTokenHandler handler = new();
-                ClaimsPrincipal claimsPrincipal;
-                try
-                {
-                    claimsPrincipal = handler.ValidateToken(clientAssertion, new TokenValidationParameters
+                var publicKeyPath = Path.Combine(KeyStoreRootPath, $"{clientId}-public.pem");
+                var (_, rsaPublicSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync(publicKeyPath);
+                JsonWebTokenHandler jsonWebTokenHandler = new();
+                var result = await jsonWebTokenHandler.ValidateTokenAsync(
+                    clientAssertion,
+                    new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = rsaPublicSecurityKey,
@@ -52,48 +44,52 @@ public static class ApiEndpoints
                         ValidIssuer = issuerBaseUrl,
                         ValidateAudience = false,
                         ValidateLifetime = true
-                    }, out _);
-                }
-                catch
+                    });
+                if (!result.IsValid)
                 {
                     return Results.Unauthorized();
                 }
 
-                var apiId = claimsPrincipal.FindFirstValue(JwtRegisteredClaimNames.Aud);
+                var jwt = (JsonWebToken)result.SecurityToken;
+                var apiId = jwt.Audiences.FirstOrDefault();
                 var settings = await GetSettingsDataAsync();
-                var result = settings.Clients!
+                var allowed = settings.Clients!
                     .Any(c => GuidsEqual(c.Id, clientId) && c.Services!.Any(s => GuidsEqual(s.Id, apiId) && s.Scopes!.Contains(scope)));
-                if (!result)
+                if (!allowed)
                 {
                     return Results.Unauthorized();
                 }
 
-                var (_, rsaPrivateSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync("./signing/private.pem");
+                var privateKeyPath = Path.Combine(KeyStoreRootPath, "private.pem");
+                var (_, rsaPrivateSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync(privateKeyPath);
                 var now = DateTime.UtcNow;
-                Claim[] claims =
-                [
-                    new(JwtRegisteredClaimNames.Sub, clientId),
-                    new("scope", scope),
-                    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
-                ];
-                SigningCredentials signingCredentials = new(rsaPrivateSecurityKey, SecurityAlgorithms.RsaSha256);
-                JwtSecurityToken jwtSecurityToken = new(
-                    issuerBaseUrl,
-                    apiId,
-                    claims,
-                    now,
-                    now.AddMinutes(tokenLifeTimeInMinutes),
-                    signingCredentials);
+                SecurityTokenDescriptor securityTokenDescriptor = new()
+                {
+                    Issuer = issuerBaseUrl,
+                    Audience = apiId,
+                    Claims = new Dictionary<string, object>
+                    {
+                        [JwtRegisteredClaimNames.Sub] = clientId,
+                        ["scope"] = scope,
+                        [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString("N")
+                    },
+                    NotBefore = now,
+                    Expires = now.AddMinutes(tokenLifeTimeInMinutes),
+                    SigningCredentials = new SigningCredentials(rsaPrivateSecurityKey, SecurityAlgorithms.RsaSha256)
+                };
+                var accessToken = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
                 return Results.Json(new
                 {
                     token_type = "Bearer",
                     expires_in = tokenLifeTimeInMinutes * 60,
-                    access_token = handler.WriteToken(jwtSecurityToken)
+                    access_token = accessToken
                 });
             });
+
             endpointRouteBuilder.MapGet($"{path}/.well-known/jwks.json", async () =>
             {
-                var (rsa, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync("./signing/public.pem");
+                var fileName = Path.Combine(KeyStoreRootPath, "public.pem");
+                var (rsa, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync(fileName);
                 var parameters = rsa.ExportParameters(false);
                 var jwk = new
                 {
@@ -106,8 +102,9 @@ public static class ApiEndpoints
                 return Results.Json(new
                 {
                     keys = new[] { jwk }
-                }, DataSerializationOptions);
+                });
             });
+
             endpointRouteBuilder.MapGet($"{path}/.well-known/openid-configuration", () =>
             {
                 var discoveryDoc = new
@@ -120,7 +117,7 @@ public static class ApiEndpoints
                     grant_types_supported = (string[])["client_credentials"],
                     claims_supported = (string[])["sub", "iss", "aud", "exp", "iat", "name", "email"]
                 };
-                return Results.Json(discoveryDoc, DataSerializationOptions);
+                return Results.Json(discoveryDoc);
             });
             return endpointRouteBuilder;
         }
