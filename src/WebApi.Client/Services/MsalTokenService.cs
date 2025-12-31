@@ -6,7 +6,7 @@ public class MsalTokenService(IConfidentialClientApplication confidentialClientA
 {
     public async Task<string> GetTokenAsync()
     {
-        string[] scopes = ["api"];
+        string[] scopes = ["api.read", "api.write"];
         var acquireTokenForClientParameterBuilder = confidentialClientApplication.AcquireTokenForClient(scopes);
         var result = await acquireTokenForClientParameterBuilder.ExecuteAsync();
         return result.AccessToken;

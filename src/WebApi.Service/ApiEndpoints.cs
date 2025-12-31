@@ -31,7 +31,7 @@ public static class ApiEndpoints
             {
                 var gameData = await GetGameDataAsync();
                 return Results.Json(gameData.Games);
-            }).RequireAuthorization();
+            }).RequireAuthorization("ApiRead");
 
             endpointRouteBuilder.MapGet($"{GamesPath}/{{id}}", async (string id) =>
                 {
@@ -39,7 +39,7 @@ public static class ApiEndpoints
                     var game = gameData.Games!.SingleOrDefault(x => GuidsEqual(x.Id, id));
                     return game is null ? Results.NotFound() : Results.Json(game);
                 }
-            ).RequireAuthorization();
+            ).RequireAuthorization("ApiRead");
 
             endpointRouteBuilder.MapPost(GamesPath, async (Game game, HttpContext httpContext) =>
             {
@@ -53,7 +53,7 @@ public static class ApiEndpoints
                 gameData.Games!.Add(game);
                 await SaveGameDataAsync(gameData);
                 return Results.Created($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/{GamesPath}/{game.Id}", game.Id);
-            }).RequireAuthorization();
+            }).RequireAuthorization("ApiWrite");
 
             endpointRouteBuilder.MapPatch(GamesPath, async (Game game) =>
             {
@@ -67,7 +67,7 @@ public static class ApiEndpoints
                 gameData.Games[index] = game;
                 await SaveGameDataAsync(gameData);
                 return Results.Ok();
-            }).RequireAuthorization();
+            }).RequireAuthorization("ApiWrite");
 
             endpointRouteBuilder.MapDelete($"{GamesPath}/{{id}}", async (string id) =>
             {
@@ -81,7 +81,7 @@ public static class ApiEndpoints
                 gameData.Games.RemoveAt(index);
                 await SaveGameDataAsync(gameData);
                 return Results.Ok();
-            }).RequireAuthorization();
+            }).RequireAuthorization("ApiWrite");
             return endpointRouteBuilder;
         }
     }

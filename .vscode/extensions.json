@@ -7,6 +7,7 @@
     "pkief.material-icon-theme",
     "ms-vscode.powershell",
     "mads-hartmann.bash-ide-vscode",
-    "bierner.markdown-mermaid"
+    "bierner.markdown-mermaid",
+    "ms-vscode.makefile-tools"
   ]
 }

@@ -3,83 +3,96 @@
 Generates a self-signed hosting certificate for API or ISSUER projects.
 
 .DESCRIPTION
-This script automates the creation of a self-signed certificate and key pair
-using OpenSSL. It places the generated files into https folder and copies
-them into the appropriate project's https directory. Supports both API and
-ISSUER modes with configurable validity period.
+Creates a self-signed certificate and key pair using OpenSSL.
+Outputs files into https/ and copies them into the appropriate project.
 
 .PARAMETER Mode
-Specifies which project to generate the certificate for.
-Valid values are:
-- API    : Generates certs for WebApi.Service
-- ISSUER : Generates certs for WebApi.Issuer
-Defaults to API.
+API    : Generates certs for WebApi.Service
+ISSUER : Generates certs for WebApi.Issuer
+Default: API
 
 .PARAMETER ValidDays
-Specifies the number of days the certificate remains valid.
-Default is 365 days.
+Certificate validity period (default: 365 days)
 
 .EXAMPLE
 .\generate-hosting-cert.ps1 -Mode API -ValidDays 90
-Generates a certificate for WebApi.Service valid for 90 days.
 
 .EXAMPLE
 .\generate-hosting-cert.ps1 -Mode ISSUER
-Generates a certificate for WebApi.Issuer valid for 365 days.
 
 .NOTES
-Requires OpenSSL to be installed and available in PATH.
+Requires OpenSSL in PATH.
 #>
 
 param(
-    [Parameter()]
     [ValidateSet("API", "ISSUER")]
     [string]$Mode = "API",
-    [Parameter()]
+
     [int]$ValidDays = 365
 )
 
 begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = "Stop"
-    $generatedFilePath = "$PSScriptRoot/https"
-    $alternateName = $Mode.ToLower()
+
+    $root = $PSScriptRoot
+    $httpsOut = Join-Path $root "https"
+    $altName = $Mode.ToLower()
+
     switch ($Mode) {
         "API" {
             $projectDir = "WebApi.Service"
-            $commonName = "Web API" 
+            $commonName = "Web API"
         }
         "ISSUER" {
             $projectDir = "WebApi.Issuer"
-            $commonName = "Token Issuer" 
+            $commonName = "Token Issuer"
         }
-        default { throw "Invalid mode specified. Use 'API' or 'ISSUER'." }
     }
-    $generatedCertPath = "$generatedFilePath/$alternateName-cert.crt"
-    $generatedKeyPath = "$generatedFilePath/$alternateName-key.pem"
+
+    $certPath = Join-Path $httpsOut "$altName-cert.crt"
+    $keyPath = Join-Path $httpsOut "$altName-key.pem"
 }
+
 process {
-    New-Item -ItemType Directory -Path $generatedFilePath -Force | Out-Null
+    # Ensure output folder exists
+    New-Item -ItemType Directory -Path $httpsOut -Force | Out-Null
+
+    # Generate certificate + key
     & openssl req `
         -x509 `
         -newkey rsa:2048 `
         -nodes `
-        -out "$generatedCertPath" `
-        -keyout "$generatedKeyPath" `
+        -out $certPath `
+        -keyout $keyPath `
         -days $ValidDays `
         -subj "/C=AU/ST=ACT/L=Canberra/O=Project ERIC/OU=Web API Suite/CN=$commonName" `
-        -addext "subjectAltName=DNS:localhost,DNS:$alternateName" `
+        -addext "subjectAltName=DNS:localhost,DNS:$altName" `
         -addext "extendedKeyUsage=serverAuth"
-    New-Item -ItemType Directory -Path "$PSScriptRoot/../$projectDir/assets/https" -Force | Out-Null
-    Copy-Item -Path $generatedCertPath -Destination "$PSScriptRoot/../$projectDir/assets/https/cert.crt" -Force
-    Copy-Item -Path $generatedKeyPath  -Destination "$PSScriptRoot/../$projectDir/assets/https/key.pem" -Force
-    New-Item -ItemType Directory -Path "$PSScriptRoot/../WebApi.Client/assets/https" -Force | Out-Null
-    Copy-Item -Path $generatedCertPath -Destination "$PSScriptRoot/../WebApi.Client/assets/https/$alternateName-cert.crt" -Force
+
+    # Resolve project paths
+    $projectHttps = Join-Path $root "..\$projectDir\assets\https"
+    $clientHttps = Join-Path $root "..\WebApi.Client\assets\https"
+
+    # Ensure directories exist
+    New-Item -ItemType Directory -Path $projectHttps -Force | Out-Null
+    New-Item -ItemType Directory -Path $clientHttps  -Force | Out-Null
+
+    # Copy to primary project
+    Copy-Item $certPath -Destination (Join-Path $projectHttps "cert.crt") -Force
+    Copy-Item $keyPath  -Destination (Join-Path $projectHttps "key.pem")  -Force
+
+    # Copy to client project
+    Copy-Item $certPath -Destination (Join-Path $clientHttps "$altName-cert.crt") -Force
+
+    # ISSUER also publishes to API
     if ($Mode -eq "ISSUER") {
-        New-Item -ItemType Directory -Path "$PSScriptRoot/../WebApi.Service/assets/https" -Force | Out-Null
-        Copy-Item -Path $generatedCertPath -Destination "$PSScriptRoot/../WebApi.Service/assets/https/$alternateName-cert.crt" -Force
+        $apiHttps = Join-Path $root "..\WebApi.Service\assets\https"
+        New-Item -ItemType Directory -Path $apiHttps -Force | Out-Null
+        Copy-Item $certPath -Destination (Join-Path $apiHttps "$altName-cert.crt") -Force
     }
 }
+
 end {
     Write-Host "Certificate for $($Mode.ToLower()) generated."
 }

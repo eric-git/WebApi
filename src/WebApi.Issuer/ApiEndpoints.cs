@@ -2,9 +2,9 @@
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Issuer.Model;
+using static WebApi.Common.Constants;
 using static WebApi.Common.SecurityExtensions;
 using static WebApi.Common.TypeExtensions;
-using static WebApi.Common.Constants;
 
 namespace WebApi.Issuer;
 
@@ -53,8 +53,9 @@ public static class ApiEndpoints
                 var jwt = (JsonWebToken)result.SecurityToken;
                 var apiId = jwt.Audiences.FirstOrDefault();
                 var settings = await GetSettingsDataAsync();
+                var requestedScopes = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 var allowed = settings.Clients!
-                    .Any(c => GuidsEqual(c.Id, clientId) && c.Services!.Any(s => GuidsEqual(s.Id, apiId) && s.Scopes!.Contains(scope)));
+                    .Any(c => GuidsEqual(c.Id, clientId) && c.Services!.Any(s => GuidsEqual(s.Id, apiId) && requestedScopes.All(rs => s.Scopes!.Contains(rs))));
                 if (!allowed)
                 {
                     return Results.Unauthorized();
@@ -69,9 +70,9 @@ public static class ApiEndpoints
                     Audience = apiId,
                     Claims = new Dictionary<string, object>
                     {
-                        [JwtRegisteredClaimNames.Sub] = clientId,
-                        ["scope"] = scope,
-                        [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString("N")
+                        { JwtRegisteredClaimNames.Sub, clientId },
+                        { JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N") },
+                        { "scope", requestedScopes }
                     },
                     NotBefore = now,
                     Expires = now.AddMinutes(tokenLifeTimeInMinutes),
@@ -115,7 +116,7 @@ public static class ApiEndpoints
                     id_token_signing_alg_values_supported = (string[])["RS256"],
                     response_types_supported = (string[])["client_credentials"],
                     grant_types_supported = (string[])["client_credentials"],
-                    claims_supported = (string[])["sub", "iss", "aud", "exp", "iat", "name", "email"]
+                    claims_supported = (string[])["sub", "iss", "aud", "scope", "exp", "iat", "name", "email"]
                 };
                 return Results.Json(discoveryDoc);
             });

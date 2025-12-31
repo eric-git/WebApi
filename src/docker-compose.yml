@@ -1,84 +1,217 @@
 name: webapi-suite
 services:
+  load-volumes:
+    labels:
+      app: loader
+      role: volume-initializer
+      purpose: populate-trust-and-data
+      managed-by: compose
+      lifecycle: ephemeral
+    image: alpine:latest
+    command: >
+      sh -c "
+        set -e
+        cp -R /source-issuer-certs/* /target-issuer-certs/ 2>/dev/null || true
+        if ls /target-issuer-certs/*.crt >/dev/null 2>&1; then
+          cat /target-issuer-certs/*.crt > /target-issuer-certs/ca-bundle.crt
+        fi
+        cp -R /source-issuer-keys/* /target-issuer-keys/ 2>/dev/null || true
+        cp -R /source-issuer-data/* /target-issuer-data/ 2>/dev/null || true
+        chown -R 1654:1654 /target-issuer-data
+        cp -R /source-api-certs/* /target-api-certs/ 2>/dev/null || true
+        if ls /target-api-certs/*.crt >/dev/null 2>&1; then
+          cat /target-api-certs/*.crt > /target-api-certs/ca-bundle.crt
+        fi
+        cp -R /source-api-data/* /target-api-data/ 2>/dev/null || true
+        chown -R 1654:1654 /target-api-data
+        cp -R /source-client-certs/* /target-client-certs/ 2>/dev/null || true
+        if ls /target-client-certs/*.crt >/dev/null 2>&1; then
+          cat /target-client-certs/*.crt > /target-client-certs/ca-bundle.crt
+        fi
+        cp -R /source-client-keys/* /target-client-keys/ 2>/dev/null || true
+      "
+    volumes:
+      - issuer-certs:/target-issuer-certs
+      - ./WebApi.Issuer/assets/https:/source-issuer-certs:ro
+      - issuer-keys:/target-issuer-keys
+      - ./WebApi.Issuer/assets/signing:/source-issuer-keys:ro
+      - issuer-data:/target-issuer-data
+      - ./WebApi.Issuer/assets/data:/source-issuer-data:ro
+      - api-certs:/target-api-certs
+      - ./WebApi.Service/assets/https:/source-api-certs:ro
+      - api-data:/target-api-data
+      - ./WebApi.Service/assets/data:/source-api-data:ro
+      - client-certs:/target-client-certs
+      - ./WebApi.Client/assets/https:/source-client-certs:ro
+      - client-keys:/target-client-keys
+      - ./WebApi.Client/assets/signing:/source-client-keys:ro
+    restart: "no"
   issuer:
     labels:
-      - "tier=backend"
-      - "purpose=authentication and authorization server"
+      app: issuer
+      tier: backend
+      role: identity-provider
+      purpose: authentication-and-authorization
+      managed-by: compose
+      lifecycle: persistent
     build:
       context: .
-      dockerfile: ./WebApi.Issuer/Dockerfile
+      dockerfile: ./Dockerfile
+      target: issuer-runtime
     image: webapi-suite/issuer:latest
     ports:
       - "5001:5001"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=https://+:5001
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/assets/https/cert.crt
-      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/assets/https/key.pem
-      - ISSUER_BASE_URL=https://issuer:5001/connect
-      - TOKEN_LIFETIME_MINUTES=30
-      - Logging__LogLevel__Default=Warning
-      - Logging__Console__FormatterOptions__TimestampFormat="yyyy-MM-dd HH:mm:ss:fff"
+      SSL_CERT_FILE: /app/assets/https/ca-bundle.crt
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: https://+:5001
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /app/assets/https/cert.crt
+      ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /app/assets/https/key.pem
+      ISSUER_BASE_URL: https://issuer:5001/connect
+      TOKEN_LIFETIME_MINUTES: 30
+      Logging__LogLevel__Default: Warning
+      Logging__Console__FormatterName: simple
+      Logging__Console__FormatterOptions__IncludeTimestamp: true
+      Logging__Console__FormatterOptions__TimestampFormat: |-
+        yyyy-MM-dd HH:mm:ss.fff 
     volumes:
-      - ./WebApi.Issuer/assets/signing:/app/assets/signing:ro
-      - ./WebApi.Issuer/assets/https:/app/assets/https:ro
-      - ./WebApi.Issuer/assets/data:/app/assets/data:rw
+      - issuer-certs:/app/assets/https:ro
+      - issuer-keys:/app/assets/signing:ro
+      - issuer-data:/app/assets/data:rw
     networks:
       - public
+    depends_on:
+      - load-volumes
+    restart: "always"
   api:
     labels:
-      - "tier=backend"
-      - "purpose=protected Web API service"
+      app: api
+      tier: backend
+      role: protected-api
+      purpose: serve-application-data
+      managed-by: compose
+      lifecycle: persistent
     build:
       context: .
-      dockerfile: ./WebApi.Service/Dockerfile
+      dockerfile: ./Dockerfile
+      target: api-runtime
     image: webapi-suite/api:latest
     ports:
       - "5002:5002"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=https://+:5002
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/app/assets/https/cert.crt
-      - ASPNETCORE_Kestrel__Certificates__Default__KeyPath=/app/assets/https/key.pem
-      - ISSUER_BASE_URL=https://issuer:5001/connect
-      - API_ID=af2157c0-3280-42e7-b327-33e5aa3ec76e
-      - Logging__LogLevel__Default=Warning
-      - Logging__Console__FormatterOptions__TimestampFormat="yyyy-MM-dd HH:mm:ss:fff"
+      SSL_CERT_FILE: /app/assets/https/ca-bundle.crt
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: https://+:5002
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /app/assets/https/cert.crt
+      ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /app/assets/https/key.pem
+      ISSUER_BASE_URL: https://issuer:5001/connect
+      API_ID: af2157c0-3280-42e7-b327-33e5aa3ec76e
+      Logging__LogLevel__Default: Warning
+      Logging__Console__FormatterName: simple
+      Logging__Console__FormatterOptions__IncludeTimestamp: true
+      Logging__Console__FormatterOptions__TimestampFormat: |-
+        yyyy-MM-dd HH:mm:ss.fff 
     volumes:
-      - ./WebApi.Service/assets/https:/app/assets/https:ro
-      - ./WebApi.Service/assets/data:/app/assets/data:rw
+      - api-certs:/app/assets/https:ro
+      - api-data:/app/assets/data:rw
     networks:
       - public
     depends_on:
-      - issuer
+      - load-volumes
+    restart: "always"
   client:
     labels:
-      - "tier=frontend"
-      - "purpose=client application consuming the Web API"
+      app: client
+      tier: frontend
+      role: web-client
+      purpose: consume-protected-api
+      managed-by: compose
+      lifecycle: persistent
     build:
       context: .
-      dockerfile: ./WebApi.Client/Dockerfile
+      dockerfile: ./Dockerfile
+      target: client-runtime
     image: webapi-suite/client:latest
     environment:
-      - DOTNET_ENVIRONMENT=Production
-      - ISSUER_BASE_URL=https://issuer:5001/connect
-      - API_BASE_URL=https://api:5002
-      - CLIENT_ID=088f6a2e-8f00-4340-b32d-49de4acde03c
-      - API_ID=af2157c0-3280-42e7-b327-33e5aa3ec76e
-      - Logging__LogLevel__Default=Information
-      - Logging__LogLevel__Microsoft=Error
-      - Logging__LogLevel__System=Error
-      - Logging__Console__FormatterOptions__TimestampFormat="yyyy-MM-dd HH:mm:ss:fff"
+      SSL_CERT_FILE: /app/assets/https/ca-bundle.crt
+      DOTNET_ENVIRONMENT: Production
+      ISSUER_BASE_URL: https://issuer:5001/connect
+      API_BASE_URL: https://api:5002
+      CLIENT_ID: 088f6a2e-8f00-4340-b32d-49de4acde03c
+      API_ID: af2157c0-3280-42e7-b327-33e5aa3ec76e
+      Logging__LogLevel__Default: Information
+      Logging__LogLevel__Microsoft: Error
+      Logging__LogLevel__System: Error
+      Logging__Console__FormatterName: simple
+      Logging__Console__FormatterOptions__IncludeTimestamp: true
+      Logging__Console__FormatterOptions__TimestampFormat: |-
+        yyyy-MM-dd HH:mm:ss.fff 
     volumes:
-      - ./WebApi.Client/assets/signing:/app/assets/signing:ro
-      - ./WebApi.Client/assets/https:/app/assets/https:ro
+      - client-certs:/app/assets/https:ro
+      - client-keys:/app/assets/signing:ro
     networks:
       - public
     depends_on:
-      - issuer
-      - api
+      - load-volumes
+    restart: "always"
+volumes:
+  issuer-certs:
+    labels:
+      app: issuer
+      role: certs
+      purpose: trust-material
+      managed-by: compose
+      lifecycle: persistent
+  issuer-keys:
+    labels:
+      app: issuer
+      role: keys
+      purpose: private-material
+      managed-by: compose
+      lifecycle: persistent
+  issuer-data:
+    labels:
+      app: issuer
+      role: data
+      purpose: persistent-state
+      managed-by: compose
+      lifecycle: persistent
+  api-certs:
+    labels:
+      app: api
+      role: certs
+      purpose: trust-material
+      managed-by: compose
+      lifecycle: persistent
+  api-data:
+    labels:
+      app: api
+      role: data
+      purpose: persistent-state
+      managed-by: compose
+      lifecycle: persistent
+  client-certs:
+    labels:
+      app: client
+      role: certs
+      purpose: trust-material
+      managed-by: compose
+      lifecycle: persistent
+  client-keys:
+    labels:
+      app: client
+      role: keys
+      purpose: private-material
+      managed-by: compose
+      lifecycle: persistent
 networks:
   public:
     labels:
-      - "purpose=publicly accessible network for the suite of Web API services"
+      app: webapi-suite
+      scope: shared
+      tier: public
+      role: service-communication
+      purpose: public-access-network
+      managed-by: compose
+      lifecycle: persistent
     driver: bridge
