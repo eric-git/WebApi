@@ -3,83 +3,85 @@
 Generates RSA security key pairs for either the Issuer or a Client project.
 
 .DESCRIPTION
-This script automates the creation of private/public PEM key pairs using OpenSSL.
-It places the generated files into a signing folder and copies them into the
-appropriate project directories. Supports both ISSUER and CLIENT modes.
+Automates creation of private/public PEM key pairs using OpenSSL.
+Keys are stored in a signing folder and copied into the appropriate project directories.
 
 .PARAMETER Mode
-Specifies which project to generate keys for.
-Valid values are:
-- ISSUER : Generates keys for WebApi.Issuer and publishes the public key to WebApi.Service.
-- CLIENT : Generates keys for WebApi.Client and publishes the public key to WebApi.Issuer.
+ISSUER : Generates keys for WebApi.Issuer and publishes public key to WebApi.Service.
+CLIENT : Generates keys for WebApi.Client and publishes public key to WebApi.Issuer.
 
 .PARAMETER ClientId
-Specifies the unique identifier for the client when Mode is CLIENT.
-Ignored when Mode is ISSUER.
+Required when Mode = CLIENT.
 
 .EXAMPLE
 ./generate-security-keys.ps1 -Mode ISSUER
-Generates issuer keys and copies them into WebApi.Issuer and WebApi.Service.
 
 .EXAMPLE
 ./generate-security-keys.ps1 -Mode CLIENT -ClientId "12345678-abcd-efgh-ijkl-9876543210"
-Generates client keys and copies them into WebApi.Client and WebApi.Issuer.
 
 .NOTES
-Requires OpenSSL to be installed and available in PATH.
-Outputs private.pem and public.pem files into the relevant project folders.
+Requires OpenSSL in PATH.
 #>
 
 param(
-    [Parameter()]
     [ValidateSet("ISSUER", "CLIENT")]
     [string]$Mode = "ISSUER",
-    [Parameter()]
+
     [string]$ClientId
 )
+
 begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = "Stop"
+
     $issuerProjectDir = "WebApi.Issuer"
     $clientProjectDir = "WebApi.Client"
+
     switch ($Mode) {
         "ISSUER" {
-            $generatedFileNamePrefix = "issuer"
-            break
+            $Prefix = "issuer"
         }
         "CLIENT" {
             if ([string]::IsNullOrWhiteSpace($ClientId)) {
-                throw "CLIENT mode requires a non-empty ClientId"
+                throw "CLIENT mode requires a non-empty ClientId."
             }
-            $generatedFileNamePrefix = $ClientId
-            break
-        }
-        default {
-            throw "Invalid mode specified. Use 'ISSUER' or 'CLIENT'."
+            $Prefix = $ClientId
         }
     }
+
     Write-Host "Generating security keys for $($Mode.ToLower())..."
 }
+
 process {
-    $privatePemFilePath = "$PSScriptRoot/signing/$generatedFileNamePrefix-private.pem"
-    $publicPemFilePath = "$PSScriptRoot/signing/$generatedFileNamePrefix-public.pem"
-    New-Item -ItemType Directory -Path "$PSScriptRoot/signing" -Force | Out-Null
-    & openssl genrsa -out $privatePemFilePath 2048
-    & openssl rsa -in $privatePemFilePath -pubout -out $publicPemFilePath
-    switch ($Mode) {
-        "ISSUER" {
-            New-Item -ItemType Directory -Path "$PSScriptRoot/../$issuerProjectDir/assets/signing" -Force | Out-Null
-            Copy-Item -Path $privatePemFilePath -Destination "$PSScriptRoot/../$issuerProjectDir/assets/signing/private.pem" -Force
-            Copy-Item -Path $publicPemFilePath -Destination "$PSScriptRoot/../$issuerProjectDir/assets/signing/public.pem" -Force
-        }
-        "CLIENT" {
-            New-Item -ItemType Directory -Path "$PSScriptRoot/../$clientProjectDir/assets/signing" -Force | Out-Null
-            Copy-Item -Path $privatePemFilePath -Destination "$PSScriptRoot/../$clientProjectDir/assets/signing/private.pem" -Force
-            New-Item -ItemType Directory -Path "$PSScriptRoot/../$issuerProjectDir/assets/signing" -Force | Out-Null
-            Copy-Item -Path $publicPemFilePath -Destination "$PSScriptRoot/../$issuerProjectDir/assets/signing/$ClientId-public.pem" -Force
-        }
+    $signingRoot = Join-Path $PSScriptRoot "signing"
+    $privatePem = Join-Path $signingRoot "$Prefix-private.pem"
+    $publicPem = Join-Path $signingRoot "$Prefix-public.pem"
+
+    # Ensure signing directory exists
+    New-Item -ItemType Directory -Path $signingRoot -Force | Out-Null
+
+    # Generate keys
+    & openssl genrsa -out $privatePem 2048
+    & openssl rsa -in $privatePem -pubout -out $publicPem
+
+    # Resolve project signing directories
+    $issuerSigning = Join-Path $PSScriptRoot "..\$issuerProjectDir\assets\signing"
+    $clientSigning = Join-Path $PSScriptRoot "..\$clientProjectDir\assets\signing"
+
+    # Ensure directories exist
+    New-Item -ItemType Directory -Path $issuerSigning -Force | Out-Null
+    New-Item -ItemType Directory -Path $clientSigning -Force | Out-Null
+
+    if ($Mode -eq "ISSUER") {
+        Copy-Item $privatePem -Destination (Join-Path $issuerSigning "private.pem") -Force
+        Copy-Item $publicPem  -Destination (Join-Path $issuerSigning "public.pem")  -Force
+    }
+    else {
+        Copy-Item $privatePem -Destination (Join-Path $clientSigning "private.pem") -Force
+        Copy-Item $publicPem  -Destination (Join-Path $issuerSigning "$ClientId-public.pem") -Force
     }
 }
+
 end {
     Write-Host "Security keys for $($Mode.ToLower()) generated."
 }

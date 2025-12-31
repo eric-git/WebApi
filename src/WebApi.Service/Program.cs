@@ -27,8 +27,19 @@ builder.Services
             };
         }
     });
-
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(authorizationOptions =>
+{
+    authorizationOptions.AddPolicy("ApiRead", authorizationPolicyBuilder =>
+    {
+        authorizationPolicyBuilder.RequireAuthenticatedUser();
+        authorizationPolicyBuilder.RequireClaim("scope", "api.read");
+    });
+    authorizationOptions.AddPolicy("ApiWrite", authorizationPolicyBuilder =>
+    {
+        authorizationPolicyBuilder.RequireAuthenticatedUser();
+        authorizationPolicyBuilder.RequireClaim("scope", "api.write");
+    });
+});
 
 var app = builder.Build();
 app.UseAuthentication();

@@ -1,59 +1,61 @@
 # Web API Suite
 
-A **.NET 10 Web API solution** demonstrating secure authentication, containerization, and contributor‑friendly workflows. The suite includes an Issuer service for token generation, an API service protected by those tokens, and a sample Client for integration testing.
+A **.NET 10 Web API solution** showcasing secure authentication, containerization, and contributor‑friendly workflows.  
+The suite includes an Issuer for token generation, an API protected by those tokens, and a sample Client for integration testing.
 
 ---
 
 ## ✨ Highlights
 
-- **Issuer service** – Issues JWT tokens with configurable lifetimes and signing keys.
-- **API service** – Exposes endpoints secured via Issuer‑issued tokens.
+- **Issuer service** – Issues JWTs with configurable lifetimes and signing keys.
+- **API service** – Exposes endpoints secured by Issuer‑issued tokens.
 - **Client app** – Demonstrates token acquisition and API consumption.
-- **Certificate automation** – PowerShell and POSIX‑compliant routines for HTTPS and signing.
-- **Security key generation** – Automated scripts to create signing keys for token issuance.
-- **Docker support** – Multi‑stage builds with guardrails for onboarding and reproducibility.
-- **Cross‑IDE profiles** – Debugging and launch settings for Visual Studio and VS Code.
+- **Certificate automation** – POSIX + PowerShell routines for HTTPS and signing.
+- **Security key generation** – Automated RSA keypair creation for token issuance.
+- **Docker support** – Multi‑stage builds with reproducible onboarding.
+- **Cross‑IDE profiles** – Debug configurations for Visual Studio and VS Code.
 
 ---
 
 ## ⚙️ Prerequisites
 
 - **.NET 10 SDK**
-- **OpenSSL in PATH**
+- **OpenSSL available in PATH**
 - **Docker Desktop** (optional, for container builds)
-- **Visual Studio 2026 or VS Code** with C# extension
+- **Visual Studio 2026 or VS Code** with the C# extension
 
 ---
 
 ## 🔧 Usage
 
-Folder `.\src\setup` contains required assets and setup scripts for project development. Both POSIX and PowerShell versions are included.
+All setup scripts live in `./src/setup`, with both POSIX and PowerShell variants available.
 
-- **Setup development assets**
+### Setup development assets
 
-  ```powershell
-  ./ensure-assets.ps1
-  ```
+```powershell
+./ensure-assets.ps1
+```
 
-- **Generate HTTPS certificates**
+### Generate HTTPS certificates
 
-  ```powershell
-  ./generate-cert.ps1 -Mode API
-  ./generate-cert.ps1 -Mode ISSUER
-  ```
+```powershell
+./generate-cert.ps1 -Mode API
+./generate-cert.ps1 -Mode ISSUER
+```
 
-- **Generate signing keys**
+### Generate signing keys
 
-  ```powershell
-  ./generate-keys.ps1 -Mode CLIENT -ClientId <GUID>
-  ./generate-keys.ps1 -Mode ISSUER
-  ```
+```powershell
+./generate-keys.ps1 -Mode CLIENT -ClientId <GUID>
+./generate-keys.ps1 -Mode ISSUER
+```
 
-- **Reset seeded data**
-  ```powershell
-  ./reset-data.ps1 -Mode API
-  ./reset-data.ps1 -Mode ISSUER
-  ```
+### Reset seeded data
+
+```powershell
+./reset-data.ps1 -Mode API
+./reset-data.ps1 -Mode ISSUER
+```
 
 ---
 
@@ -69,7 +71,7 @@ flowchart LR
 
 ---
 
-## 📈 Sequence Diagram (Token Request & Validation)
+## 📈 Token Request & Validation (Sequence)
 
 ```mermaid
 sequenceDiagram
@@ -86,23 +88,23 @@ sequenceDiagram
 
 **Step‑by‑step:**
 
-1. Client requests a token from Issuer.
-2. Issuer generates a JWT using its private signing key.
+1. Client requests a token from the Issuer.
+2. Issuer signs a JWT using its private key.
 3. Client calls the API with the JWT in the Authorization header.
-4. API validates the JWT using the Issuer's public key.
+4. API validates the token using the Issuer’s public key.
 5. API returns secured data if validation succeeds.
 
 ---
 
 ## 🧪 Testing & Development
 
-- **Certificates and keys** are located in each project's `assets/https/` or `assets/signing/` folder.
-- **Mock data** are located in each project's `assets/data/` folder.
-- **Token issuance and API calls** can be verified using `curl`, Postman, or any standard HTTP client.
+- **Certificates and keys** live in each project’s `assets/https/` or `assets/signing/`.
+- **Mock data** lives in each project’s `assets/data/`.
+- **Token issuance and API calls** can be tested with `curl`, Postman, or any HTTP client.
 
 ---
 
 ## 📌 Notes
 
 - **Scripts are atomic and rollback‑safe** to ensure clean onboarding.
-- **Repo hygiene**: keep `LICENSE`, `SECURITY.md`, and `README.md` aligned.
+- Maintain repo hygiene by keeping `LICENSE`, `SECURITY.md`, and `README.md` aligned.
