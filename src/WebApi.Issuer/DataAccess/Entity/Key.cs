@@ -1,0 +1,13 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace WebApi.Issuer.DataAccess.Entity;
+
+public partial class Key
+{
+    public Guid Id { get; set; }
+
+    public string Pem { get; set; } = null!;
+
+    public virtual ICollection<ClientService> ClientServices { get; set; } = new List<ClientService>();
+}

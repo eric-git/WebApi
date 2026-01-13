@@ -49,16 +49,10 @@ public class ClientTest(IHostEnvironment hostEnvironment, IServiceClient service
     {
         Game game = new()
         {
-            Type = "Game",
+            Type = "game",
             Name = "Mario Kart 8 Deluxe",
-            Attributes = new Attributes
-            {
-                Player = new Player
-                {
-                    Name = "Mario",
-                    Health = 100
-                }
-            },
+            PlayerName = "Mario",
+            PlayerHealth = 100,
             Relations =
             [
                 new Relation

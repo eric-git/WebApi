@@ -1,0 +1,44 @@
+<Project>
+  <!-- Shared props -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Product>Sample Web API Suite</Product>
+    <Company>Project ERIC</Company>
+    <Copyright>© 2025 Project ERIC. All rights reserved.</Copyright>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\web-api-suite.snk</AssemblyOriginatorKeyFile>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <!-- Default configuration -->
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!-- Single publish folder -->
+  <PropertyGroup>
+    <PublishRoot>$(SolutionDir)publish</PublishRoot>
+    <PublishFlavor Condition="'$(IsContainerBuild)'=='true'">container</PublishFlavor>
+    <PublishFlavor Condition="'$(IsContainerBuild)'!='true'">local</PublishFlavor>
+    <PublishDir>$(PublishRoot)/$(PublishFlavor)/</PublishDir>
+    <IsContainerBuild Condition="'$(IsContainerBuild)'==''">false</IsContainerBuild>
+  </PropertyGroup>
+
+  <!-- Asset folders -->
+  <PropertyGroup>
+    <AssetRoot>$(MSBuildProjectDirectory)/runtime</AssetRoot>
+    <SecretStoreRoot>$(AssetRoot)/secrets</SecretStoreRoot>
+    <DataStoreRoot>$(AssetRoot)/data</DataStoreRoot>
+  </PropertyGroup>
+</Project>

@@ -8,7 +8,9 @@ public class Game
 
     public string? Name { get; set; }
 
-    public Attributes? Attributes { get; set; }
+    public string? PlayerName { get; set; }
+
+    public int? PlayerHealth { get; set; }
 
     public List<Relation>? Relations { get; set; }
 }

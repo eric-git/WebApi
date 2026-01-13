@@ -1,26 +1,41 @@
 <Project>
-  <PropertyGroup>
-    <AssetRoot Condition="'$(AssetRoot)' == ''">$(MSBuildProjectDirectory)\assets</AssetRoot>
-    <KeyStoreRoot Condition="'$(KeyStoreRoot)' == ''">$(AssetRoot)\signing</KeyStoreRoot>
-    <CertificateStoreRoot Condition="'$(CertificateStoreRoot)' == ''">$(AssetRoot)\https</CertificateStoreRoot>
-    <DataStoreRoot Condition="'$(DataStoreRoot)' == ''">$(AssetRoot)\data</DataStoreRoot>
-  </PropertyGroup>
+  <!-- Include all runtime -->
+  <ItemGroup Condition="Exists('$(SecretStoreRoot)')">
+    <AssetFiles Include="$(SecretStoreRoot)/**/*">
+      <Link>secrets\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </AssetFiles>
+  </ItemGroup>
+  <ItemGroup Condition="Exists('$(DataStoreRoot)')">
+    <AssetFiles Include="$(DataStoreRoot)/**/*">
+      <Link>data\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </AssetFiles>
+  </ItemGroup>
   <ItemGroup>
-    <AssetFiles Include="$(AssetRoot)\**\*" Condition="Exists('$(AssetRoot)')" />
-    <AssetFiles Remove="$(AssetRoot)\appicon.ico" Condition="Exists('$(AssetRoot)\appicon.ico')" />
+    <None Update="favicon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
-  <ItemGroup Condition="'$(PublishProfile)' == 'DefaultContainer' Or '$(IsContainerBuild)' == 'true'">
-    <AssetFiles Remove="$(KeyStoreRoot)\**\*" Condition="Exists('$(KeyStoreRoot)')" />
-    <AssetFiles Remove="$(CertificateStoreRoot)\**\*" Condition="Exists('$(CertificateStoreRoot)')" />
-    <AssetFiles Remove="$(DataStoreRoot)\**\*" Condition="Exists('$(DataStoreRoot)')" />
-    <EmptyAssetDirs Include="$(KeyStoreRoot)" Condition="Exists('$(KeyStoreRoot)')" />
-    <EmptyAssetDirs Include="$(CertificateStoreRoot)" Condition="Exists('$(CertificateStoreRoot)')" />
-    <EmptyAssetDirs Include="$(DataStoreRoot)" Condition="Exists('$(DataStoreRoot)')" />
+
+  <!-- Exclude container folders -->
+  <ItemGroup>
+    <ExcludedAssetDirs Include="$(SecretStoreRoot)" Condition="'$(IsContainerBuild)'=='true'" />
+    <ExcludedAssetDirs Include="$(DataStoreRoot)" Condition="'$(IsContainerBuild)'=='true'" />
+    <AssetFiles Remove="@(ExcludedAssetDirs->'%(FullPath)/**/*')" Condition="'@(ExcludedAssetDirs)' != ''" />
   </ItemGroup>
-  <Target Name="CopyAssets" AfterTargets="Build" Condition="'@(AssetFiles)' != ''">
-    <Copy SourceFiles="@(AssetFiles)" DestinationFolder="$(OutDir)assets\%(RecursiveDir)" />
+
+  <!-- Copy runtime for normal build -->
+  <Target Name="CopyRuntimeAfterBuild" AfterTargets="Build" Condition="'@(AssetFiles)' != ''">
+    <PropertyGroup>
+      <AssetTargetDir>$(OutDir)runtime</AssetTargetDir>
+    </PropertyGroup>
+    <Copy SourceFiles="@(AssetFiles)" DestinationFiles="@(AssetFiles->'$(OutDir)runtime\%(Link)')" SkipUnchangedFiles="true" />
   </Target>
-  <Target Name="CreateEmptyAssetDirs" AfterTargets="CopyAssets" Condition="'@(EmptyAssetDirs)' != ''">
-    <MakeDir Directories="@(EmptyAssetDirs->'$(OutDir)assets\%(RecursiveDir)')" />
+
+  <!-- Copy runtime for publish -->
+  <Target Name="CopyRuntimeAfterPublish" AfterTargets="Publish" Condition="'@(AssetFiles)' != ''">
+    <PropertyGroup>
+      <AssetTargetDir>$(PublishDir)runtime</AssetTargetDir>
+    </PropertyGroup>
+    <Copy SourceFiles="@(AssetFiles)" DestinationFolder="$(AssetTargetDir)\%(RecursiveDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

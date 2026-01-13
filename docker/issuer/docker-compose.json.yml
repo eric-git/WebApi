@@ -1,0 +1,21 @@
+name: webapi-suite
+
+services:
+
+  issuer:
+    environment:
+      Persistence__Mode: json
+      DATA_PATH: /lib/var/api/
+    volumes:
+      - issuer-json-data:/lib/var/api/:rw
+
+volumes:
+
+  issuer-json-data:
+    labels:
+      app: issuer
+      role: data
+      purpose: persistent-state
+      managed-by: compose
+      lifecycle: persistent
+      mode: json

@@ -11,14 +11,16 @@ using WebApi.Client.Handlers;
 using WebApi.Client.Services;
 using WebApi.Common;
 using static WebApi.Common.SecurityExtensions;
-using static WebApi.Common.Constants;
 
 var builder = Host.CreateApplicationBuilder(args);
-if (builder.Environment.IsDevelopment())
+builder.Configuration.AddEnvironmentVariables();
+var secretPath = builder.Configuration["SECRET_PATH"];
+if (!Path.IsPathRooted(secretPath!))
 {
-    CertificateStore.Load();
+    secretPath = Path.Combine(AppContext.BaseDirectory, secretPath!);
 }
 
+builder.Configuration.AddKeyPerFile(secretPath);
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 builder.Logging.AddConsole();
 
@@ -28,14 +30,15 @@ builder.Services.AddSingleton<IConfidentialClientApplication>(serviceProvider =>
     var issuer = configuration["ISSUER_BASE_URL"]!;
     var clientId = configuration["CLIENT_ID"]!;
     var apiId = configuration["API_ID"]!;
+    var keyId = configuration["KEY_ID"]!;
     return ConfidentialClientApplicationBuilder
         .Create(clientId)
         .WithOidcAuthority(issuer)
         .WithHttpClientFactory(serviceProvider.GetRequiredService<IMsalHttpClientFactory>())
         .WithClientAssertion(async (CancellationToken _) =>
         {
-            var fileName = Path.Combine(KeyStoreRootPath, "private.pem");
-            var (_, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemFileAsync(fileName);
+            var privateSigningKey = configuration["private-signing-key.pem"];
+            var (_, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemAsync(privateSigningKey!, keyId);
             var now = DateTime.UtcNow;
             SecurityTokenDescriptor securityTokenDescriptor = new()
             {
@@ -67,7 +70,7 @@ builder.Services.AddHttpClient(ServiceClient.HttpClientName, (serviceProvider, h
     {
         var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
         return hostEnvironment.IsDevelopment()
-            ? new HttpClientHandler { ServerCertificateCustomValidationCallback = CertificateValidationCallback }
+            ? serviceProvider.GetRequiredService<ClientCertificateHandler>()
             : new HttpClientHandler();
     })
     .AddHttpMessageHandler<AccessTokenHandler>()
@@ -77,7 +80,7 @@ builder.Services.AddHttpClient(MsalHttpClientFactory.HttpClientName)
     {
         var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
         return hostEnvironment.IsDevelopment()
-            ? new HttpClientHandler { ServerCertificateCustomValidationCallback = CertificateValidationCallback }
+            ? serviceProvider.GetRequiredService<ClientCertificateHandler>()
             : new HttpClientHandler();
     });
 
@@ -87,6 +90,10 @@ builder.Services.AddSingleton<IServiceClient, ServiceClient>();
 builder.Services.AddTransient<LoggingHandler>();
 builder.Services.AddTransient<AccessTokenHandler>();
 builder.Services.AddTransient<ClientTest>();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddSingleton<ClientCertificateHandler>();
+}
 
 var app = builder.Build();
 await app.Services.GetRequiredService<ClientTest>().TestAsync();

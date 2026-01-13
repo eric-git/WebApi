@@ -2,82 +2,153 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Issuer (Development)",
+      "name": "Issuer (Json Data)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-issuer",
       "program": "${workspaceFolder}/src/WebApi.Issuer/bin/Debug/net10.0/WebApi.Issuer.dll",
-      "args": [],
       "cwd": "${workspaceFolder}/src/WebApi.Issuer",
+      "justMyCode": true,
       "serverReadyAction": {
         "action": "openExternally",
-        "pattern": "\\bhttps://localhost:5003\\b",
+        "pattern": "https://.*:5003",
         "uriFormat": "https://localhost:5003"
       },
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://+:5003",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./assets/https/cert.crt",
-        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./assets/https/key.pem",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./runtime/secrets/hosting-cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./runtime/secrets/hosting-key.pem",
         "ISSUER_BASE_URL": "https://localhost:5003/connect",
         "TOKEN_LIFETIME_MINUTES": "30",
+        "SECRET_PATH": "./runtime/secrets/",
+        "Persistence__Mode": "json",
+        "DATA_PATH": "./runtime/data/",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
-        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
+        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
       }
     },
     {
-      "name": "Api (Development)",
+      "name": "Issuer (Postgres Data)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-api",
-      "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}/src/WebApi.Service",
+      "program": "${workspaceFolder}/src/WebApi.Issuer/bin/Debug/net10.0/WebApi.Issuer.dll",
+      "cwd": "${workspaceFolder}/src/WebApi.Issuer",
+      "justMyCode": true,
       "serverReadyAction": {
         "action": "openExternally",
-        "pattern": "\\bhttps://localhost:5004\\b",
+        "pattern": "https://.*:5003",
+        "uriFormat": "https://localhost:5003"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://+:5003",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./runtime/secrets/hosting-cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./runtime/secrets/hosting-key.pem",
+        "ISSUER_BASE_URL": "https://localhost:5003/connect",
+        "TOKEN_LIFETIME_MINUTES": "30",
+        "SECRET_PATH": "./runtime/secrets/",
+        "Persistence__Mode": "postgres",
+        "ConnectionStrings__Default": "Host=localhost;Port=5432;Database=issuer_db;Username=svc_issuer",
+        "Logging__Console__FormatterName": "simple",
+        "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
+        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
+        "EFCORE__ENABLEDETAILEDERRORS": "true",
+        "EFCORE__ENABLESENSITIVEDATALOGGING": "true"
+      }
+    },
+    {
+      "name": "Api (Json Data)",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
+      "cwd": "${workspaceFolder}/src/WebApi.Service",
+      "justMyCode": true,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "https://.*:5004",
         "uriFormat": "https://localhost:5004/"
       },
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://+:5004",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./assets/https/cert.crt",
-        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./assets/https/key.pem",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./runtime/secrets/hosting-cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./runtime/secrets/hosting-key.pem",
         "ISSUER_BASE_URL": "https://localhost:5003/connect",
         "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+        "SECRET_PATH": "./runtime/secrets/",
+        "Persistence__Mode": "json",
+        "DATA_PATH": "./runtime/data/",
+        "Logging__Console__FormatterName": "simple",
+        "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
+        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
+      }
+    },
+    {
+      "name": "Api (Postgres Data)",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
+      "cwd": "${workspaceFolder}/src/WebApi.Service",
+      "justMyCode": true,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "https://.*:5004",
+        "uriFormat": "https://localhost:5004/"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://+:5004",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./runtime/secrets/hosting-cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./runtime/secrets/hosting-key.pem",
+        "ISSUER_BASE_URL": "https://localhost:5003/connect",
+        "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+        "SECRET_PATH": "./runtime/secrets/",
+        "Persistence__Mode": "postgres",
+        "ConnectionStrings__Default": "Host=localhost;Port=5432;Database=api_db;Username=svc_api",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
+        "EFCORE__ENABLEDETAILEDERRORS": "true",
+        "EFCORE__ENABLESENSITIVEDATALOGGING": "true"
       }
     },
     {
       "name": "Client (Development)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build-client",
       "program": "${workspaceFolder}/src/WebApi.Client/bin/Debug/net10.0/WebApi.Client.dll",
-      "args": [],
       "cwd": "${workspaceFolder}/src/WebApi.Client",
       "console": "integratedTerminal",
+      "justMyCode": true,
       "env": {
         "DOTNET_ENVIRONMENT": "Development",
         "ISSUER_BASE_URL": "https://localhost:5003/connect",
         "API_BASE_URL": "https://localhost:5004",
         "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
         "CLIENT_ID": "088f6a2e-8f00-4340-b32d-49de4acde03c",
+        "KEY_ID": "dc6f9ca5-1337-4bcb-952c-f6df8ff9d528",
+        "SECRET_PATH": "./runtime/secrets/",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
-        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
+        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
       }
     }
   ],
   "compounds": [
     {
-      "name": "Debug All (Issuer+Api+Client)",
+      "name": "Debug All (Issuer+Api+Client) Json Data",
       "configurations": [
-        "Issuer (Development)",
-        "Api (Development)",
+        "Issuer (Json Data)",
+        "Api (Json Data)",
+        "Client (Development)"
+      ]
+    },
+    {
+      "name": "Debug All (Issuer+Api+Client) Postgres Data",
+      "configurations": [
+        "Issuer (Postgres Data)",
+        "Api (Postgres Data)",
         "Client (Development)"
       ]
     }

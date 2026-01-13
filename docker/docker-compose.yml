@@ -1,0 +1,23 @@
+name: webapi-suite
+
+secrets:
+  ca-bundle:
+    labels:
+      app: webapi-suite
+      role: certs
+      purpose: trust-material
+      managed-by: compose
+      lifecycle: persistent
+    file: ../local/hosting/ca-bundle.crt
+
+networks:
+  public:
+    labels:
+      app: webapi-suite
+      scope: shared
+      tier: public
+      role: service-communication
+      purpose: public-access-network
+      managed-by: compose
+      lifecycle: persistent
+    driver: bridge

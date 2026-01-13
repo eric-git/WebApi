@@ -1,0 +1,68 @@
+name: webapi-suite
+
+services:
+
+  postgres-issuer:
+    labels:
+      app: issuer
+      tier: backend
+      role: relational-store
+      purpose: issuer-persistent-state
+      managed-by: compose
+      lifecycle: persistent
+      mode: postgres
+    image: postgres:18.1-alpine
+    environment:
+      POSTGRES_USER: db_manager
+      POSTGRES_PASSWORD_FILE: /run/secrets/db-manager-password
+      POSTGRES_DB: issuer_db
+    command: >
+      postgres -c password_encryption=scram-sha-256
+    ports:
+      - "55433:5432"
+    secrets:
+      - db-manager-password
+      - svc-issuer-password
+    networks:
+      - public
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U db_manager -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  issuer:
+    image: webapi-suite/issuer:latest
+    depends_on:
+      - postgres-issuer
+    environment:
+      Persistence__Mode: postgres
+      SECRET_PATH: /run/secrets/
+      ConnectionStrings__Default: Host=postgres-issuer;Database=issuer_db;Username=svc_issuer
+    secrets:
+      - source: svc-issuer-password
+        target: connection-default.password
+
+secrets:
+
+  db-manager-password:
+    file: ../local/data/postgres/db-manager-password.txt
+    labels:
+      app: webapi-suite
+      role: secret
+      purpose: postgres-superuser-password
+      managed-by: compose
+      lifecycle: persistent
+      mode: postgres
+
+  svc-issuer-password:
+    file: ../local/data/postgres/svc-issuer-password.txt
+    labels:
+      app: issuer
+      role: secret
+      purpose: database-runtime-password
+      managed-by: compose
+      lifecycle: persistent
+      mode: postgres

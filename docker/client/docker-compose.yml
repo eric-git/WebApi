@@ -1,0 +1,56 @@
+name: webapi-suite
+
+services:
+
+  client:
+    labels:
+      app: client
+      tier: frontend
+      role: web-client
+      purpose: consume-protected-api
+      managed-by: compose
+      lifecycle: persistent
+    build:
+      context: ../src
+      dockerfile: ../docker/Dockerfile
+      target: client-runtime
+    image: webapi-suite/client:latest
+    pull_policy: never
+    environment:
+      SSL_CERT_FILE: /run/secrets/ca-bundle
+      DOTNET_ENVIRONMENT: Production
+      ISSUER_BASE_URL: https://issuer:5001/connect
+      API_BASE_URL: https://api:5002
+      API_ID: af2157c0-3280-42e7-b327-33e5aa3ec76e
+      CLIENT_ID: 088f6a2e-8f00-4340-b32d-49de4acde03c
+      KEY_ID: dc6f9ca5-1337-4bcb-952c-f6df8ff9d528
+      SECRET_PATH: /run/secrets/
+      Logging__LogLevel__Default: Information
+      Logging__LogLevel__Microsoft: Error
+      Logging__LogLevel__System: Error
+      Logging__Console__FormatterName: simple
+      Logging__Console__FormatterOptions__IncludeTimestamp: true
+      Logging__Console__FormatterOptions__TimestampFormat: |-
+        yyyy-MM-dd HH:mm:ss.fff 
+    secrets:
+      - source: issuer-hosting-cert
+        target: issuer-hosting-cert.crt
+      - source: api-hosting-cert
+        target: api-hosting-cert.crt
+      - source: client-private-signing-key
+        target: private-signing-key.pem
+      - ca-bundle
+    networks:
+      - public
+    restart: always
+
+secrets:
+
+  client-private-signing-key:
+    labels:
+      app: issuer
+      role: keys
+      purpose: private-material
+      managed-by: compose
+      lifecycle: persistent
+    file: ../local/signing/client-private.pem

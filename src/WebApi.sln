@@ -11,54 +11,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Client", "WebApi.Cli
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8679EF77-5D09-44B7-9A42-27A414BD40E1}"
 	ProjectSection(SolutionItems) = preProject
-		.dockerignore = .dockerignore
-		.editorconfig = .editorconfig
 		..\.gitattributes = ..\.gitattributes
 		..\.gitignore = ..\.gitignore
+		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
-		docker-compose.yml = docker-compose.yml
-		Dockerfile = Dockerfile
 		..\LICENSE = ..\LICENSE
-		Makefile = Makefile
 		..\README.md = ..\README.md
 		..\SECURITY.md = ..\SECURITY.md
+		WebApi.slnLaunch = WebApi.slnLaunch
 		webspi-suite.snk = webspi-suite.snk
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Common", "WebApi.Common\WebApi.Common.csproj", "{A46358B5-3B46-474B-B239-19A518E1D178}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "setup", "setup", "{B25C7C71-8E1D-442B-85BA-A6C84A620158}"
-	ProjectSection(SolutionItems) = preProject
-		setup\extra-runtime-setup.sh = setup\extra-runtime-setup.sh
-		setup\generate-hosting-cert.ps1 = setup\generate-hosting-cert.ps1
-		setup\generate-hosting-cert.sh = setup\generate-hosting-cert.sh
-		setup\generate-security-keys.ps1 = setup\generate-security-keys.ps1
-		setup\generate-security-keys.sh = setup\generate-security-keys.sh
-		setup\reset-db.ps1 = setup\reset-db.ps1
-		setup\reset-db.sh = setup\reset-db.sh
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "signing", "signing", "{76F780B7-0776-4315-B43A-B3DF238D52B8}"
-	ProjectSection(SolutionItems) = preProject
-		setup\signing\088f6a2e-8f00-4340-b32d-49de4acde03c-private.pem = setup\signing\088f6a2e-8f00-4340-b32d-49de4acde03c-private.pem
-		setup\signing\088f6a2e-8f00-4340-b32d-49de4acde03c-public.pem = setup\signing\088f6a2e-8f00-4340-b32d-49de4acde03c-public.pem
-		setup\signing\issuer-private.pem = setup\signing\issuer-private.pem
-		setup\signing\issuer-public.pem = setup\signing\issuer-public.pem
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "hosting", "hosting", "{3B81C4F5-67C0-4EAE-8290-9AA7AA917390}"
-	ProjectSection(SolutionItems) = preProject
-		setup\hosting\api-cert.crt = setup\hosting\api-cert.crt
-		setup\hosting\api-key.pem = setup\hosting\api-key.pem
-		setup\hosting\issuer-cert.crt = setup\hosting\issuer-cert.crt
-		setup\hosting\issuer-key.pem = setup\hosting\issuer-key.pem
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{6DDED610-0A08-4423-BAD1-7CFCED0EF0CE}"
-	ProjectSection(SolutionItems) = preProject
-		setup\data\api-db.json = setup\data\api-db.json
-		setup\data\issuer-db.json = setup\data\issuer-db.json
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Common.Web", "WebApi.Common.Web\WebApi.Common.Web.csproj", "{6AA1C631-EAAA-4102-A17A-3619808B4C0C}"
 EndProject
@@ -135,12 +99,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{B25C7C71-8E1D-442B-85BA-A6C84A620158} = {8679EF77-5D09-44B7-9A42-27A414BD40E1}
-		{76F780B7-0776-4315-B43A-B3DF238D52B8} = {B25C7C71-8E1D-442B-85BA-A6C84A620158}
-		{3B81C4F5-67C0-4EAE-8290-9AA7AA917390} = {B25C7C71-8E1D-442B-85BA-A6C84A620158}
-		{6DDED610-0A08-4423-BAD1-7CFCED0EF0CE} = {B25C7C71-8E1D-442B-85BA-A6C84A620158}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {86280678-C9E5-45A3-A41C-65B61A4FE94D}

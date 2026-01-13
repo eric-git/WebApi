@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "Api (Development)": {
+    "Api (Postgres Data)": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:5004",
@@ -8,13 +8,36 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://+:5004",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./assets/https/cert.crt",
-        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./assets/https/key.pem",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./runtime/secrets/hosting-cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./runtime/secrets/hosting-key.pem",
         "ISSUER_BASE_URL": "https://localhost:5003/connect",
         "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+        "SECRET_PATH": "./runtime/secrets/",
+        "Persistence__Mode": "postgres",
+        "ConnectionStrings__Default": "Host=localhost;Port=5432;Database=api_db;Username=svc_api",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
-        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
+        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
+      }
+    },
+    "Api (JSON Data)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:5004",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://+:5004",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "./runtime/secrets/hosting-cert.crt",
+        "ASPNETCORE_Kestrel__Certificates__Default__KeyPath": "./runtime/secrets/hosting-key.pem",
+        "ISSUER_BASE_URL": "https://localhost:5003/connect",
+        "API_ID": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+        "SECRET_PATH": "./runtime/secrets/",
+        "Persistence__Mode": "json",
+        "DATA_PATH": "./runtime/data/",
+        "Logging__Console__FormatterName": "simple",
+        "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
+        "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
       }
     }
   }

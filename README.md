@@ -30,31 +30,31 @@ The suite includes an Issuer for token generation, an API protected by those tok
 
 All setup scripts live in `./src/setup`, with both POSIX and PowerShell variants available.
 
-### Setup development assets
+### Setup development runtime
 
 ```powershell
-./ensure-assets.ps1
+./ensure-runtime.ps1
 ```
 
 ### Generate HTTPS certificates
 
 ```powershell
-./generate-cert.ps1 -Mode API
-./generate-cert.ps1 -Mode ISSUER
+./generate-hosting-cert.ps1 -Mode API
+./generate-hosting-cert.ps1 -Mode ISSUER
 ```
 
 ### Generate signing keys
 
 ```powershell
-./generate-keys.ps1 -Mode CLIENT -ClientId <GUID>
-./generate-keys.ps1 -Mode ISSUER
+./generate-security-keys.ps1 -Mode CLIENT -ClientId <GUID>
+./generate-security-keys.ps1 -Mode ISSUER
 ```
 
 ### Reset seeded data
 
 ```powershell
-./reset-data.ps1 -Mode API
-./reset-data.ps1 -Mode ISSUER
+./provision.ps1 -Mode API
+./provision.ps1 -Mode ISSUER
 ```
 
 ---
@@ -98,8 +98,8 @@ sequenceDiagram
 
 ## 🧪 Testing & Development
 
-- **Certificates and keys** live in each project’s `assets/https/` or `assets/signing/`.
-- **Mock data** lives in each project’s `assets/data/`.
+- **Certificates and keys** live in each project’s `runtime/secrets/`.
+- **Mock data** lives in each project’s `runtime/data/`.
 - **Token issuance and API calls** can be tested with `curl`, Postman, or any HTTP client.
 
 ---
