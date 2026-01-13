@@ -1,0 +1,42 @@
+[
+  {
+    "Name": "All - Postgres",
+    "Projects": [
+      {
+        "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",
+        "Action": "Start",
+        "DebugTarget": "Issuer (Postgres Data)"
+      },
+      {
+        "Path": "WebApi.Service\\WebApi.Service.csproj",
+        "Action": "Start",
+        "DebugTarget": "Api (Postgres Data)"
+      },
+      {
+        "Path": "WebApi.Client\\WebApi.Client.csproj",
+        "Action": "Start",
+        "DebugTarget": "Client (Development)"
+      }
+    ]
+  },
+  {
+    "Name": "All - JSON",
+    "Projects": [
+      {
+        "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",
+        "Action": "Start",
+        "DebugTarget": "Issuer (JSON Data)"
+      },
+      {
+        "Path": "WebApi.Service\\WebApi.Service.csproj",
+        "Action": "Start",
+        "DebugTarget": "Api (JSON Data)"
+      },
+      {
+        "Path": "WebApi.Client\\WebApi.Client.csproj",
+        "Action": "Start",
+        "DebugTarget": "Client (Development)"
+      }
+    ]
+  }
+]

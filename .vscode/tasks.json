@@ -2,12 +2,14 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build-api",
+      "label": "rebuild-sln",
+      "type": "shell",
       "command": "dotnet",
-      "type": "process",
       "args": [
-        "build",
-        "${workspaceFolder}/src/WebApi.Service/WebApi.Service.csproj"
+        "msbuild",
+        "${workspaceFolder}/src/WebApi.sln",
+        "/t:Rebuild",
+        "/p:Configuration=Debug"
       ],
       "problemMatcher": "$msCompile",
       "group": {
@@ -16,32 +18,125 @@
       }
     },
     {
-      "label": "build-issuer",
+      "label": "_publish-local-issuer",
+      "type": "shell",
       "command": "dotnet",
-      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
       "args": [
-        "build",
-        "${workspaceFolder}/src/WebApi.Issuer/WebApi.Issuer.csproj"
+        "publish",
+        "WebApi.Issuer/WebApi.Issuer.csproj",
+        "-c",
+        "Release"
       ],
-      "problemMatcher": "$msCompile",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "problemMatcher": "$msCompile"
     },
     {
-      "label": "build-client",
+      "label": "_publish-local-api",
+      "type": "shell",
       "command": "dotnet",
-      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
       "args": [
-        "build",
-        "${workspaceFolder}/src/WebApi.Client/WebApi.Client.csproj"
+        "publish",
+        "WebApi.Service/WebApi.Service.csproj",
+        "-c",
+        "Release"
       ],
-      "problemMatcher": "$msCompile",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "dependsOn": [
+        "_publish-local-issuer"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "_publish-local-client",
+      "type": "shell",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "args": [
+        "publish",
+        "WebApi.Client/WebApi.Client.csproj",
+        "-c",
+        "Release"
+      ],
+      "dependsOn": [
+        "_publish-local-api"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "publish-local",
+      "dependsOn": [
+        "_publish-local-client"
+      ],
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "_publish-container-issuer",
+      "type": "shell",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "args": [
+        "publish",
+        "WebApi.Issuer/WebApi.Issuer.csproj",
+        "-c",
+        "Release",
+        "-p:IsContainerBuild=true"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "_publish-container-api",
+      "type": "shell",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "args": [
+        "publish",
+        "WebApi.Service/WebApi.Service.csproj",
+        "-c",
+        "Release",
+        "-p:IsContainerBuild=true"
+      ],
+      "dependsOn": [
+        "_publish-container-issuer"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "_publish-container-client",
+      "type": "shell",
+      "command": "dotnet",
+      "options": {
+        "cwd": "${workspaceFolder}/src"
+      },
+      "args": [
+        "publish",
+        "WebApi.Client/WebApi.Client.csproj",
+        "-c",
+        "Release",
+        "-p:IsContainerBuild=true"
+      ],
+      "dependsOn": [
+        "_publish-container-api"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "publish-container",
+      "dependsOn": [
+        "_publish-container-client"
+      ],
+      "problemMatcher": [],
+      "group": "build"
     }
   ]
 }

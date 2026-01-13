@@ -485,3 +485,5 @@ $RECYCLE.BIN/
 
 *.crt
 *.pem
+*.password
+*.data

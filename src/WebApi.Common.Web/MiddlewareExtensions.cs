@@ -30,12 +30,11 @@ public static class MiddlewareExtensions
 
         public IEndpointRouteBuilder MapFavIcon()
         {
-            endpointRouteBuilder.MapGet("/favicon.ico",
-                () =>
-                {
-                    var fileName = Path.Combine(AssetsRootPath, "favicon.ico");
-                    return Results.File(fileName, "image/x-icon");
-                });
+            endpointRouteBuilder.MapGet("/favicon.ico", () =>
+            {
+                var filePath = Path.Combine(AppContext.BaseDirectory, "favicon.ico");
+                return Results.File(filePath, "image/x-icon");
+            });
             return endpointRouteBuilder;
         }
     }

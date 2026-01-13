@@ -1,0 +1,124 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using WebApi.Issuer.DataAccess.Entity;
+
+namespace WebApi.Issuer.DataAccess;
+
+public partial class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<Client> Clients { get; set; }
+
+    public virtual DbSet<ClientService> ClientServices { get; set; }
+
+    public virtual DbSet<ClientServiceScope> ClientServiceScopes { get; set; }
+
+    public virtual DbSet<Key> Keys { get; set; }
+
+    public virtual DbSet<Service> Services { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("client_pkey");
+
+            entity.ToTable("client", "core");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<ClientService>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("client_service_pkey");
+
+            entity.ToTable("client_service", "core");
+
+            entity.HasIndex(e => e.ClientId, "idx_client_service_client_id");
+
+            entity.HasIndex(e => e.KeyId, "idx_client_service_key_id");
+
+            entity.HasIndex(e => e.ServiceId, "idx_client_service_service_id");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.KeyId).HasColumnName("key_id");
+            entity.Property(e => e.ServiceId).HasColumnName("service_id");
+
+            entity.HasOne(d => d.Client).WithMany(p => p.ClientServices)
+                .HasForeignKey(d => d.ClientId)
+                .HasConstraintName("client_service_client_id_fkey");
+
+            entity.HasOne(d => d.Key).WithMany(p => p.ClientServices)
+                .HasForeignKey(d => d.KeyId)
+                .HasConstraintName("client_service_key_id_fkey");
+
+            entity.HasOne(d => d.Service).WithMany(p => p.ClientServices)
+                .HasForeignKey(d => d.ServiceId)
+                .HasConstraintName("client_service_service_id_fkey");
+        });
+
+        modelBuilder.Entity<ClientServiceScope>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("client_service_scope_pkey");
+
+            entity.ToTable("client_service_scope", "core");
+
+            entity.HasIndex(e => e.ClientServiceId, "idx_client_service_scope_client_service_id");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.ClientServiceId).HasColumnName("client_service_id");
+            entity.Property(e => e.Scope)
+                .HasMaxLength(255)
+                .HasColumnName("scope");
+
+            entity.HasOne(d => d.ClientService).WithMany(p => p.ClientServiceScopes)
+                .HasForeignKey(d => d.ClientServiceId)
+                .HasConstraintName("client_service_scope_client_service_id_fkey");
+        });
+
+        modelBuilder.Entity<Key>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("key_pkey");
+
+            entity.ToTable("key", "core");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.Pem).HasColumnName("pem");
+        });
+
+        modelBuilder.Entity<Service>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("service_pkey");
+
+            entity.ToTable("service", "core");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("gen_random_uuid()")
+                .HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(255)
+                .HasColumnName("name");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}

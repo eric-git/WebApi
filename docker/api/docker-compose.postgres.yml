@@ -1,0 +1,67 @@
+name: webapi-suite
+
+services:
+
+  postgres-api:
+    labels:
+      app: api
+      tier: backend
+      role: relational-store
+      purpose: api-persistent-state
+      managed-by: compose
+      lifecycle: persistent
+      mode: postgres
+    image: postgres:18.1-alpine
+    environment:
+      POSTGRES_USER: db_manager
+      POSTGRES_PASSWORD_FILE: /run/secrets/db-manager-password
+      POSTGRES_DB: api_db
+    command: >
+      postgres -c password_encryption=scram-sha-256
+    ports:
+      - "55434:5432"
+    secrets:
+      - db-manager-password
+      - svc-api-password
+    networks:
+      - public
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U db_manager -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  api:
+    image: webapi-suite/api:latest
+    depends_on:
+      - postgres-api
+    environment:
+      Persistence__Mode: postgres
+      ConnectionStrings__Default: Host=postgres-api;Database=api_db;Username=svc_api
+    secrets:
+      - source: svc-api-password
+        target: connection-default.password
+
+secrets:
+
+  db-manager-password:
+    file: ../local/data/postgres/db-manager-password.txt
+    labels:
+      app: webapi-suite
+      role: secret
+      purpose: postgres-superuser-password
+      managed-by: compose
+      lifecycle: persistent
+      mode: postgres
+
+  svc-api-password:
+    file: ../local/data/postgres/svc-api-password.txt
+    labels:
+      app: api
+      role: secret
+      purpose: database-runtime-password
+      managed-by: compose
+      lifecycle: persistent
+      mode: postgres

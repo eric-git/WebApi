@@ -1,0 +1,26 @@
+name: webapi-suite
+
+services:
+
+  issuer-json-loader:
+    labels:
+      app: loader
+      role: issuer-json-initializer
+      purpose: populate-issuer-json-state
+      managed-by: compose
+      lifecycle: ephemeral
+    image: alpine:latest
+    depends_on:
+      - issuer
+    command: >
+      sh -c "
+        set -e
+        cp -R /source-data/issuer-db.json /target-issuer-data/db.data 2>/dev/null
+        chown -R 1654:1654 /target-issuer-data
+      "
+    volumes:
+      - issuer-json-data:/target-issuer-data
+      - ../local/data/json:/source-data:ro
+    networks:
+      - public
+    restart: no

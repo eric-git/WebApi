@@ -1,0 +1,30 @@
+{
+  "Services": [
+    {
+      "Id": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+      "Name": "WebApi.Service"
+    }
+  ],
+  "Clients": [
+    {
+      "Id": "088f6a2e-8f00-4340-b32d-49de4acde03c",
+      "Name": "WebApi.Client",
+      "Services": [
+        {
+          "Id": "af2157c0-3280-42e7-b327-33e5aa3ec76e",
+          "KeyId": "dc6f9ca5-1337-4bcb-952c-f6df8ff9d528",
+          "Scopes": [
+            "api.read",
+            "api.write"
+          ]
+        }
+      ]
+    }
+  ],
+  "Keys": [
+    {
+      "Id": "dc6f9ca5-1337-4bcb-952c-f6df8ff9d528",
+      "Pem": "{SAMPLE_CLIENT_PUBLIC_KEY}"
+    }
+  ]
+}
