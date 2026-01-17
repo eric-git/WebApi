@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Issuer (Json Data)",
+      "name": "Issuer - JSON",
       "type": "coreclr",
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Issuer/bin/Debug/net10.0/WebApi.Issuer.dll",
@@ -23,13 +23,15 @@
         "SECRET_PATH": "./runtime/secrets/",
         "Persistence__Mode": "json",
         "DATA_PATH": "./runtime/data/",
+        "Logging__LogLevel__Default": "Warning",
+        "Logging__LogLevel__WebApi": "Information",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
       }
     },
     {
-      "name": "Issuer (Postgres Data)",
+      "name": "Issuer - Postgres",
       "type": "coreclr",
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Issuer/bin/Debug/net10.0/WebApi.Issuer.dll",
@@ -50,6 +52,8 @@
         "SECRET_PATH": "./runtime/secrets/",
         "Persistence__Mode": "postgres",
         "ConnectionStrings__Default": "Host=localhost;Port=5432;Database=issuer_db;Username=svc_issuer",
+        "Logging__LogLevel__Default": "Warning",
+        "Logging__LogLevel__WebApi": "Information",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
@@ -58,7 +62,7 @@
       }
     },
     {
-      "name": "Api (Json Data)",
+      "name": "API - JSON",
       "type": "coreclr",
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
@@ -79,13 +83,15 @@
         "SECRET_PATH": "./runtime/secrets/",
         "Persistence__Mode": "json",
         "DATA_PATH": "./runtime/data/",
+        "Logging__LogLevel__Default": "Warning",
+        "Logging__LogLevel__WebApi": "Information",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
       }
     },
     {
-      "name": "Api (Postgres Data)",
+      "name": "API - Postgres",
       "type": "coreclr",
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
@@ -106,6 +112,8 @@
         "SECRET_PATH": "./runtime/secrets/",
         "Persistence__Mode": "postgres",
         "ConnectionStrings__Default": "Host=localhost;Port=5432;Database=api_db;Username=svc_api",
+        "Logging__LogLevel__Default": "Warning",
+        "Logging__LogLevel__WebApi": "Information",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
@@ -114,7 +122,7 @@
       }
     },
     {
-      "name": "Client (Development)",
+      "name": "Client",
       "type": "coreclr",
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Client/bin/Debug/net10.0/WebApi.Client.dll",
@@ -129,6 +137,8 @@
         "CLIENT_ID": "088f6a2e-8f00-4340-b32d-49de4acde03c",
         "KEY_ID": "dc6f9ca5-1337-4bcb-952c-f6df8ff9d528",
         "SECRET_PATH": "./runtime/secrets/",
+        "Logging__LogLevel__Default": "Warning",
+        "Logging__LogLevel__WebApi": "Information",
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
@@ -137,19 +147,19 @@
   ],
   "compounds": [
     {
-      "name": "Debug All (Issuer+Api+Client) Json Data",
+      "name": "All - JSON",
       "configurations": [
-        "Issuer (Json Data)",
-        "Api (Json Data)",
-        "Client (Development)"
+        "Issuer - JSON",
+        "API - JSON",
+        "Client"
       ]
     },
     {
-      "name": "Debug All (Issuer+Api+Client) Postgres Data",
+      "name": "All - Postgres",
       "configurations": [
-        "Issuer (Postgres Data)",
-        "Api (Postgres Data)",
-        "Client (Development)"
+        "Issuer - Postgres",
+        "API - Postgres",
+        "Client"
       ]
     }
   ]

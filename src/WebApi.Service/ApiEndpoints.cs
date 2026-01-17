@@ -3,7 +3,7 @@ using WebApi.Service.Model;
 
 namespace WebApi.Service;
 
-public static class ApiEndpoints
+internal static class ApiEndpoints
 {
     private const string GamesPath = "games";
 
@@ -13,20 +13,20 @@ public static class ApiEndpoints
         {
             endpointRouteBuilder.MapGet(GamesPath, async (IGameDataRepository gameDataRepository) =>
             {
-                var gameData = await gameDataRepository.GetGamesAsync();
+                var gameData = await gameDataRepository.GetGamesAsync().ConfigureAwait(false);
                 return Results.Json(gameData);
             }).RequireAuthorization("ApiRead");
 
             endpointRouteBuilder.MapGet($"{GamesPath}/{{id}}", async (string id, IGameDataRepository gameDataRepository) =>
                 {
-                    var game = await gameDataRepository.GetGameByIdAsync(id);
+                    var game = await gameDataRepository.GetGameByIdAsync(id).ConfigureAwait(false);
                     return game is null ? Results.NotFound() : Results.Json(game);
                 }
             ).RequireAuthorization("ApiRead");
 
             endpointRouteBuilder.MapPost(GamesPath, async (Game game, HttpContext httpContext, IGameDataRepository gameDataRepository) =>
             {
-                var id = await gameDataRepository.CreateGameAsync(game);
+                var id = await gameDataRepository.CreateGameAsync(game).ConfigureAwait(false);
                 return Results.Created($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/{GamesPath}/{id}", id);
             }).RequireAuthorization("ApiWrite");
 
@@ -34,7 +34,7 @@ public static class ApiEndpoints
             {
                 try
                 {
-                    await gameDataRepository.UpdateGameAsync(game);
+                    await gameDataRepository.UpdateGameAsync(game).ConfigureAwait(false);
                 }
                 catch (KeyNotFoundException keyNotFoundException)
                 {
@@ -48,7 +48,7 @@ public static class ApiEndpoints
             {
                 try
                 {
-                    await gameDataRepository.DeleteGameAsync(id);
+                    await gameDataRepository.DeleteGameAsync(id).ConfigureAwait(false);
                 }
                 catch (KeyNotFoundException keyNotFoundException)
                 {

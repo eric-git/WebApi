@@ -2,14 +2,15 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.Configuration;
 
-namespace WebApi.Common;
+namespace WebApi.Common.Handler;
 
-public sealed class ClientCertificateHandler : HttpClientHandler
+public sealed class CertificateHandler : HttpClientHandler
 {
     private readonly X509Certificate2Collection _trustedRoots = [];
 
-    public ClientCertificateHandler(IConfiguration configuration)
+    public CertificateHandler(IConfiguration configuration)
     {
+        ArgumentNullException.ThrowIfNull(configuration);
         _trustedRoots.ImportFromPem(configuration["ca-bundle.crt"]);
         ServerCertificateCustomValidationCallback = ValidateServerCertificate;
     }
@@ -21,7 +22,7 @@ public sealed class ClientCertificateHandler : HttpClientHandler
             return false;
         }
 
-        X509Certificate2 serverCert = new(cert);
+        using X509Certificate2 serverCert = new(cert);
         using X509Chain customChain = new();
         customChain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
         customChain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;

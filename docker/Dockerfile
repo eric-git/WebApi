@@ -17,7 +17,8 @@ RUN --mount=type=bind,source=.,target=/context \
     cp /context/WebApi.sln . && \
     # Copy MSBuild shared configuration files
     if [ -f /context/Directory.Build.props ]; then cp /context/Directory.Build.props .; fi && \
-    if [ -f /context/Directory.Build.targets ]; then cp /context/Directory.Build.targets .; fi
+    if [ -f /context/Directory.Build.targets ]; then cp /context/Directory.Build.targets .; fi && \
+    if [ -f /context/Directory.Packages.props ]; then cp /context/Directory.Packages.props .; fi
 
 # Restore
 RUN --mount=type=cache,target=/root/.nuget/packages \

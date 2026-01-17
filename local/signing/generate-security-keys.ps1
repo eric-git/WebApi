@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 <#
 .SYNOPSIS
 Generates RSA security key pairs for the Issuer and/or Client projects.
@@ -54,10 +56,10 @@ begin {
             Copy-Item $privatePem -Destination (Join-Path $clientSecretPath "private-signing-key.pem") -Force
 
             New-Item -ItemType Directory -Path $jsonDataDir -Force | Out-Null
-            Copy-Item $publicPem -Destination jsonDataDir -Force
+            Copy-Item $publicPem -Destination $jsonDataDir -Force
 
             New-Item -ItemType Directory -Path $postgresDataDir -Force | Out-Null
-            Copy-Item $publicPem -Destination postgresDataDir -Force
+            Copy-Item $publicPem -Destination $postgresDataDir -Force
         }
     }
 

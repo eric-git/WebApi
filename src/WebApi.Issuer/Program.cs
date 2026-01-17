@@ -1,6 +1,10 @@
+using System.Globalization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using WebApi.Common.Logging;
 using WebApi.Common.Web;
+using WebApi.Common.Web.Logging;
 using WebApi.Issuer;
 using WebApi.Issuer.DataAccess;
 
@@ -25,7 +29,9 @@ switch (persistenceMode)
             const string connectionStringName = "Default";
             var configuration = serviceCollection.GetRequiredService<IConfiguration>();
             var connectionString = configuration.GetConnectionString(connectionStringName);
-            var password = configuration[$"connection-{connectionStringName.ToLower()}.password"];
+#pragma warning disable CA1308
+            var password = configuration[$"connection-{connectionStringName.ToLowerInvariant()}.password"];
+#pragma warning restore CA1308
             NpgsqlConnectionStringBuilder npgsqlConnectionStringBuilder = new(connectionString)
             {
                 Password = password
@@ -39,13 +45,18 @@ switch (persistenceMode)
         throw new InvalidOperationException($"Unsupported persistence mode: {persistenceMode}");
 }
 
+builder.Services.Configure<MvcOptions>(_ => { });
+builder.Services.AddTransient(typeof(IHttpLoggingHandler<>), typeof(HttpLoggingHandler<>));
+
 var app = builder.Build();
+app.UseMiddleware<CorrelationMiddleware>();
+app.UseMiddleware<LoggingMiddleware>();
 
 var configuration = app.Services.GetRequiredService<IConfiguration>();
 var issuerBaseUrl = configuration["ISSUER_BASE_URL"]!;
 var tokenLiftTime = configuration["TOKEN_LIFETIME_MINUTES"]!;
 app.MapFavIcon();
 app.MapStatus(configuration);
-app.MapIssuer(issuerBaseUrl, int.Parse(tokenLiftTime));
+app.MapIssuer(issuerBaseUrl, int.Parse(tokenLiftTime, NumberStyles.Integer, NumberFormatInfo.InvariantInfo));
 
 app.Run();

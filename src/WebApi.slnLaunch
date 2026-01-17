@@ -1,41 +1,91 @@
 [
   {
-    "Name": "All - Postgres",
-    "Projects": [
-      {
-        "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",
-        "Action": "Start",
-        "DebugTarget": "Issuer (Postgres Data)"
-      },
-      {
-        "Path": "WebApi.Service\\WebApi.Service.csproj",
-        "Action": "Start",
-        "DebugTarget": "Api (Postgres Data)"
-      },
-      {
-        "Path": "WebApi.Client\\WebApi.Client.csproj",
-        "Action": "Start",
-        "DebugTarget": "Client (Development)"
-      }
-    ]
-  },
-  {
     "Name": "All - JSON",
     "Projects": [
       {
         "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",
         "Action": "Start",
-        "DebugTarget": "Issuer (JSON Data)"
+        "DebugTarget": "Issuer - JSON"
       },
       {
         "Path": "WebApi.Service\\WebApi.Service.csproj",
         "Action": "Start",
-        "DebugTarget": "Api (JSON Data)"
+        "DebugTarget": "API - JSON"
       },
       {
         "Path": "WebApi.Client\\WebApi.Client.csproj",
         "Action": "Start",
-        "DebugTarget": "Client (Development)"
+        "DebugTarget": "Client"
+      }
+    ]
+  },
+  {
+    "Name": "All - Postgres",
+    "Projects": [
+      {
+        "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",
+        "Action": "Start",
+        "DebugTarget": "Issuer - Postgres"
+      },
+      {
+        "Path": "WebApi.Service\\WebApi.Service.csproj",
+        "Action": "Start",
+        "DebugTarget": "API - Postgres"
+      },
+      {
+        "Path": "WebApi.Client\\WebApi.Client.csproj",
+        "Action": "Start",
+        "DebugTarget": "Client"
+      }
+    ]
+  },
+  {
+    "Name": "Issuer - JSON",
+    "Projects": [
+      {
+        "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",
+        "Action": "Start",
+        "DebugTarget": "Issuer - JSON"
+      }
+    ]
+  },
+  {
+    "Name": "Issure - Postgres",
+    "Projects": [
+      {
+        "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",
+        "Action": "Start",
+        "DebugTarget": "Issuer - Postgres"
+      }
+    ]
+  },
+  {
+    "Name": "API - JSON",
+    "Projects": [
+      {
+        "Path": "WebApi.Service\\WebApi.Service.csproj",
+        "Action": "Start",
+        "DebugTarget": "API - JSON"
+      }
+    ]
+  },
+  {
+    "Name": "API - Postgres",
+    "Projects": [
+      {
+        "Path": "WebApi.Service\\WebApi.Service.csproj",
+        "Action": "Start",
+        "DebugTarget": "API - Postgres"
+      }
+    ]
+  },
+  {
+    "Name": "Client",
+    "Projects": [
+      {
+        "Path": "WebApi.Client\\WebApi.Client.csproj",
+        "Action": "Start",
+        "DebugTarget": "Client"
       }
     ]
   }

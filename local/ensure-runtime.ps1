@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 <#
 .SYNOPSIS
 Ensures all required cryptographic assets and service data for the Web API suite are present.
@@ -33,20 +35,11 @@ begin {
 }
 
 process {
-  #
-  # --- Cryptographic provisioning ---
-  #
   & (Join-Path $PSScriptRoot "hosting/generate-hosting-cert.ps1")
   & (Join-Path $PSScriptRoot "signing/generate-security-keys.ps1")
 
-  #
-  # --- JSON data provisioning (always runs) ---
-  #
   & (Join-Path $PSScriptRoot "data/json/provision.ps1")
 
-  #
-  # --- PostgreSQL provisioning (optional) ---
-  #
   $postgresInstalled = $false
   try {
     $null = Get-Command psql -ErrorAction Stop

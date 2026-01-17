@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 <#
 .SYNOPSIS
 Generates self‑signed hosting certificates for API and/or ISSUER projects.

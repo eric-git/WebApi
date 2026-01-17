@@ -11,7 +11,8 @@ CREATE TABLE core.service (
 
 CREATE TABLE core.client (
 	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-	name VARCHAR(255) NOT NULL
+	name VARCHAR(255) NOT NULL,
+	email VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE core.key (

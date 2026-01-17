@@ -1,41 +1,53 @@
 <Project>
-  <!-- Include all runtime -->
+
+  <!-- Discover asset files -->
   <ItemGroup Condition="Exists('$(SecretStoreRoot)')">
     <AssetFiles Include="$(SecretStoreRoot)/**/*">
       <Link>secrets\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AssetFiles>
   </ItemGroup>
+
   <ItemGroup Condition="Exists('$(DataStoreRoot)')">
     <AssetFiles Include="$(DataStoreRoot)/**/*">
       <Link>data\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </AssetFiles>
   </ItemGroup>
+
+  <!-- Example static file -->
   <ItemGroup>
     <None Update="favicon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
-  <!-- Exclude container folders -->
+  <!-- Exclude asset directories during container builds -->
   <ItemGroup>
     <ExcludedAssetDirs Include="$(SecretStoreRoot)" Condition="'$(IsContainerBuild)'=='true'" />
     <ExcludedAssetDirs Include="$(DataStoreRoot)" Condition="'$(IsContainerBuild)'=='true'" />
     <AssetFiles Remove="@(ExcludedAssetDirs->'%(FullPath)/**/*')" Condition="'@(ExcludedAssetDirs)' != ''" />
   </ItemGroup>
 
-  <!-- Copy runtime for normal build -->
-  <Target Name="CopyRuntimeAfterBuild" AfterTargets="Build" Condition="'@(AssetFiles)' != ''">
-    <PropertyGroup>
-      <AssetTargetDir>$(OutDir)runtime</AssetTargetDir>
-    </PropertyGroup>
-    <Copy SourceFiles="@(AssetFiles)" DestinationFiles="@(AssetFiles->'$(OutDir)runtime\%(Link)')" SkipUnchangedFiles="true" />
+  <!-- Copy runtime assets after normal build -->
+  <Target Name="CopyRuntimeAfterBuild"
+          AfterTargets="Build"
+          Condition="'@(AssetFiles)' != ''">
+    <Copy SourceFiles="@(AssetFiles)"
+          DestinationFiles="@(AssetFiles->'$(OutDir)runtime\%(Link)')"
+          SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- Copy runtime for publish -->
-  <Target Name="CopyRuntimeAfterPublish" AfterTargets="Publish" Condition="'@(AssetFiles)' != ''">
-    <PropertyGroup>
-      <AssetTargetDir>$(PublishDir)runtime</AssetTargetDir>
-    </PropertyGroup>
-    <Copy SourceFiles="@(AssetFiles)" DestinationFolder="$(AssetTargetDir)\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  <!-- Copy runtime assets after publish -->
+  <Target Name="CopyRuntimeAfterPublish"
+          AfterTargets="Publish"
+          Condition="'@(AssetFiles)' != ''">
+    <Copy SourceFiles="@(AssetFiles)"
+          DestinationFolder="$(PublishDir)runtime\%(RecursiveDir)"
+          SkipUnchangedFiles="true" />
   </Target>
+
+  <!-- Full clean: remove bin/obj -->
+  <Target Name="CleanBinObj" AfterTargets="Clean">
+    <RemoveDir Directories="$(ProjectDir)bin" />
+  </Target>
+
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace WebApi.Client.Services;
+﻿namespace WebApi.Common.Handler;
 
 public interface ITokenService
 {
