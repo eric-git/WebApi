@@ -2,7 +2,7 @@ using WebApi.Client.Model;
 
 namespace WebApi.Client;
 
-public interface IServiceClient
+internal interface IServiceClient
 {
     Task<string?> CreateGameAsync(Game game);
 

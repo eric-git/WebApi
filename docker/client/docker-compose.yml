@@ -25,13 +25,11 @@ services:
       CLIENT_ID: 088f6a2e-8f00-4340-b32d-49de4acde03c
       KEY_ID: dc6f9ca5-1337-4bcb-952c-f6df8ff9d528
       SECRET_PATH: /run/secrets/
-      Logging__LogLevel__Default: Information
-      Logging__LogLevel__Microsoft: Error
-      Logging__LogLevel__System: Error
+      Logging__LogLevel__Default: Warning
+      Logging__LogLevel__WebApi: Information
       Logging__Console__FormatterName: simple
       Logging__Console__FormatterOptions__IncludeTimestamp: true
-      Logging__Console__FormatterOptions__TimestampFormat: |-
-        yyyy-MM-dd HH:mm:ss.fff 
+      Logging__Console__FormatterOptions__TimestampFormat: 'yyyy-MM-dd HH:mm:ss.fff '
     secrets:
       - source: issuer-hosting-cert
         target: issuer-hosting-cert.crt

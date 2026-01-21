@@ -1,6 +1,8 @@
-﻿namespace WebApi.Client.Model;
+﻿using System.Collections.ObjectModel;
 
-public class Game
+namespace WebApi.Client.Model;
+
+internal sealed class Game
 {
     public string? Id { get; set; }
 
@@ -12,5 +14,5 @@ public class Game
 
     public int? PlayerHealth { get; set; }
 
-    public List<Relation>? Relations { get; set; }
+    public Collection<Relation>? Relations { get; set; }
 }

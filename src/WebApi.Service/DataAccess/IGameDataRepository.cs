@@ -2,7 +2,7 @@
 
 namespace WebApi.Service.DataAccess;
 
-public interface IGameDataRepository
+internal interface IGameDataRepository
 {
     Task<List<Game>> GetGamesAsync();
 

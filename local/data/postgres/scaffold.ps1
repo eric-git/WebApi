@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 <#
 .SYNOPSIS
     Scaffolds EF Core DbContext and entities for API and/or ISSUER projects using RAW PostgreSQL connection strings.

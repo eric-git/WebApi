@@ -24,14 +24,16 @@ WHEN NOT MATCHED THEN
 MERGE INTO core.client AS t
 USING (
 	VALUES
-		('088f6a2e-8f00-4340-b32d-49de4acde03c'::uuid, 'WebApi.Client')
-) AS s(id, name)
+		('088f6a2e-8f00-4340-b32d-49de4acde03c'::uuid, 'WebApi.Client', 'email@sample.client.com')
+) AS s(id, name, email)
 ON t.id = s.id
 WHEN MATCHED THEN
-	UPDATE SET name = s.name
+	UPDATE SET
+		name = s.name,
+		email = s.email
 WHEN NOT MATCHED THEN
-	INSERT (id, name)
-	VALUES (s.id, s.name);
+	INSERT (id, name, email)
+	VALUES (s.id, s.name, s.email);
 
 ------------------------------------------------------------------
 -- Seed core.key

@@ -28,7 +28,9 @@ The suite includes an Issuer for token generation, an API protected by those tok
 
 ## 🔧 Usage
 
-All setup scripts live in `./src/setup`, with both POSIX and PowerShell variants available.
+All setup and deployment scripts live in `./local`, with both POSIX and PowerShell variants available.
+
+The docker project lives in `./docker`, it can be deployed using `make` commands.
 
 ### Setup development runtime
 
@@ -36,9 +38,12 @@ All setup scripts live in `./src/setup`, with both POSIX and PowerShell variants
 ./ensure-runtime.ps1
 ```
 
+This sets up all required resources for runtime. Unless hosting certificates, signing keys and/or passwords need to be rotated, this is enough for a start.
+
 ### Generate HTTPS certificates
 
 ```powershell
+./generate-hosting-cert.ps1
 ./generate-hosting-cert.ps1 -Mode API
 ./generate-hosting-cert.ps1 -Mode ISSUER
 ```
@@ -46,15 +51,46 @@ All setup scripts live in `./src/setup`, with both POSIX and PowerShell variants
 ### Generate signing keys
 
 ```powershell
-./generate-security-keys.ps1 -Mode CLIENT -ClientId <GUID>
+./generate-security-keys.ps1
+./generate-security-keys.ps1 -Mode CLIENT
 ./generate-security-keys.ps1 -Mode ISSUER
 ```
 
-### Reset seeded data
+After generating the client keys, please run `provision.ps1` to ensure the public key is correctly deployed.
+
+### Provision data
 
 ```powershell
 ./provision.ps1 -Mode API
 ./provision.ps1 -Mode ISSUER
+```
+
+This supports both Postgres and JSON file-based data store.
+
+### Run docker
+
+File-based data store:
+
+```sh
+./make json-init
+```
+
+Postgres data store:
+
+```sh
+./make postgres-init
+```
+
+Reset:
+
+```sh
+./make nuke
+```
+
+There are a number of other commands, to list them, run:
+
+```sh
+./make
 ```
 
 ---
@@ -78,12 +114,12 @@ sequenceDiagram
     participant Client
     participant Issuer
     participant API
-    Client->>Issuer: Request token
-    Issuer-->>Client: JWT
-    Client->>API: Call API with JWT
-    API->>Issuer: Validate JWT
-    Issuer-->>API: Public Key
-    API-->>Client: Response
+    Client->>Issuer: 1. Request token
+    Issuer-->>Client: 2. JWT
+    Client->>API: 3. Call API with JWT
+    API->>Issuer: 4. Validate JWT
+    Issuer-->>API: 5. Public Key
+    API-->>Client: 6. Response
 ```
 
 **Step‑by‑step:**

@@ -1,44 +1,63 @@
 <Project>
-  <!-- Shared props -->
+
+  <!-- Assembly identity & metadata -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Product>Sample Web API Suite</Product>
     <Company>Project ERIC</Company>
     <Copyright>© 2025 Project ERIC. All rights reserved.</Copyright>
-    <SignAssembly>True</SignAssembly>
+
+    <!-- Strong naming -->
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\web-api-suite.snk</AssemblyOriginatorKeyFile>
+
+    <!-- Deterministic builds -->
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <!-- Language & globalization -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <NeutralLanguage>en-AU</NeutralLanguage>
+    <GenerateNeutralResourcesLanguageAttribute>true</GenerateNeutralResourcesLanguageAttribute>
+  </PropertyGroup>
+
+  <!-- Code analysis -->
+  <PropertyGroup>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
 
-  <!-- Default configuration -->
+  <!-- Debug configuration -->
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
 
+  <!-- Release configuration -->
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <Optimize>true</Optimize>
   </PropertyGroup>
 
-  <!-- Single publish folder -->
+  <!-- Publish output -->
   <PropertyGroup>
     <PublishRoot>$(SolutionDir)publish</PublishRoot>
+    <IsContainerBuild Condition="'$(IsContainerBuild)'==''">false</IsContainerBuild>
     <PublishFlavor Condition="'$(IsContainerBuild)'=='true'">container</PublishFlavor>
     <PublishFlavor Condition="'$(IsContainerBuild)'!='true'">local</PublishFlavor>
     <PublishDir>$(PublishRoot)/$(PublishFlavor)/</PublishDir>
-    <IsContainerBuild Condition="'$(IsContainerBuild)'==''">false</IsContainerBuild>
   </PropertyGroup>
 
-  <!-- Asset folders -->
+  <!-- Runtime asset paths -->
   <PropertyGroup>
     <AssetRoot>$(MSBuildProjectDirectory)/runtime</AssetRoot>
     <SecretStoreRoot>$(AssetRoot)/secrets</SecretStoreRoot>
     <DataStoreRoot>$(AssetRoot)/data</DataStoreRoot>
   </PropertyGroup>
+
 </Project>

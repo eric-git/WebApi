@@ -1,11 +1,26 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
+using WebApi.Issuer.DataAccess.Entity;
 using static WebApi.Common.SecurityExtensions;
 
 namespace WebApi.Issuer.DataAccess;
 
-public class JsonFileSettingsDataRepository(IConfiguration configuration) : ISettingsDataRepository
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by DI container")]
+internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
 {
-    private readonly string _dataFilePath = Path.Combine(configuration["DATA_PATH"]!, "db.data");
+    private readonly string _dataFilePath;
+
+    public JsonFileSettingsDataRepository(IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+        var dataFilePath = Path.Combine(configuration["DATA_PATH"]!, "db.data");
+        if (!Path.IsPathRooted(dataFilePath))
+        {
+            dataFilePath = Path.Combine(AppContext.BaseDirectory, dataFilePath);
+        }
+
+        _dataFilePath = dataFilePath;
+    }
 
     public Task<bool> VerifyClientAccessAsync(Guid clientId, Guid serviceId, IList<string> scopes)
     {
@@ -73,6 +88,28 @@ public class JsonFileSettingsDataRepository(IConfiguration configuration) : ISet
             ? pemProp.GetString()
             : null;
         return Task.FromResult(WrapPublicKey(pem));
+    }
+
+    public Task<Client?> GetClientDetailsById(Guid clientId)
+    {
+        var root = GetJsonRootElement();
+        var client = root.GetProperty("Clients")
+            .EnumerateArray()
+            .FirstOrDefault(c =>
+                c.TryGetProperty("Id", out var id) &&
+                id.GetGuid() == clientId);
+        if (client.ValueKind is JsonValueKind.Undefined)
+        {
+            return Task.FromResult<Client?>(null);
+        }
+
+        Client clientObj = new()
+        {
+            Id = clientId,
+            Name = client.GetProperty(nameof(Client.Name)).GetString()!,
+            Email = client.GetProperty(nameof(Client.Email)).GetString()!
+        };
+        return Task.FromResult<Client?>(clientObj);
     }
 
     private JsonElement GetJsonRootElement()

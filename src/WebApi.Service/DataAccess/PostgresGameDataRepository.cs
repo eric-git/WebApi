@@ -1,58 +1,66 @@
-﻿using AutoMapper;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using Game = WebApi.Service.DataAccess.Entity.Game;
+using WebApi.Service.Model;
 
 namespace WebApi.Service.DataAccess;
 
-public class PostgresGameDataRepository(AppDbContext appDbContext, IMapper mapper) : IGameDataRepository
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by DI container")]
+internal sealed class PostgresGameDataRepository(AppDbContext appDbContext) : IGameDataRepository
 {
-    public async Task<List<Model.Game>> GetGamesAsync()
+    public async Task<List<Game>> GetGamesAsync()
     {
         var result = await appDbContext.Games
             .AsNoTracking()
             .Include(x => x.Relations)
-            .ToListAsync();
-        var model = mapper.Map<List<Game>, List<Model.Game>>(result);
+            .ToListAsync()
+            .ConfigureAwait(false);
+        var model = result.Select(Game.FromEntity).ToList();
         return model;
     }
 
-    public async Task<string> CreateGameAsync(Model.Game game)
+    public async Task<string> CreateGameAsync(Game game)
     {
-        var entity = mapper.Map<Model.Game, Game>(game);
-        var result = await appDbContext.Games.AddAsync(entity);
-        await appDbContext.SaveChangesAsync();
+        ArgumentNullException.ThrowIfNull(game);
+        var entity = game.ToEntity();
+        var result = await appDbContext.Games.AddAsync(entity).ConfigureAwait(false);
+        await appDbContext.SaveChangesAsync().ConfigureAwait(false);
         return result.Entity.Id.ToString();
     }
 
-    public async Task UpdateGameAsync(Model.Game game)
+    public async Task UpdateGameAsync(Game game)
     {
+        ArgumentNullException.ThrowIfNull(game);
         var entityId = Guid.Parse(game.Id!);
         var entity = await appDbContext.Games
             .Include(x => x.Relations)
-            .SingleOrDefaultAsync(x => x.Id == entityId) ?? throw new KeyNotFoundException($"Game with ID {game.Id} not found.");
-        mapper.Map(game, entity);
-        await appDbContext.SaveChangesAsync();
+            .SingleOrDefaultAsync(x => x.Id == entityId)
+            .ConfigureAwait(false) ?? throw new KeyNotFoundException($"Game with ID {game.Id} not found.");
+        game.ToEntity(entity);
+        await appDbContext.SaveChangesAsync().ConfigureAwait(false);
     }
 
     public async Task DeleteGameAsync(string id)
     {
-        var entity = await appDbContext.Games.FindAsync(Guid.Parse(id)) ?? throw new KeyNotFoundException($"Game with ID {id} not found.");
+        var entity = await appDbContext.Games
+            .FindAsync(Guid.Parse(id))
+            .ConfigureAwait(false) ?? throw new KeyNotFoundException($"Game with ID {id} not found.");
         appDbContext.Games.Remove(entity);
-        await appDbContext.SaveChangesAsync();
+        await appDbContext.SaveChangesAsync().ConfigureAwait(false);
     }
 
-    public async Task<Model.Game?> GetGameByIdAsync(string id)
+    public async Task<Game?> GetGameByIdAsync(string id)
     {
         var entityId = Guid.Parse(id);
         var entity = await appDbContext.Games
             .Include(x => x.Relations)
-            .SingleOrDefaultAsync(x => x.Id == entityId);
+            .SingleOrDefaultAsync(x => x.Id == entityId)
+            .ConfigureAwait(false);
         if (entity is null)
         {
             return null;
         }
 
-        var model = mapper.Map<Game, Model.Game>(entity);
+        var model = Game.FromEntity(entity);
         return model;
     }
 }

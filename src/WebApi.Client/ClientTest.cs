@@ -1,47 +1,56 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Hosting;
 using WebApi.Client.Model;
+using WebApi.Client.Properties;
 
 namespace WebApi.Client;
 
-public class ClientTest(IHostEnvironment hostEnvironment, IServiceClient serviceClient)
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by DI container")]
+internal sealed class ClientTest(IHostEnvironment hostEnvironment, IServiceClient serviceClient)
 {
+    private const string Esc = "\u001b[";
+    private const string Yellow = Esc + "33m";
+    private const string Reset = Esc + "0m";
+    private const string Bold = Esc + "1m";
+    private const string Green = Esc + "32m";
+
     public async Task TestAsync()
     {
         WriteTitle($"Runtime: {hostEnvironment.EnvironmentName}", false);
         WriteTitle("(1/5) Test creating a record...");
         var newGame = GetNewGameData();
-        var id = await serviceClient.CreateGameAsync(newGame);
+        var id = await serviceClient.CreateGameAsync(newGame).ConfigureAwait(false);
 
         WriteTitle("(2/5) Test getting a single record...");
-        var game = await serviceClient.GetGameAsync(id!);
+        var game = await serviceClient.GetGameAsync(id!).ConfigureAwait(false);
 
         WriteTitle("(3/5) Test updating a record...");
         game!.Name = $"{game.Name} - Updated";
-        await serviceClient.UpdateGameAsync(game);
+        await serviceClient.UpdateGameAsync(game).ConfigureAwait(false);
 
         WriteTitle("(4/5) Test deleting a record...");
-        await serviceClient.DeleteGameAsync(id!);
+        await serviceClient.DeleteGameAsync(id!).ConfigureAwait(false);
 
         WriteTitle("(5/5) Test listing records...");
-        await serviceClient.ListGamesAsync();
+        await serviceClient.ListGamesAsync().ConfigureAwait(false);
 
         WriteTitle("All done.", false);
     }
 
     private static void WriteTitle(string text, bool wait = true)
     {
-        WriteText(text, "\e[1m\e[32m", wait);
+        WriteText(text, $"{Bold}{Green}", wait);
     }
 
     private static void WriteText(string text, string settings, bool wait)
     {
-        Console.WriteLine($"{settings}{text}\e[0m");
+        Console.WriteLine($"{settings}{text}{Reset}");
         if (!wait)
         {
             return;
         }
 
-        Console.WriteLine("\e[33mPress any key to continue, or terminate...\e[0m");
+        Console.WriteLine($"{Yellow}{Resources.PressAnyKey}{Reset}");
         Console.ReadKey();
     }
 

@@ -1,3 +1,5 @@
+#!/usr/bin/env pwsh
+
 <#
 .SYNOPSIS
 Resets development database files for ISSUER, API, or ALL modes.

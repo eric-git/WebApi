@@ -1,6 +1,6 @@
 ﻿namespace WebApi.Client.Model;
 
-public class Relation
+internal sealed class Relation
 {
     public string? Id { get; set; }
 

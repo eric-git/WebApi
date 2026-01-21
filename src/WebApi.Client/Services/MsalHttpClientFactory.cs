@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Identity.Client;
 
 namespace WebApi.Client.Services;
 
-public class MsalHttpClientFactory(IHttpClientFactory factory) : IMsalHttpClientFactory
+[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by DI container")]
+internal sealed class MsalHttpClientFactory(IHttpClientFactory factory) : IMsalHttpClientFactory
 {
     public const string HttpClientName = "msal";
 
