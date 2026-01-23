@@ -6,13 +6,12 @@
     <Product>Sample Web API Suite</Product>
     <Company>Project ERIC</Company>
     <Copyright>© 2025 Project ERIC. All rights reserved.</Copyright>
-
-    <!-- Strong naming -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\web-api-suite.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
 
-    <!-- Deterministic builds -->
-    <Deterministic>true</Deterministic>
+  <!-- CI -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release' AND ('$(GITHUB_ACTIONS)'=='true' OR '$(TF_BUILD)'=='True')">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
@@ -21,7 +20,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <NeutralLanguage>en-AU</NeutralLanguage>
-    <GenerateNeutralResourcesLanguageAttribute>true</GenerateNeutralResourcesLanguageAttribute>
+    <PreferredUILang>en-AU</PreferredUILang>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <!-- Code analysis -->
@@ -29,6 +29,7 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <AnalysisLevel>latest</AnalysisLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <!-- Debug configuration -->
@@ -42,6 +43,7 @@
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
     <Optimize>true</Optimize>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
 
   <!-- Publish output -->

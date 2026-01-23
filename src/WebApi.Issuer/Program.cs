@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,8 @@ using WebApi.Common.Web;
 using WebApi.Common.Web.Logging;
 using WebApi.Issuer;
 using WebApi.Issuer.DataAccess;
+
+[assembly: SuppressMessage("Design", "CA1515", Justification = "Top-level Program generates a public class; safe to ignore")]
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -60,3 +63,4 @@ app.MapStatus(configuration);
 app.MapIssuer(issuerBaseUrl, int.Parse(tokenLiftTime, NumberStyles.Integer, NumberFormatInfo.InvariantInfo));
 
 app.Run();
+#pragma warning restore CA1515
