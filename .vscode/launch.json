@@ -8,10 +8,11 @@
       "program": "${workspaceFolder}/src/WebApi.Issuer/bin/Debug/net10.0/WebApi.Issuer.dll",
       "cwd": "${workspaceFolder}/src/WebApi.Issuer",
       "justMyCode": true,
+      "console": "integratedTerminal",
       "serverReadyAction": {
         "action": "openExternally",
         "pattern": "https://.*:5003",
-        "uriFormat": "https://localhost:5003"
+        "uriFormat": "https://localhost:5003/"
       },
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
@@ -28,6 +29,9 @@
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
+      },
+      "presentation": {
+        "hidden": true
       }
     },
     {
@@ -36,11 +40,12 @@
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Issuer/bin/Debug/net10.0/WebApi.Issuer.dll",
       "cwd": "${workspaceFolder}/src/WebApi.Issuer",
+      "console": "integratedTerminal",
       "justMyCode": true,
       "serverReadyAction": {
         "action": "openExternally",
         "pattern": "https://.*:5003",
-        "uriFormat": "https://localhost:5003"
+        "uriFormat": "https://localhost:5003/"
       },
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",
@@ -59,6 +64,9 @@
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
         "EFCORE__ENABLEDETAILEDERRORS": "true",
         "EFCORE__ENABLESENSITIVEDATALOGGING": "true"
+      },
+      "presentation": {
+        "hidden": true
       }
     },
     {
@@ -67,6 +75,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
       "cwd": "${workspaceFolder}/src/WebApi.Service",
+      "console": "integratedTerminal",
       "justMyCode": true,
       "serverReadyAction": {
         "action": "openExternally",
@@ -88,6 +97,9 @@
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
+      },
+      "presentation": {
+        "hidden": true
       }
     },
     {
@@ -96,6 +108,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/src/WebApi.Service/bin/Debug/net10.0/WebApi.Service.dll",
       "cwd": "${workspaceFolder}/src/WebApi.Service",
+      "console": "integratedTerminal",
       "justMyCode": true,
       "serverReadyAction": {
         "action": "openExternally",
@@ -119,6 +132,9 @@
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff ",
         "EFCORE__ENABLEDETAILEDERRORS": "true",
         "EFCORE__ENABLESENSITIVEDATALOGGING": "true"
+      },
+      "presentation": {
+        "hidden": true
       }
     },
     {
@@ -142,12 +158,16 @@
         "Logging__Console__FormatterName": "simple",
         "Logging__Console__FormatterOptions__IncludeTimestamp": "true",
         "Logging__Console__FormatterOptions__TimestampFormat": "yyyy-MM-dd HH:mm:ss.fff "
+      },
+      "presentation": {
+        "hidden": true
       }
     }
   ],
   "compounds": [
     {
       "name": "All - JSON",
+      "preLaunchTask": "build-all",
       "configurations": [
         "Issuer - JSON",
         "API - JSON",
@@ -156,6 +176,7 @@
     },
     {
       "name": "All - Postgres",
+      "preLaunchTask": "build-all",
       "configurations": [
         "Issuer - Postgres",
         "API - Postgres",

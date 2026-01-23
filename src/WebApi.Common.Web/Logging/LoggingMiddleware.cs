@@ -13,7 +13,7 @@ public sealed class LoggingMiddleware(RequestDelegate next, IHttpLoggingHandler<
         var requestData = context.Request.ToPipelineRequestData();
         await logger.LogRequestAsync(requestData).ConfigureAwait(false);
         context.Request.Body.Position = 0;
-        
+
         var original = context.Response.Body;
         using MemoryStream buffer = new();
         context.Response.Body = buffer;

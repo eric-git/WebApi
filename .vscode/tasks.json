@@ -2,19 +2,21 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "rebuild-sln",
+      "label": "build-all",
       "type": "shell",
       "command": "dotnet",
       "args": [
-        "msbuild",
+        "build",
         "${workspaceFolder}/src/WebApi.sln",
-        "/t:Rebuild",
-        "/p:Configuration=Debug"
+        "--configuration",
+        "Debug"
       ],
       "problemMatcher": "$msCompile",
-      "group": {
-        "kind": "build",
-        "isDefault": true
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
       }
     },
     {
@@ -30,7 +32,12 @@
         "-c",
         "Release"
       ],
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     },
     {
       "label": "_publish-local-api",
@@ -48,7 +55,13 @@
       "dependsOn": [
         "_publish-local-issuer"
       ],
-      "problemMatcher": "$msCompile"
+      "dependsOrder": "sequence",
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     },
     {
       "label": "_publish-local-client",
@@ -66,15 +79,27 @@
       "dependsOn": [
         "_publish-local-api"
       ],
-      "problemMatcher": "$msCompile"
+      "dependsOrder": "sequence",
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     },
     {
       "label": "publish-local",
       "dependsOn": [
         "_publish-local-client"
       ],
+      "dependsOrder": "sequence",
       "problemMatcher": [],
-      "group": "build"
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     },
     {
       "label": "_publish-container-issuer",
@@ -90,7 +115,12 @@
         "Release",
         "-p:IsContainerBuild=true"
       ],
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     },
     {
       "label": "_publish-container-api",
@@ -109,7 +139,13 @@
       "dependsOn": [
         "_publish-container-issuer"
       ],
-      "problemMatcher": "$msCompile"
+      "dependsOrder": "sequence",
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     },
     {
       "label": "_publish-container-client",
@@ -128,15 +164,27 @@
       "dependsOn": [
         "_publish-container-api"
       ],
-      "problemMatcher": "$msCompile"
+      "dependsOrder": "sequence",
+      "problemMatcher": "$msCompile",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     },
     {
       "label": "publish-container",
       "dependsOn": [
         "_publish-container-client"
       ],
+      "dependsOrder": "sequence",
       "problemMatcher": [],
-      "group": "build"
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "close": true
+      }
     }
   ]
 }

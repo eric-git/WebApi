@@ -53,12 +53,25 @@ public sealed class HttpLoggingHandler<TLogger>(TLogger logger) : IHttpLoggingHa
             return Empty;
         }
 
-        return contentType switch
+        string mediaType;
+        if (string.IsNullOrWhiteSpace(contentType))
+        {
+            mediaType = string.Empty;
+        }
+        else
+        {
+            var semicolonIndex = contentType.IndexOf(';', StringComparison.OrdinalIgnoreCase);
+            mediaType = semicolonIndex >= 0 ? contentType[..semicolonIndex].Trim() : contentType.Trim();
+        }
+
+#pragma warning disable CA1308
+        return mediaType.ToLowerInvariant() switch
         {
             "application/json" when TryFormatJsonBody(content, out var formattedJson) => formattedJson!,
             "application/x-www-form-urlencoded" when TryFormatFormBody(content, out var formattedForm) => formattedForm!,
             _ => content
         };
+#pragma warning restore CA1308
     }
 
     private static string FormatHeaders(IReadOnlyList<KeyValuePair<string, string>> httpHeaders)
