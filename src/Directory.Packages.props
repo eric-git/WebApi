@@ -2,22 +2,20 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-
   <ItemGroup>
     <!-- ASP.NET Core -->
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
-
     <!-- EF Core -->
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-
+    <!-- Microsoft.* -->
+    <PackageVersion Include="Microsoft.Net.Http.Headers" Version="10.0.2" />
     <!-- Microsoft.Extensions.* -->
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.KeyPerFile" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.2" />
-
     <!-- IdentityModel / MSAL -->
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.15.0" />

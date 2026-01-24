@@ -7,6 +7,7 @@ public sealed class LoggingHandler(IHttpLoggingHandler<ILogger<LoggingHandler>> 
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
         if (request.Content is not null)
         {
@@ -14,15 +15,19 @@ public sealed class LoggingHandler(IHttpLoggingHandler<ILogger<LoggingHandler>> 
         }
 
         var requestData = request.ToPipelineRequestData();
-        await httpLoggingHandler.LogRequestAsync(requestData).ConfigureAwait(false);
+        await httpLoggingHandler.LogRequestAsync(requestData, cancellationToken).ConfigureAwait(false);
 
         var responseMessage = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         var original = await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
         MemoryStream buffer = new();
-        await original.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+        await using (original)
+        {
+            await original.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+        }
+
         var responseData = responseMessage.ToPipelineResponseData(buffer);
-        await httpLoggingHandler.LogResponseAsync(responseData).ConfigureAwait(false);
+        await httpLoggingHandler.LogResponseAsync(responseData, cancellationToken).ConfigureAwait(false);
         buffer.Position = 0;
         responseMessage.Content = new StreamContent(buffer);
         foreach (var header in responseMessage.Content.Headers)
@@ -30,7 +35,6 @@ public sealed class LoggingHandler(IHttpLoggingHandler<ILogger<LoggingHandler>> 
             responseMessage.Headers.TryAddWithoutValidation(header.Key, header.Value);
         }
 
-        await original.DisposeAsync().ConfigureAwait(false);
         return responseMessage;
     }
 }

@@ -7,11 +7,12 @@ namespace WebApi.Client.Services;
 [SuppressMessage("Performance", "CA1812", Justification = "Instantiated by DI container")]
 internal sealed class MsalTokenService(IConfidentialClientApplication confidentialClientApplication) : ITokenService
 {
-    public async Task<string> GetTokenAsync()
+    public async Task<string> GetTokenAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         string[] scopes = ["api.read", "api.write"];
         var acquireTokenForClientParameterBuilder = confidentialClientApplication.AcquireTokenForClient(scopes);
-        var result = await acquireTokenForClientParameterBuilder.ExecuteAsync().ConfigureAwait(false);
+        var result = await acquireTokenForClientParameterBuilder.ExecuteAsync(cancellationToken).ConfigureAwait(false);
         return result.AccessToken;
     }
 }

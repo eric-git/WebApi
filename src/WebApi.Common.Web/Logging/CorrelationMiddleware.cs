@@ -12,6 +12,8 @@ public sealed class CorrelationMiddleware(RequestDelegate next, ILogger<Correlat
     public async Task Invoke(HttpContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
+        var cancellationToken = context.RequestAborted;
+        cancellationToken.ThrowIfCancellationRequested();
         Dictionary<string, object> state = new(StringComparer.OrdinalIgnoreCase);
         if (context.Request.Headers.TryGetValue(Constants.ClientCorrelationIdHeader, out var clientCorrelationId))
         {
@@ -34,7 +36,7 @@ public sealed class CorrelationMiddleware(RequestDelegate next, ILogger<Correlat
             state[ClientRequestIdHeader] = clientRequestId.ToString();
         }
 
-        if (state.Count == 0)
+        if (state.Count is 0)
         {
             await next(context).ConfigureAwait(false);
             return;

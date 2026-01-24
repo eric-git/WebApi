@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using static WebApi.Common.Constants;
 
 namespace WebApi.Common.Logging;
@@ -8,12 +9,14 @@ public sealed class HttpLoggingHandler<TLogger>(TLogger logger) : IHttpLoggingHa
     where TLogger : ILogger
 {
     private const string Empty = "<empty>";
+    private const string Omitted = "<omitted>";
     private readonly LogCallback _logDelegate = logger.Log;
     private readonly EventId _requestEventId = new(RequestReceived, $"{nameof(HttpPipelineEvents)}.{nameof(RequestReceived)}");
     private readonly EventId _responseEventId = new(ResponseSent, $"{nameof(HttpPipelineEvents)}.{nameof(ResponseSent)}");
 
-    public async Task LogRequestAsync(PipelineRequestData request)
+    public async Task LogRequestAsync(PipelineRequestData request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
         _logDelegate(LogLevel.Information,
             _requestEventId,
@@ -21,12 +24,13 @@ public sealed class HttpLoggingHandler<TLogger>(TLogger logger) : IHttpLoggingHa
             request.Method,
             request.Uri,
             FormatHeaders(request.Headers),
-            await FormatBodyAsync(request.Body, request.ContentType).ConfigureAwait(false)
+            await FormatBodyAsync(request.Body, request.ContentType, cancellationToken).ConfigureAwait(false)
         );
     }
 
-    public async Task LogResponseAsync(PipelineResponseData response)
+    public async Task LogResponseAsync(PipelineResponseData response, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(response);
         _logDelegate(
             LogLevel.Information,
@@ -34,44 +38,53 @@ public sealed class HttpLoggingHandler<TLogger>(TLogger logger) : IHttpLoggingHa
             "=== Response ===\nStatus: {Status}\nHeaders:\n{Headers}\nBody:\n{Body}",
             response.StatusCode,
             FormatHeaders(response.Headers),
-            await FormatBodyAsync(response.Body, response.ContentType).ConfigureAwait(false)
+            await FormatBodyAsync(response.Body, response.ContentType, cancellationToken).ConfigureAwait(false)
         );
     }
 
-    private static async Task<string> FormatBodyAsync(Stream? body, string? contentType)
+    private static async Task<string> FormatBodyAsync(Stream? body, string? contentType, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         if (body is null)
         {
             return Empty;
         }
 
+        if (!MediaTypeHeaderValue.TryParse(contentType, out var mediaType))
+        {
+            return Omitted;
+        }
+
+        var isFormData = mediaType.SubType.Equals("x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase);
+        var isJsonData = mediaType.SubType.EndsWith("json", StringComparison.OrdinalIgnoreCase);
+        if (!isFormData &&
+            !isJsonData &&
+            !mediaType.SubType.EndsWith("xml", StringComparison.OrdinalIgnoreCase) &&
+            !mediaType.SubType.Equals("javascript", StringComparison.OrdinalIgnoreCase) &&
+            !mediaType.Type.Equals("text", StringComparison.OrdinalIgnoreCase))
+        {
+            return Omitted;
+        }
+
         using StreamReader reader = new(body, leaveOpen: true);
         body.Position = 0;
-        var content = await reader.ReadToEndAsync().ConfigureAwait(false);
+        var content = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
         if (string.IsNullOrWhiteSpace(content))
         {
             return Empty;
         }
 
-        string mediaType;
-        if (string.IsNullOrWhiteSpace(contentType))
+        if (isFormData && TryFormatFormBody(content, out var formattedForm))
         {
-            mediaType = string.Empty;
-        }
-        else
-        {
-            var semicolonIndex = contentType.IndexOf(';', StringComparison.OrdinalIgnoreCase);
-            mediaType = semicolonIndex >= 0 ? contentType[..semicolonIndex].Trim() : contentType.Trim();
+            return formattedForm!;
         }
 
-#pragma warning disable CA1308
-        return mediaType.ToLowerInvariant() switch
+        if (isJsonData && TryFormatJsonBody(content, out var formattedJson))
         {
-            "application/json" when TryFormatJsonBody(content, out var formattedJson) => formattedJson!,
-            "application/x-www-form-urlencoded" when TryFormatFormBody(content, out var formattedForm) => formattedForm!,
-            _ => content
-        };
-#pragma warning restore CA1308
+            return formattedJson!;
+        }
+
+        return content;
     }
 
     private static string FormatHeaders(IReadOnlyList<KeyValuePair<string, string>> httpHeaders)

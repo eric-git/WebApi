@@ -11,30 +11,34 @@ internal static class ApiEndpoints
     {
         public IEndpointRouteBuilder MapGame()
         {
-            endpointRouteBuilder.MapGet(GamesPath, async (IGameDataRepository gameDataRepository) =>
+            endpointRouteBuilder.MapGet(GamesPath, async (IGameDataRepository gameDataRepository, CancellationToken cancellationToken) =>
             {
-                var gameData = await gameDataRepository.GetGamesAsync().ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                var gameData = await gameDataRepository.GetGamesAsync(cancellationToken).ConfigureAwait(false);
                 return Results.Json(gameData);
             }).RequireAuthorization("ApiRead");
 
-            endpointRouteBuilder.MapGet($"{GamesPath}/{{id}}", async (string id, IGameDataRepository gameDataRepository) =>
+            endpointRouteBuilder.MapGet($"{GamesPath}/{{id}}", async (string id, IGameDataRepository gameDataRepository, CancellationToken cancellationToken) =>
                 {
-                    var game = await gameDataRepository.GetGameByIdAsync(id).ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var game = await gameDataRepository.GetGameByIdAsync(id, cancellationToken).ConfigureAwait(false);
                     return game is null ? Results.NotFound() : Results.Json(game);
                 }
             ).RequireAuthorization("ApiRead");
 
-            endpointRouteBuilder.MapPost(GamesPath, async (Game game, HttpContext httpContext, IGameDataRepository gameDataRepository) =>
+            endpointRouteBuilder.MapPost(GamesPath, async (Game game, HttpContext httpContext, IGameDataRepository gameDataRepository, CancellationToken cancellationToken) =>
             {
-                var id = await gameDataRepository.CreateGameAsync(game).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                var id = await gameDataRepository.CreateGameAsync(game, cancellationToken).ConfigureAwait(false);
                 return Results.Created($"{httpContext.Request.Scheme}://{httpContext.Request.Host}/{GamesPath}/{id}", id);
             }).RequireAuthorization("ApiWrite");
 
-            endpointRouteBuilder.MapPatch(GamesPath, async (Game game, IGameDataRepository gameDataRepository) =>
+            endpointRouteBuilder.MapPatch(GamesPath, async (Game game, IGameDataRepository gameDataRepository, CancellationToken cancellationToken) =>
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    await gameDataRepository.UpdateGameAsync(game).ConfigureAwait(false);
+                    await gameDataRepository.UpdateGameAsync(game, cancellationToken).ConfigureAwait(false);
                 }
                 catch (KeyNotFoundException keyNotFoundException)
                 {
@@ -44,11 +48,12 @@ internal static class ApiEndpoints
                 return Results.Ok();
             }).RequireAuthorization("ApiWrite");
 
-            endpointRouteBuilder.MapDelete($"{GamesPath}/{{id}}", async (string id, IGameDataRepository gameDataRepository) =>
+            endpointRouteBuilder.MapDelete($"{GamesPath}/{{id}}", async (string id, IGameDataRepository gameDataRepository, CancellationToken cancellationToken) =>
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    await gameDataRepository.DeleteGameAsync(id).ConfigureAwait(false);
+                    await gameDataRepository.DeleteGameAsync(id, cancellationToken).ConfigureAwait(false);
                 }
                 catch (KeyNotFoundException keyNotFoundException)
                 {

@@ -13,6 +13,7 @@ using WebApi.Common.Web.Logging;
 using WebApi.Service;
 using WebApi.Service.DataAccess;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
+using static WebApi.Common.Web.ErrorHandlingExtensions;
 
 [assembly: SuppressMessage("Design", "CA1515", Justification = "Top-level Program generates a public class; safe to ignore")]
 
@@ -140,6 +141,7 @@ app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseExceptionHandler(applicationBuilder => { applicationBuilder.Run(HandleExceptionAsync); });
 
 var configuration = app.Services.GetRequiredService<IConfiguration>();
 app.MapFavIcon();

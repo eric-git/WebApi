@@ -296,3 +296,6 @@ dotnet_format = false
 [**/DataAccess/AppDbContext.cs]
 generated_code = true
 dotnet_format = false
+
+[*{.ps1,psm1,psd}]
+end_of_line = lf

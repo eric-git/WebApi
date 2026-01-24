@@ -4,13 +4,13 @@ namespace WebApi.Client;
 
 internal interface IServiceClient
 {
-    Task<string?> CreateGameAsync(Game game);
+    Task<string?> CreateGameAsync(Game game, CancellationToken cancellationToken);
 
-    Task UpdateGameAsync(Game game);
+    Task UpdateGameAsync(Game game, CancellationToken cancellationToken);
 
-    Task<Game?> GetGameAsync(string id);
+    Task<Game?> GetGameAsync(string id, CancellationToken cancellationToken);
 
-    Task DeleteGameAsync(string id);
+    Task DeleteGameAsync(string id, CancellationToken cancellationToken);
 
-    Task<List<Game>> ListGamesAsync();
+    Task<List<Game>> ListGamesAsync(CancellationToken cancellationToken);
 }

@@ -14,25 +14,26 @@ internal sealed class ClientTest(IHostEnvironment hostEnvironment, IServiceClien
     private const string Bold = Esc + "1m";
     private const string Green = Esc + "32m";
 
-    public async Task TestAsync()
+    public async Task TestAsync(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         WriteTitle($"Runtime: {hostEnvironment.EnvironmentName}", false);
         WriteTitle("(1/5) Test creating a record...");
         var newGame = GetNewGameData();
-        var id = await serviceClient.CreateGameAsync(newGame).ConfigureAwait(false);
+        var id = await serviceClient.CreateGameAsync(newGame, cancellationToken).ConfigureAwait(false);
 
         WriteTitle("(2/5) Test getting a single record...");
-        var game = await serviceClient.GetGameAsync(id!).ConfigureAwait(false);
+        var game = await serviceClient.GetGameAsync(id!, cancellationToken).ConfigureAwait(false);
 
         WriteTitle("(3/5) Test updating a record...");
         game!.Name = $"{game.Name} - Updated";
-        await serviceClient.UpdateGameAsync(game).ConfigureAwait(false);
+        await serviceClient.UpdateGameAsync(game, cancellationToken).ConfigureAwait(false);
 
         WriteTitle("(4/5) Test deleting a record...");
-        await serviceClient.DeleteGameAsync(id!).ConfigureAwait(false);
+        await serviceClient.DeleteGameAsync(id!, cancellationToken).ConfigureAwait(false);
 
         WriteTitle("(5/5) Test listing records...");
-        await serviceClient.ListGamesAsync().ConfigureAwait(false);
+        await serviceClient.ListGamesAsync(cancellationToken).ConfigureAwait(false);
 
         WriteTitle("All done.", false);
     }

@@ -23,17 +23,20 @@ internal sealed class JsonFileGameDataRepository : IGameDataRepository
         _dataFilePath = dataFilePath;
     }
 
-    public async Task<List<Game>> GetGamesAsync()
+    public async Task<List<Game>> GetGamesAsync(CancellationToken cancellationToken)
     {
-#pragma warning disable CA2007
-        await using var fileStream = File.OpenRead(_dataFilePath);
-#pragma warning restore CA2007
-        var games = await JsonSerializer.DeserializeAsync<List<Game>>(fileStream, DataSerializationOptions).ConfigureAwait(false);
-        return games ?? [];
+        cancellationToken.ThrowIfCancellationRequested();
+        var fileStream = File.OpenRead(_dataFilePath);
+        await using (fileStream)
+        {
+            var games = await JsonSerializer.DeserializeAsync<List<Game>>(fileStream, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
+            return games ?? [];
+        }
     }
 
-    public async Task<string> CreateGameAsync(Game game)
+    public async Task<string> CreateGameAsync(Game game, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(game);
         game.Id = Guid.NewGuid().ToString("D");
         foreach (var relation in game.Relations ?? [])
@@ -41,18 +44,20 @@ internal sealed class JsonFileGameDataRepository : IGameDataRepository
             relation.Id = Guid.NewGuid().ToString("D");
         }
 
-        var games = await GetGamesAsync().ConfigureAwait(false);
+        var games = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
         games.Add(game);
-#pragma warning disable CA2007
-        await using var fileStream = File.Create(_dataFilePath);
-#pragma warning restore CA2007
-        await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions).ConfigureAwait(false);
-        return game.Id;
+        var fileStream = File.Create(_dataFilePath);
+        await using (fileStream)
+        {
+            await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
+            return game.Id;
+        }
     }
 
-    public async Task UpdateGameAsync(Game game)
+    public async Task UpdateGameAsync(Game game, CancellationToken cancellationToken)
     {
-        var games = await GetGamesAsync().ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        var games = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
         var index = games.FindIndex(g => GuidsEqual(g.Id, game.Id));
         if (index is -1)
         {
@@ -60,15 +65,17 @@ internal sealed class JsonFileGameDataRepository : IGameDataRepository
         }
 
         games[index] = game;
-#pragma warning disable CA2007
-        await using var fileStream = File.Create(_dataFilePath);
-#pragma warning restore CA2007
-        await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions).ConfigureAwait(false);
+        var fileStream = File.Create(_dataFilePath);
+        await using (fileStream)
+        {
+            await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
+        }
     }
 
-    public async Task DeleteGameAsync(string id)
+    public async Task DeleteGameAsync(string id, CancellationToken cancellationToken)
     {
-        var games = await GetGamesAsync().ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        var games = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
         var index = games.FindIndex(g => GuidsEqual(g.Id, id));
         if (index is -1)
         {
@@ -76,15 +83,17 @@ internal sealed class JsonFileGameDataRepository : IGameDataRepository
         }
 
         games.RemoveAt(index);
-#pragma warning disable CA2007
-        await using var fileStream = File.Create(_dataFilePath);
-#pragma warning restore CA2007
-        await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions).ConfigureAwait(false);
+        var fileStream = File.Create(_dataFilePath);
+        await using (fileStream)
+        {
+            await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
+        }
     }
 
-    public async Task<Game?> GetGameByIdAsync(string id)
+    public async Task<Game?> GetGameByIdAsync(string id, CancellationToken cancellationToken)
     {
-        var allGames = await GetGamesAsync().ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        var allGames = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
         var game = allGames.Find(x => GuidsEqual(x.Id, id));
         return game;
     }

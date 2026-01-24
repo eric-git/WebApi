@@ -50,7 +50,7 @@
     ]
   },
   {
-    "Name": "Issure - Postgres",
+    "Name": "Issuer - Postgres",
     "Projects": [
       {
         "Path": "WebApi.Issuer\\WebApi.Issuer.csproj",

@@ -7,6 +7,7 @@ public sealed class CorrelationHandler(ILogger<CorrelationHandler> logger) : Del
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
         var correlationId = request.Headers.TryGetValues(ClientCorrelationIdHeader, out var existing)
             ? existing.First()
