@@ -24,7 +24,6 @@ services:
       ASPNETCORE_URLS: https://+:5001
       ASPNETCORE_Kestrel__Certificates__Default__Path: /run/secrets/hosting-cert.crt
       ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /run/secrets/hosting-key.pem
-      ISSUER_BASE_URL: https://issuer:5001/connect
       TOKEN_LIFETIME_MINUTES: 30
       SECRET_PATH: /run/secrets/
       Logging__LogLevel__Default: Warning

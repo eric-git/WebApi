@@ -25,11 +25,11 @@ $src = Join-Path $PSScriptRoot "../../../src"
 $Projects = @{
     API    = @{
         CsProj  = Join-Path $src "WebApi.Service/WebApi.Service.csproj"
-        Profile = "Api (Postgres Data)"
+        Profile = "API - Postgres"
     }
     ISSUER = @{
         CsProj  = Join-Path $src "WebApi.Issuer/WebApi.Issuer.csproj"
-        Profile = "Issuer (Postgres Data)"
+        Profile = "Issuer - Postgres"
     }
 }
 

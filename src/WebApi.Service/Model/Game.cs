@@ -1,66 +1,55 @@
-﻿using Entity = WebApi.Service.DataAccess.Entity;
-using static WebApi.Common.TypeExtensions;
+﻿using System.ComponentModel;
+using Entity = WebApi.Service.DataAccess.Entity;
 
 namespace WebApi.Service.Model;
 
 internal sealed class Game
 {
-    public string? Id { get; set; }
+    [Description("The ID of the game")]
+    public Guid Id { get; set; }
 
+    [Description("The type of the game")]
     public string? Type { get; set; }
 
+    [Description("The name of the game")]
     public string? Name { get; set; }
 
+    [Description("The name of the game player")]
     public string? PlayerName { get; set; }
 
-    public int? PlayerHealth { get; set; }
+    [Description("The health of the game player")]
+    public int PlayerHealth { get; set; }
 
+    [Description("The relations of the game")]
     public List<Relation>? Relations { get; set; }
 
     public static Game FromEntity(Entity.Game entity)
     {
+        List<Relation> relations = [.. (entity.Relations ?? []).Select(Relation.FromEntity)];
         Game model = new()
         {
-            Id = entity.Id.ToString("D"),
+            Id = entity.Id,
             Name = entity.Name,
             Type = entity.Type,
             PlayerName = entity.PlayerName,
             PlayerHealth = entity.PlayerHealth,
-            Relations = entity.Relations.Select(Relation.FromEntity).ToList()
+            Relations = relations.Count > 0 ? relations : null
         };
         return model;
     }
 
-    public Entity.Game ToEntity(Entity.Game? entity = null)
+    public Entity.Game ToEntityForJson()
     {
-        entity ??= new Entity.Game();
-        entity.Id = string.IsNullOrWhiteSpace(Id) ? Guid.Empty : Guid.Parse(Id);
-        entity.Name = Name!;
-        entity.Type = Type!;
-        entity.PlayerName = PlayerName!;
-        entity.PlayerHealth = PlayerHealth ?? 0;
-        var relations = Relations ?? [];
-        var itemsToRemove = entity.Relations
-            .Where(x => !relations.Any(y => GuidsEqual(x.Id.ToString(), y.Id)))
-            .ToList();
-        foreach (var relation in itemsToRemove)
+        Entity.Game entity = new()
         {
-            entity.Relations.Remove(relation);
-        }
-
-        foreach (var relation in relations)
-        {
-            var existingItem = entity.Relations.SingleOrDefault(x => GuidsEqual(x.Id.ToString(), relation.Id));
-            if (existingItem is null)
-            {
-                entity.Relations.Add(relation.ToEntity()!);
-            }
-            else
-            {
-                relation.ToEntity(existingItem);
-            }
-        }
-
+            Id = Id,
+            Name = Name,
+            Type = Type,
+            PlayerName = PlayerName,
+            PlayerHealth = PlayerHealth
+        };
+        var relations = (Relations ?? []).Select(x => x.ToEntityForJson(Id, entity)).ToList();
+        entity.Relations = relations;
         return entity;
     }
 }
