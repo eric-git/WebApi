@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1
 
 # Build: Solution
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -13,9 +13,7 @@ RUN --mount=type=bind,source=.,target=/context \
     mkdir -p \"\$dir\"; \
     cp {} \"\$dir\"; \
     " && \
-    # Copy solution file
     cp /context/WebApi.sln . && \
-    # Copy MSBuild shared configuration files
     if [ -f /context/Directory.Build.props ]; then cp /context/Directory.Build.props .; fi && \
     if [ -f /context/Directory.Build.targets ]; then cp /context/Directory.Build.targets .; fi && \
     if [ -f /context/Directory.Packages.props ]; then cp /context/Directory.Packages.props .; fi

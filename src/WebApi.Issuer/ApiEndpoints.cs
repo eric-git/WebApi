@@ -13,9 +13,10 @@ internal static class ApiEndpoints
         {
             Uri uri = new(issuerBaseUrl);
             var path = uri.AbsolutePath.Trim('/');
-            endpointRouteBuilder.MapPost($"{path}/token", async (HttpRequest httpRequest, IConfiguration configuration, ISettingsDataRepository settingsDataRepository) =>
+            endpointRouteBuilder.MapPost($"{path}/token", async (HttpRequest httpRequest, IConfiguration configuration, ISettingsDataRepository settingsDataRepository, CancellationToken cancellationToken) =>
             {
-                var formData = await httpRequest.ReadFormAsync().ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                var formData = await httpRequest.ReadFormAsync(cancellationToken).ConfigureAwait(false);
                 var clientId = Guid.Parse(formData["client_id"].ToString());
                 var clientAssertion = formData["client_assertion"].ToString();
                 var scope = formData["scope"].ToString();
@@ -24,13 +25,13 @@ internal static class ApiEndpoints
                 var keyId = Guid.Parse(jsonWebToken.Kid);
                 var audience = jsonWebToken.Audiences.FirstOrDefault();
                 var apiId = Guid.Parse(audience!);
-                var publicSigningKey = await settingsDataRepository.GetSigningKeyByClientIdAsync(clientId, apiId, keyId).ConfigureAwait(false);
+                var publicSigningKey = await settingsDataRepository.GetSigningKeyByClientIdAsync(clientId, apiId, keyId, cancellationToken).ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(publicSigningKey))
                 {
                     return Results.Unauthorized();
                 }
 
-                var (_, rsaPublicSecurityKey) = await CreateRsaSecurityKeyFromPemAsync(publicSigningKey, jsonWebToken.Kid).ConfigureAwait(false);
+                var (_, rsaPublicSecurityKey) = CreateRsaSecurityKeyFromPem(publicSigningKey, jsonWebToken.Kid);
                 var result = await jsonWebTokenHandler.ValidateTokenAsync(
                     jsonWebToken,
                     new TokenValidationParameters
@@ -46,15 +47,15 @@ internal static class ApiEndpoints
                 }
 
                 var requestedScopes = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                var allowed = await settingsDataRepository.VerifyClientAccessAsync(clientId, apiId, requestedScopes).ConfigureAwait(false);
+                var allowed = await settingsDataRepository.VerifyClientAccessAsync(clientId, apiId, requestedScopes, cancellationToken).ConfigureAwait(false);
                 if (!allowed)
                 {
                     return Results.Unauthorized();
                 }
 
-                var client = await settingsDataRepository.GetClientDetailsById(clientId).ConfigureAwait(false);
+                var client = await settingsDataRepository.GetClientDetailsById(clientId, cancellationToken).ConfigureAwait(false);
                 var privateSigningKey = configuration["private-signing-key.pem"];
-                var (_, rsaPrivateSecurityKey) = await CreateRsaSecurityKeyFromPemAsync(privateSigningKey!).ConfigureAwait(false);
+                var (_, rsaPrivateSecurityKey) = CreateRsaSecurityKeyFromPem(privateSigningKey!);
                 var now = DateTime.UtcNow;
                 SecurityTokenDescriptor securityTokenDescriptor = new()
                 {
@@ -82,10 +83,11 @@ internal static class ApiEndpoints
                 });
             });
 
-            endpointRouteBuilder.MapGet($"{path}/.well-known/jwks.json", async (IConfiguration configuration) =>
+            endpointRouteBuilder.MapGet($"{path}/.well-known/jwks.json", (IConfiguration configuration, CancellationToken cancellationToken) =>
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var publicSigningKey = configuration["public-signing-key.pem"];
-                var (rsa, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemAsync(publicSigningKey!).ConfigureAwait(false);
+                var (rsa, rsaSecurityKey) = CreateRsaSecurityKeyFromPem(publicSigningKey!);
                 var parameters = rsa.ExportParameters(false);
                 var jwk = new
                 {
@@ -101,8 +103,9 @@ internal static class ApiEndpoints
                 });
             });
 
-            endpointRouteBuilder.MapGet($"{path}/.well-known/openid-configuration", () =>
+            endpointRouteBuilder.MapGet($"{path}/.well-known/openid-configuration", (CancellationToken cancellationToken) =>
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var discoveryDoc = new
                 {
                     issuer = issuerBaseUrl,

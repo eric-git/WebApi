@@ -6,8 +6,9 @@ public sealed class AccessTokenHandler(ITokenService tokenService) : DelegatingH
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentNullException.ThrowIfNull(request);
-        var token = await tokenService.GetTokenAsync().ConfigureAwait(false);
+        var token = await tokenService.GetTokenAsync(cancellationToken).ConfigureAwait(false);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
     }

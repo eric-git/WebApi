@@ -8,32 +8,33 @@ namespace WebApi.Issuer.DataAccess;
 [SuppressMessage("Performance", "CA1812", Justification = "Instantiated by DI container")]
 internal sealed class PostgresSettingsDataRepository(AppDbContext appDbContext) : ISettingsDataRepository
 {
-    public async Task<bool> VerifyClientAccessAsync(Guid clientId, Guid serviceId, IList<string> scopes)
+    public async Task<bool> VerifyClientAccessAsync(Guid clientId, Guid serviceId, IList<string> scopes, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var result = await appDbContext.ClientServices
             .AnyAsync(x =>
                 x.ClientId == clientId &&
                 x.ServiceId == serviceId &&
-                scopes.All(y => x.ClientServiceScopes.Any(z => z.Scope == y)))
+                scopes.All(y => x.ClientServiceScopes.Any(z => z.Scope == y)), cancellationToken)
             .ConfigureAwait(false);
         return result;
     }
 
-    public async Task<string?> GetSigningKeyByClientIdAsync(Guid clientId, Guid serviceId, Guid keyId)
+    public async Task<string?> GetSigningKeyByClientIdAsync(Guid clientId, Guid serviceId, Guid keyId, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var signingKey = await appDbContext.ClientServices
             .Where(x => x.ClientId == clientId && x.ServiceId == serviceId && x.KeyId == keyId)
             .Select(x => x.Key.Pem)
-            .FirstOrDefaultAsync()
+            .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
         return WrapPublicKey(signingKey);
     }
 
-    public async Task<Client?> GetClientDetailsById(Guid clientId)
+    public async Task<Client?> GetClientDetailsById(Guid clientId, CancellationToken cancellationToken)
     {
-        var client = await appDbContext.Clients
-            .FindAsync(clientId)
-            .ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        var client = await appDbContext.Clients.FindAsync([clientId], cancellationToken).ConfigureAwait(false);
         return client;
     }
 }

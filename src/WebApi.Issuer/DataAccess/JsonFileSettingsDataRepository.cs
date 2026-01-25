@@ -22,8 +22,9 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
         _dataFilePath = dataFilePath;
     }
 
-    public Task<bool> VerifyClientAccessAsync(Guid clientId, Guid serviceId, IList<string> scopes)
+    public Task<bool> VerifyClientAccessAsync(Guid clientId, Guid serviceId, IList<string> scopes, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var rootElement = GetJsonRootElement();
         var client = rootElement.GetProperty("Clients")
             .EnumerateArray()
@@ -49,8 +50,9 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
         return Task.FromResult(result);
     }
 
-    public Task<string?> GetSigningKeyByClientIdAsync(Guid clientId, Guid serviceId, Guid keyId)
+    public Task<string?> GetSigningKeyByClientIdAsync(Guid clientId, Guid serviceId, Guid keyId, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var root = GetJsonRootElement();
         var client = root.GetProperty("Clients")
             .EnumerateArray()
@@ -90,8 +92,9 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
         return Task.FromResult(WrapPublicKey(pem));
     }
 
-    public Task<Client?> GetClientDetailsById(Guid clientId)
+    public Task<Client?> GetClientDetailsById(Guid clientId, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var root = GetJsonRootElement();
         var client = root.GetProperty("Clients")
             .EnumerateArray()

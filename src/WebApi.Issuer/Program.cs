@@ -8,6 +8,7 @@ using WebApi.Common.Web;
 using WebApi.Common.Web.Logging;
 using WebApi.Issuer;
 using WebApi.Issuer.DataAccess;
+using static WebApi.Common.Web.ErrorHandlingExtensions;
 
 [assembly: SuppressMessage("Design", "CA1515", Justification = "Top-level Program generates a public class; safe to ignore")]
 
@@ -54,6 +55,7 @@ builder.Services.AddTransient(typeof(IHttpLoggingHandler<>), typeof(HttpLoggingH
 var app = builder.Build();
 app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
+app.UseExceptionHandler(applicationBuilder => { applicationBuilder.Run(HandleExceptionAsync); });
 
 var configuration = app.Services.GetRequiredService<IConfiguration>();
 var issuerBaseUrl = configuration["ISSUER_BASE_URL"]!;
@@ -63,4 +65,3 @@ app.MapStatus(configuration);
 app.MapIssuer(issuerBaseUrl, int.Parse(tokenLiftTime, NumberStyles.Integer, NumberFormatInfo.InvariantInfo));
 
 app.Run();
-#pragma warning restore CA1515

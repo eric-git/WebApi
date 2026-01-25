@@ -6,6 +6,7 @@ namespace WebApi.Common;
 public static class Constants
 {
     public const string ClientCorrelationIdHeader = "X-Client-Correlation-ID";
+    public const string GlobalExceptionHandler = nameof(GlobalExceptionHandler);
 
     // JWT events
     public const int JwtEvents = 1000;
@@ -26,6 +27,9 @@ public static class Constants
     public const int HttpPipelineEvents = 3000;
     public const int RequestReceived = 3001;
     public const int ResponseSent = 3002;
+
+    // Exception events
+    public const int ErrorOccurred = 500;
 
     public static JsonSerializerOptions DataSerializationOptions { get; } = new(JsonSerializerDefaults.Web)
     {

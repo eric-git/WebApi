@@ -1,8 +1,9 @@
 {
-  "cSpell.words": [],
   "workbench.colorTheme": "Abyss",
   "workbench.iconTheme": "material-icon-theme",
   "debug.hideSlowPreLaunchWarning": true,
   "git.decorations.enabled": true,
-  "makefile.configureOnOpen": true
+  "makefile.configureOnOpen": true,
+  "editor.formatOnSave": true,
+  "editor.trimAutoWhitespace": true
 }

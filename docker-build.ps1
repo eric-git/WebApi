@@ -53,10 +53,10 @@
   Optional service name for shell commands (json-sh, postgres-sh).
 
 .EXAMPLE
-  ./build.ps1 json-build
+  ./docker-build.ps1 json-build
 
 .EXAMPLE
-  ./build.ps1 json-sh -svc api
+  ./docker-build.ps1 json-sh -svc api
 #>
 
 param(
@@ -92,7 +92,7 @@ function Timed($scriptBlock) {
     Write-Host ""
 }
 
-function Require-Secret($path) {
+function Assert-Secret($path) {
     if (-not (Test-Path $path)) {
         Write-Host "$RED Missing secret: $path $RESET"
         exit 1
@@ -142,32 +142,32 @@ switch ($Command) {
     # ---------------- JSON MODE ----------------
     "json-build" {
         Section "Building JSON stack..."
-        Timed { iex "$COMPOSE $COMPOSE_JSON build" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build" }
     }
 
     "json-build-api" {
         Section "Building API (json)..."
-        Timed { iex "$COMPOSE $COMPOSE_JSON build api" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build api" }
     }
 
     "json-build-issuer" {
         Section "Building Issuer (json)..."
-        Timed { iex "$COMPOSE $COMPOSE_JSON build issuer" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build issuer" }
     }
 
     "json-build-client" {
         Section "Building Client (json)..."
-        Timed { iex "$COMPOSE $COMPOSE_JSON build client" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build client" }
     }
 
     "json-up" {
         Section "Starting JSON stack..."
-        Timed { iex "$COMPOSE $COMPOSE_JSON up -d issuer api client" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON up -d issuer api client" }
     }
 
     "json-down" {
         Section "Stopping JSON stack..."
-        iex "$COMPOSE $COMPOSE_JSON down"
+        Invoke-Expression "$COMPOSE $COMPOSE_JSON down"
         Write-Host ""
     }
 
@@ -177,14 +177,14 @@ switch ($Command) {
     }
 
     "json-ps" {
-        iex "$COMPOSE $COMPOSE_JSON ps"
+        Invoke-Expression "$COMPOSE $COMPOSE_JSON ps"
         Write-Host ""
     }
 
     "json-load" {
         Section "Running JSON loaders..."
-        Timed { iex "$COMPOSE $COMPOSE_JSON up --abort-on-container-exit issuer-json-loader api-json-loader" }
-        iex "$COMPOSE $COMPOSE_JSON rm -f issuer-json-loader api-json-loader"
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON up --abort-on-container-exit issuer-json-loader api-json-loader" }
+        Invoke-Expression "$COMPOSE $COMPOSE_JSON rm -f issuer-json-loader api-json-loader"
         Write-Host ""
     }
 
@@ -201,52 +201,52 @@ switch ($Command) {
 
     "json-reset" {
         Section "Resetting JSON mode..."
-        iex "$COMPOSE $COMPOSE_JSON down -v"
+        Invoke-Expression "$COMPOSE $COMPOSE_JSON down -v"
         & $PSCommandPath json-init
     }
 
     "json-logs" {
         Section "Aggregated logs (json)..."
-        iex "$COMPOSE $COMPOSE_JSON logs -f"
+        Invoke-Expression "$COMPOSE $COMPOSE_JSON logs -f"
     }
 
     "json-sh" {
         if (-not $svc) {
-            Write-Host "$RED Usage: ./build.ps1 json-sh -svc api $RESET"
+            Write-Host "$RED Usage: ./docker-build.ps1 json-sh -svc api $RESET"
             exit 1
         }
-        iex "$COMPOSE $COMPOSE_JSON exec $svc sh"
+        Invoke-Expression "$COMPOSE $COMPOSE_JSON exec $svc sh"
     }
 
     # ---------------- POSTGRES MODE ----------------
     "postgres-build" {
         Section "Building Postgres stack..."
-        Timed { iex "$COMPOSE $COMPOSE_PG build" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build" }
     }
 
     "postgres-build-api" {
         Section "Building API (postgres)..."
-        Timed { iex "$COMPOSE $COMPOSE_PG build api" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build api" }
     }
 
     "postgres-build-issuer" {
         Section "Building Issuer (postgres)..."
-        Timed { iex "$COMPOSE $COMPOSE_PG build issuer" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build issuer" }
     }
 
     "postgres-build-client" {
         Section "Building Client (postgres)..."
-        Timed { iex "$COMPOSE $COMPOSE_PG build client" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build client" }
     }
 
     "postgres-up" {
         Section "Starting Postgres stack..."
-        Timed { iex "$COMPOSE $COMPOSE_PG up -d postgres-issuer postgres-api issuer api client" }
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG up -d postgres-issuer postgres-api issuer api client" }
     }
 
     "postgres-down" {
         Section "Stopping Postgres stack..."
-        iex "$COMPOSE $COMPOSE_PG down"
+        Invoke-Expression "$COMPOSE $COMPOSE_PG down"
         Write-Host ""
     }
 
@@ -256,50 +256,50 @@ switch ($Command) {
     }
 
     "postgres-ps" {
-        iex "$COMPOSE $COMPOSE_PG ps"
+        Invoke-Expression "$COMPOSE $COMPOSE_PG ps"
         Write-Host ""
     }
 
     "postgres-load" {
         Section "Running SQL loaders..."
-        Timed { iex "$COMPOSE $COMPOSE_PG up --abort-on-container-exit issuer-postgres-loader api-postgres-loader" }
-        iex "$COMPOSE $COMPOSE_PG rm -f issuer-postgres-loader api-postgres-loader"
+        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG up --abort-on-container-exit issuer-postgres-loader api-postgres-loader" }
+        Invoke-Expression "$COMPOSE $COMPOSE_PG rm -f issuer-postgres-loader api-postgres-loader"
         Write-Host ""
     }
 
     "postgres-init" {
         Section "Postgres full initialization..."
-        iex "$COMPOSE $COMPOSE_PG up -d postgres-issuer postgres-api"
+        Invoke-Expression "$COMPOSE $COMPOSE_PG up -d postgres-issuer postgres-api"
         & $PSCommandPath postgres-load
-        iex "$COMPOSE $COMPOSE_PG up -d issuer api client"
+        Invoke-Expression "$COMPOSE $COMPOSE_PG up -d issuer api client"
         Write-Host "$GREEN Postgres mode fully initialized $RESET"
     }
 
     "postgres-reset" {
         Section "Resetting Postgres mode..."
-        iex "$COMPOSE $COMPOSE_PG down -v"
+        Invoke-Expression "$COMPOSE $COMPOSE_PG down -v"
         & $PSCommandPath postgres-init
     }
 
     "postgres-logs" {
         Section "Aggregated logs (postgres)..."
-        iex "$COMPOSE $COMPOSE_PG logs -f"
+        Invoke-Expression "$COMPOSE $COMPOSE_PG logs -f"
     }
 
     "postgres-sh" {
         if (-not $svc) {
-            Write-Host "$RED Usage: ./build.ps1 postgres-sh -svc postgres-api $RESET"
+            Write-Host "$RED Usage: ./docker-build.ps1 postgres-sh -svc postgres-api $RESET"
             exit 1
         }
-        iex "$COMPOSE $COMPOSE_PG exec $svc sh"
+        Invoke-Expression "$COMPOSE $COMPOSE_PG exec $svc sh"
     }
 
     # ---------------- UTILITIES ----------------
     "secrets-check" {
         Section "Validating secrets..."
-        Require-Secret "./secrets/db-manager-password.txt"
-        Require-Secret "./secrets/svc-issuer-password.txt"
-        Require-Secret "./secrets/svc-api-password.txt"
+        Assert-Secret "./secrets/db-manager-password.txt"
+        Assert-Secret "./secrets/svc-issuer-password.txt"
+        Assert-Secret "./secrets/svc-api-password.txt"
         Write-Host "$GREEN All required secrets are present $RESET"
         Write-Host ""
     }
@@ -352,7 +352,7 @@ switch ($Command) {
 
     default {
         Write-Host "$RED Unknown command: $Command $RESET"
-        Write-Host "Run: ./build.ps1 help"
+        Write-Host "Run: ./docker-build.ps1 help"
         exit 1
     }
 }

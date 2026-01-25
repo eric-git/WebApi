@@ -1,0 +1,73 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "files": [
+    "**/*"
+  ],
+  "dictionaries": [
+    "powershell",
+    "softwareTerms",
+    "dotnet"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "dotnet",
+      "path": "./node_modules/@cspell/dict-dotnet/dict/dotnet.txt"
+    }
+  ],
+  "ignorePaths": [
+    "**/bin/**",
+    "**/obj/**",
+    "**/node_modules/**",
+    "**/.git/**"
+  ],
+  "words": [
+    "addext",
+    "appicon",
+    "appsettings",
+    "aspnet",
+    "ASPNETCORE",
+    "Backchannel",
+    "Browsable",
+    "buildtransitive",
+    "bytearray",
+    "CDPATH",
+    "contentfiles",
+    "datname",
+    "dbcontext",
+    "dbname",
+    "depersist",
+    "fkey",
+    "Ganon",
+    "healthcheck",
+    "hostspecific",
+    "Hylian",
+    "Hyrule",
+    "isready",
+    "keyout",
+    "keypair",
+    "keypairs",
+    "Linq",
+    "Mipha",
+    "MSAL",
+    "msdata",
+    "Navigations",
+    "newkey",
+    "Npgsql",
+    "onconfiguring",
+    "PGPASSWORD",
+    "pkey",
+    "psql",
+    "psqlrc",
+    "pubout",
+    "resheader",
+    "resmimetype",
+    "resx",
+    "rolname",
+    "Ruta",
+    "stty",
+    "traceparent",
+    "ttinclude",
+    "webapi"
+  ]
+}

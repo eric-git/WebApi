@@ -10,6 +10,7 @@ using WebApi.Client;
 using WebApi.Client.Services;
 using WebApi.Common.Handler;
 using WebApi.Common.Logging;
+using static WebApi.Common.ErrorHandlingExtensions;
 using static WebApi.Common.SecurityExtensions;
 using IdentityLogLevel = Microsoft.Identity.Client.LogLevel;
 
@@ -23,8 +24,6 @@ if (!Path.IsPathRooted(secretPath!))
 
 builder.Configuration.AddKeyPerFile(secretPath);
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
-builder.Logging.AddConsole();
-
 builder.Services.AddSingleton<IConfidentialClientApplication>(serviceProvider =>
 {
     var configuration = serviceProvider.GetRequiredService<IConfiguration>();
@@ -38,10 +37,11 @@ builder.Services.AddSingleton<IConfidentialClientApplication>(serviceProvider =>
         .Create(clientId)
         .WithOidcAuthority(issuer)
         .WithHttpClientFactory(msalHttpClientFactory)
-        .WithClientAssertion(async (CancellationToken _) =>
+        .WithClientAssertion(cancellationToken =>
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var privateSigningKey = configuration["private-signing-key.pem"];
-            var (_, rsaSecurityKey) = await CreateRsaSecurityKeyFromPemAsync(privateSigningKey!, keyId).ConfigureAwait(false);
+            var (_, rsaSecurityKey) = CreateRsaSecurityKeyFromPem(privateSigningKey!, keyId);
             var now = DateTime.UtcNow;
             SecurityTokenDescriptor securityTokenDescriptor = new()
             {
@@ -58,7 +58,7 @@ builder.Services.AddSingleton<IConfidentialClientApplication>(serviceProvider =>
             };
             JsonWebTokenHandler jsonWebTokenHandler = new();
             var jwt = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
-            return jwt;
+            return Task.FromResult(jwt);
         })
         .WithLogging((level, message, containsPii) =>
         {
@@ -122,4 +122,22 @@ if (builder.Environment.IsDevelopment())
 }
 
 var app = builder.Build();
-await app.Services.GetRequiredService<ClientTest>().TestAsync().ConfigureAwait(false);
+
+var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+{
+    var exception = e.ExceptionObject as Exception;
+    HandleException(nameof(AppDomain.UnhandledException), loggerFactory, exception);
+};
+TaskScheduler.UnobservedTaskException += (_, e) =>
+{
+    foreach (var exception in e.Exception.Flatten().InnerExceptions)
+    {
+        HandleException(nameof(TaskScheduler.UnobservedTaskException), loggerFactory, exception);
+    }
+
+    e.SetObserved();
+};
+
+using CancellationTokenSource cancellationTokenSource = new();
+await app.Services.GetRequiredService<ClientTest>().TestAsync(cancellationTokenSource.Token).ConfigureAwait(false);
