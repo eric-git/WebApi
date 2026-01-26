@@ -51,10 +51,10 @@ SRC="$(cd "$(dirname "$0")/../../../src" && pwd)"
 # Project settings
 # -----------------------------
 API_CSPROJ="$SRC/WebApi.Service/WebApi.Service.csproj"
-API_PROFILE="Api (Postgres Data)"
+API_PROFILE="API - Postgres"
 
 ISSUER_CSPROJ="$SRC/WebApi.Issuer/WebApi.Issuer.csproj"
-ISSUER_PROFILE="Issuer (Postgres Data)"
+ISSUER_PROFILE="Issuer - Postgres"
 
 # -----------------------------
 # Build raw connection string

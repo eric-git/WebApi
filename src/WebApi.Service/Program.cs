@@ -12,8 +12,9 @@ using WebApi.Common.Web;
 using WebApi.Common.Web.Logging;
 using WebApi.Service;
 using WebApi.Service.DataAccess;
-using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 using static WebApi.Common.Web.ErrorHandlingExtensions;
+using static WebApi.Service.ApiEndpoints;
+using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 [assembly: SuppressMessage("Design", "CA1515", Justification = "Top-level Program generates a public class; safe to ignore")]
 
@@ -117,12 +118,12 @@ builder.Services
     });
 builder.Services.AddAuthorization(authorizationOptions =>
 {
-    authorizationOptions.AddPolicy("ApiRead", authorizationPolicyBuilder =>
+    authorizationOptions.AddPolicy(ReadPolicyName, authorizationPolicyBuilder =>
     {
         authorizationPolicyBuilder.RequireAuthenticatedUser();
         authorizationPolicyBuilder.RequireClaim("scope", "api.read");
     });
-    authorizationOptions.AddPolicy("ApiWrite", authorizationPolicyBuilder =>
+    authorizationOptions.AddPolicy(WritePolicyName, authorizationPolicyBuilder =>
     {
         authorizationPolicyBuilder.RequireAuthenticatedUser();
         authorizationPolicyBuilder.RequireClaim("scope", "api.write");
@@ -135,6 +136,7 @@ if (builder.Environment.IsDevelopment())
 }
 
 builder.Services.AddTransient(typeof(IHttpLoggingHandler<>), typeof(HttpLoggingHandler<>));
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 app.UseMiddleware<CorrelationMiddleware>();
@@ -142,10 +144,10 @@ app.UseMiddleware<LoggingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler(applicationBuilder => { applicationBuilder.Run(HandleExceptionAsync); });
+app.MapOpenApi();
 
-var configuration = app.Services.GetRequiredService<IConfiguration>();
-app.MapFavIcon();
-app.MapStatus(configuration);
+app.MapCommonRoot();
 app.MapGame();
+app.MapDocument();
 
 app.Run();

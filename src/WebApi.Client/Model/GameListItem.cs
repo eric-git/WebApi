@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace WebApi.Client.Model;
 
 [SuppressMessage("Performance", "CA1812", Justification = "Instantiated by client")]
-internal sealed class Game
+internal sealed class GameListItem
 {
     [Description("The ID of the game")]
     public Guid Id { get; set; }
@@ -20,7 +20,4 @@ internal sealed class Game
 
     [Description("The health of the game player")]
     public int PlayerHealth { get; set; }
-
-    [Description("The relations of the game")]
-    public List<Relation>? Relations { get; set; }
 }

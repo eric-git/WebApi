@@ -2,7 +2,6 @@
 using System.Text.Json;
 using WebApi.Service.Model;
 using static WebApi.Common.Constants;
-using static WebApi.Common.TypeExtensions;
 
 namespace WebApi.Service.DataAccess;
 
@@ -14,87 +13,140 @@ internal sealed class JsonFileGameDataRepository : IGameDataRepository
     public JsonFileGameDataRepository(IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(configuration);
-        var dataFilePath = Path.Combine(configuration["DATA_PATH"]!, "db.data");
-        if (!Path.IsPathRooted(dataFilePath))
+
+        var path = Path.Combine(configuration["DATA_PATH"]!, "db.data");
+        if (!Path.IsPathRooted(path))
         {
-            dataFilePath = Path.Combine(AppContext.BaseDirectory, dataFilePath);
+            path = Path.Combine(AppContext.BaseDirectory, path);
         }
 
-        _dataFilePath = dataFilePath;
+        _dataFilePath = path;
     }
 
-    public async Task<List<Game>> GetGamesAsync(CancellationToken cancellationToken)
+    public async Task<List<GameListItem>> GetGamesAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var fileStream = File.OpenRead(_dataFilePath);
-        await using (fileStream)
-        {
-            var games = await JsonSerializer.DeserializeAsync<List<Game>>(fileStream, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
-            return games ?? [];
-        }
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        return data.Select(GameListItem.FromEntity).ToList();
     }
 
-    public async Task<string> CreateGameAsync(Game game, CancellationToken cancellationToken)
+    public async Task<Guid> CreateGameAsync(CreateGame game, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ArgumentNullException.ThrowIfNull(game);
-        game.Id = Guid.NewGuid().ToString("D");
-        foreach (var relation in game.Relations ?? [])
-        {
-            relation.Id = Guid.NewGuid().ToString("D");
-        }
-
-        var games = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
-        games.Add(game);
-        var fileStream = File.Create(_dataFilePath);
-        await using (fileStream)
-        {
-            await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
-            return game.Id;
-        }
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var entity = game.ToEntity();
+        data.Add(entity);
+        await SaveAsync(data, cancellationToken).ConfigureAwait(false);
+        return entity.Id;
     }
 
-    public async Task UpdateGameAsync(Game game, CancellationToken cancellationToken)
+    public async Task UpdateGameAsync(Guid id, UpdateGame game, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var games = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
-        var index = games.FindIndex(g => GuidsEqual(g.Id, game.Id));
-        if (index is -1)
-        {
-            throw new KeyNotFoundException($"Game with ID '{game.Id}' not found.");
-        }
-
-        games[index] = game;
-        var fileStream = File.Create(_dataFilePath);
-        await using (fileStream)
-        {
-            await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
-        }
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var entity = data.SingleOrDefault(x => x.Id == id)
+                     ?? throw new KeyNotFoundException($"Game with ID {id} not found.");
+        game.UpdateEntity(entity);
+        await SaveAsync(data, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task DeleteGameAsync(string id, CancellationToken cancellationToken)
+    public async Task DeleteGameAsync(Guid id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var games = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
-        var index = games.FindIndex(g => GuidsEqual(g.Id, id));
-        if (index is -1)
-        {
-            throw new KeyNotFoundException($"Game with ID '{id}' not found.");
-        }
-
-        games.RemoveAt(index);
-        var fileStream = File.Create(_dataFilePath);
-        await using (fileStream)
-        {
-            await JsonSerializer.SerializeAsync(fileStream, games, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
-        }
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var entity = data.SingleOrDefault(x => x.Id == id)
+                     ?? throw new KeyNotFoundException($"Game with ID {id} not found.");
+        data.Remove(entity);
+        await SaveAsync(data, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<Game?> GetGameByIdAsync(string id, CancellationToken cancellationToken)
+    public async Task<Game> GetGameByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var allGames = await GetGamesAsync(cancellationToken).ConfigureAwait(false);
-        var game = allGames.Find(x => GuidsEqual(x.Id, id));
-        return game;
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var entity = data.SingleOrDefault(x => x.Id == id)
+                     ?? throw new KeyNotFoundException($"Game with ID {id} not found.");
+        return Game.FromEntity(entity);
+    }
+
+    public async Task<List<RelationListItem>> GetRelationsAsync(Guid gameId, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var game = data.SingleOrDefault(x => x.Id == gameId)
+                   ?? throw new KeyNotFoundException($"Game with ID {gameId} not found.");
+        return game.Relations.Select(RelationListItem.FromEntity).ToList();
+    }
+
+    public async Task<Guid> CreateRelationAsync(Guid gameId, CreateRelation relation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var game = data.SingleOrDefault(x => x.Id == gameId)
+                   ?? throw new KeyNotFoundException($"Game with ID {gameId} not found.");
+        var entity = relation.ToEntity(gameId);
+        game.Relations.Add(entity);
+        await SaveAsync(data, cancellationToken).ConfigureAwait(false);
+        return entity.Id;
+    }
+
+    public async Task UpdateRelationAsync(Guid gameId, Guid id, UpdateRelation relation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var game = data.SingleOrDefault(x => x.Id == gameId)
+                   ?? throw new KeyNotFoundException($"Game with ID {gameId} not found.");
+        var entity = game.Relations.SingleOrDefault(x => x.Id == id)
+                     ?? throw new KeyNotFoundException($"Relation with ID {id} not found.");
+        relation.UpdateEntity(entity);
+        await SaveAsync(data, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task DeleteRelationAsync(Guid gameId, Guid id, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var game = data.SingleOrDefault(x => x.Id == gameId)
+                   ?? throw new KeyNotFoundException($"Game with ID {gameId} not found.");
+        var entity = game.Relations.SingleOrDefault(x => x.Id == id)
+                     ?? throw new KeyNotFoundException($"Relation with ID {id} not found.");
+        game.Relations.Remove(entity);
+        await SaveAsync(data, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<Relation> GetRelationByIdAsync(Guid gameId, Guid id, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var data = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        var game = data.SingleOrDefault(x => x.Id == gameId)
+                   ?? throw new KeyNotFoundException($"Game with ID {gameId} not found.");
+        var entity = game.Relations.SingleOrDefault(x => x.Id == id)
+                     ?? throw new KeyNotFoundException($"Relation with ID {id} not found.");
+        return Relation.FromEntity(entity);
+    }
+
+    private async Task<List<Entity.Game>> LoadAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        List<Game>? data;
+        var stream = new FileStream(_dataFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        await using (stream)
+        {
+            data = await JsonSerializer.DeserializeAsync<List<Game>>(stream, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
+        }
+
+        var result = (data ?? []).Select(x => x.ToEntityForJson()).ToList();
+        return result;
+    }
+
+    private async Task SaveAsync(List<Entity.Game> data, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var result = data.Select(Game.FromEntity).ToList();
+        FileStream stream = new(_dataFilePath, FileMode.Create, FileAccess.Write, FileShare.None);
+        await using (stream)
+        {
+            await JsonSerializer.SerializeAsync(stream, result, DataSerializationOptions, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using WebApi.Common.Logging;
@@ -49,7 +47,6 @@ switch (persistenceMode)
         throw new InvalidOperationException($"Unsupported persistence mode: {persistenceMode}");
 }
 
-builder.Services.Configure<MvcOptions>(_ => { });
 builder.Services.AddTransient(typeof(IHttpLoggingHandler<>), typeof(HttpLoggingHandler<>));
 
 var app = builder.Build();
@@ -57,11 +54,7 @@ app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseExceptionHandler(applicationBuilder => { applicationBuilder.Run(HandleExceptionAsync); });
 
-var configuration = app.Services.GetRequiredService<IConfiguration>();
-var issuerBaseUrl = configuration["ISSUER_BASE_URL"]!;
-var tokenLiftTime = configuration["TOKEN_LIFETIME_MINUTES"]!;
-app.MapFavIcon();
-app.MapStatus(configuration);
-app.MapIssuer(issuerBaseUrl, int.Parse(tokenLiftTime, NumberStyles.Integer, NumberFormatInfo.InvariantInfo));
+app.MapCommonRoot();
+app.MapConnect();
 
 app.Run();

@@ -45,7 +45,7 @@ public sealed class HttpLoggingHandler<TLogger>(TLogger logger) : IHttpLoggingHa
     private static async Task<string> FormatBodyAsync(Stream? body, string? contentType, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (body is null)
+        if (body is null || body.Length is 0)
         {
             return Empty;
         }
