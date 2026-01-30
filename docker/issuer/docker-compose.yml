@@ -17,11 +17,11 @@ services:
     image: webapi-suite/issuer:latest
     pull_policy: never
     ports:
-      - "5001:5001"
+      - "5001:443"
     environment:
       SSL_CERT_FILE: /run/secrets/ca-bundle
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: https://+:5001
+      ASPNETCORE_URLS: https://+:443
       ASPNETCORE_Kestrel__Certificates__Default__Path: /run/secrets/hosting-cert.crt
       ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /run/secrets/hosting-key.pem
       TOKEN_LIFETIME_MINUTES: 30
@@ -42,7 +42,10 @@ services:
         target: private-signing-key.pem
       - ca-bundle
     networks:
-      - public
+      public:
+        ipv4_address: 172.20.0.10
+    extra_hosts:
+      - "issuer.webapisuite.projecteric.io:172.20.0.10"
     restart: always
 
 secrets:

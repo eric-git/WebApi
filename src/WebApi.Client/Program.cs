@@ -6,12 +6,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using WebApi.Client;
-using WebApi.Client.Services;
-using WebApi.Common.Handler;
+using WebApi.Client.Client;
 using WebApi.Common.Logging;
-using static WebApi.Common.ErrorHandlingExtensions;
-using static WebApi.Common.SecurityExtensions;
+using WebApi.Common.Security;
+using static WebApi.Common.Logging.Helper;
+using static WebApi.Common.Security.Helper;
 using IdentityLogLevel = Microsoft.Identity.Client.LogLevel;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -19,7 +18,7 @@ builder.Configuration.AddEnvironmentVariables();
 var secretPath = builder.Configuration["SECRET_PATH"];
 if (!Path.IsPathRooted(secretPath!))
 {
-    secretPath = Path.Combine(AppContext.BaseDirectory, secretPath!);
+    secretPath = Path.Combine(builder.Environment.ContentRootPath, secretPath!);
 }
 
 builder.Configuration.AddKeyPerFile(secretPath);
@@ -82,7 +81,7 @@ builder.Services.AddSingleton<IConfidentialClientApplication>(serviceProvider =>
         .Build();
 });
 
-builder.Services.AddHttpClient(ServiceClient.HttpClientName, (serviceProvider, httpClient) =>
+builder.Services.AddHttpClient(GameServiceClient.HttpClientName, (serviceProvider, httpClient) =>
     {
         var configuration = serviceProvider.GetRequiredService<IConfiguration>();
         httpClient.BaseAddress = new Uri($"{configuration["API_BASE_URL"]}/");
@@ -110,12 +109,12 @@ builder.Services.AddHttpClient(MsalHttpClientFactory.HttpClientName)
 
 builder.Services.AddSingleton<ITokenService, MsalTokenService>();
 builder.Services.AddSingleton<IMsalHttpClientFactory, MsalHttpClientFactory>();
-builder.Services.AddSingleton<IServiceClient, ServiceClient>();
+builder.Services.AddSingleton<IGameServiceClient, GameServiceClient>();
 builder.Services.AddTransient<CorrelationHandler>();
-builder.Services.AddTransient(typeof(IHttpLoggingHandler<>), typeof(HttpLoggingHandler<>));
+builder.Services.AddTransient(typeof(IHttpPipelineLogger<>), typeof(HttpPipelineLogger<>));
 builder.Services.AddTransient<LoggingHandler>();
 builder.Services.AddTransient<AccessTokenHandler>();
-builder.Services.AddTransient<ClientTest>();
+builder.Services.AddTransient<WebApi.Client.Test.GameServiceClient>();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSingleton<CertificateHandler>();
@@ -140,4 +139,4 @@ TaskScheduler.UnobservedTaskException += (_, e) =>
 };
 
 using CancellationTokenSource cancellationTokenSource = new();
-await app.Services.GetRequiredService<ClientTest>().TestAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+await app.Services.GetRequiredService<WebApi.Client.Test.GameServiceClient>().TestAsync(cancellationTokenSource.Token).ConfigureAwait(false);

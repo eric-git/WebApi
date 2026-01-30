@@ -9,13 +9,13 @@ internal sealed class Game
     public Guid Id { get; set; }
 
     [Description("The type of the game")]
-    public string? Type { get; set; }
+    public string Type { get; set; } = null!;
 
     [Description("The name of the game")]
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
     [Description("The name of the game player")]
-    public string? PlayerName { get; set; }
+    public string PlayerName { get; set; } = null!;
 
     [Description("The health of the game player")]
     public int PlayerHealth { get; set; }

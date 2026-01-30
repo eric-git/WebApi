@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using static WebApi.Common.Logging.Constants;
 
 namespace WebApi.Common.Web.Logging;
 
@@ -15,10 +16,10 @@ public sealed class CorrelationMiddleware(RequestDelegate next, ILogger<Correlat
         var cancellationToken = context.RequestAborted;
         cancellationToken.ThrowIfCancellationRequested();
         Dictionary<string, object> state = new(StringComparer.OrdinalIgnoreCase);
-        if (context.Request.Headers.TryGetValue(Constants.ClientCorrelationIdHeader, out var clientCorrelationId))
+        if (context.Request.Headers.TryGetValue(ClientCorrelationIdHeader, out var clientCorrelationId))
         {
-            context.Response.Headers[Constants.ClientCorrelationIdHeader] = clientCorrelationId;
-            state[Constants.ClientCorrelationIdHeader] = clientCorrelationId.ToString();
+            context.Response.Headers[ClientCorrelationIdHeader] = clientCorrelationId;
+            state[ClientCorrelationIdHeader] = clientCorrelationId.ToString();
         }
 
         if (context.Request.Headers.TryGetValue(TraceParentHeader, out var traceParent))

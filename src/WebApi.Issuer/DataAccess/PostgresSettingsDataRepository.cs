@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Issuer.DataAccess.Entity;
-using static WebApi.Common.SecurityExtensions;
+using static WebApi.Common.Security.Helper;
 
 namespace WebApi.Issuer.DataAccess;
 

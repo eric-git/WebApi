@@ -11,10 +11,10 @@ internal sealed class Relation
     public Guid Id { get; set; }
 
     [Description("The type of the relation")]
-    public string? Type { get; set; }
+    public string Type { get; set; } = null!;
 
     [Description("The name of the relation")]
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
 
     [Description("The attributes of the relation")]
     public Dictionary<string, string>? Attributes { get; set; }

@@ -6,7 +6,7 @@ using WebApi.Common.Web;
 using WebApi.Common.Web.Logging;
 using WebApi.Issuer;
 using WebApi.Issuer.DataAccess;
-using static WebApi.Common.Web.ErrorHandlingExtensions;
+using static WebApi.Common.Web.ErrorHandling.Helper;
 
 [assembly: SuppressMessage("Design", "CA1515", Justification = "Top-level Program generates a public class; safe to ignore")]
 
@@ -15,7 +15,7 @@ builder.Configuration.AddEnvironmentVariables();
 var secretPath = builder.Configuration["SECRET_PATH"];
 if (!Path.IsPathRooted(secretPath!))
 {
-    secretPath = Path.Combine(AppContext.BaseDirectory, secretPath!);
+    secretPath = Path.Combine(builder.Environment.ContentRootPath, secretPath!);
 }
 
 builder.Configuration.AddKeyPerFile(secretPath);
@@ -47,14 +47,16 @@ switch (persistenceMode)
         throw new InvalidOperationException($"Unsupported persistence mode: {persistenceMode}");
 }
 
-builder.Services.AddTransient(typeof(IHttpLoggingHandler<>), typeof(HttpLoggingHandler<>));
+builder.Services.AddTransient(typeof(IHttpPipelineLogger<>), typeof(HttpPipelineLogger<>));
+builder.Services.AddValidation();
+builder.Services.AddProblemDetails(config => { config.CustomizeProblemDetails = ConfigureProblemDetails; });
 
 var app = builder.Build();
 app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseExceptionHandler(applicationBuilder => { applicationBuilder.Run(HandleExceptionAsync); });
 
-app.MapCommonRoot();
+app.MapCommonEndpoints();
 app.MapConnect();
 
 app.Run();

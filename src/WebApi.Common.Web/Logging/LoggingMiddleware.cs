@@ -4,7 +4,7 @@ using WebApi.Common.Logging;
 
 namespace WebApi.Common.Web.Logging;
 
-public sealed class LoggingMiddleware(RequestDelegate next, IHttpLoggingHandler<ILogger<LoggingMiddleware>> logger)
+public sealed class LoggingMiddleware(RequestDelegate next, IHttpPipelineLogger<ILogger<LoggingMiddleware>> logger)
 {
     public async Task Invoke(HttpContext context)
     {

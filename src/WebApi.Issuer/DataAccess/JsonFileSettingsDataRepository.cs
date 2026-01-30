@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using WebApi.Issuer.DataAccess.Entity;
-using static WebApi.Common.SecurityExtensions;
+using static WebApi.Common.Security.Helper;
 
 namespace WebApi.Issuer.DataAccess;
 
@@ -10,13 +10,13 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
 {
     private readonly string _dataFilePath;
 
-    public JsonFileSettingsDataRepository(IConfiguration configuration)
+    public JsonFileSettingsDataRepository(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         ArgumentNullException.ThrowIfNull(configuration);
         var dataFilePath = Path.Combine(configuration["DATA_PATH"]!, "db.data");
         if (!Path.IsPathRooted(dataFilePath))
         {
-            dataFilePath = Path.Combine(AppContext.BaseDirectory, dataFilePath);
+            dataFilePath = Path.Combine(hostEnvironment.ContentRootPath, dataFilePath);
         }
 
         _dataFilePath = dataFilePath;

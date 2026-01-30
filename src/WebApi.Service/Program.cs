@@ -1,19 +1,24 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Npgsql;
-using WebApi.Common.Handler;
 using WebApi.Common.Logging;
+using WebApi.Common.Security;
 using WebApi.Common.Web;
+using WebApi.Common.Web.Documentation;
+using WebApi.Common.Web.ErrorHandling;
 using WebApi.Common.Web.Logging;
-using WebApi.Service;
+using WebApi.Common.Web.Security;
 using WebApi.Service.DataAccess;
-using static WebApi.Common.Web.ErrorHandlingExtensions;
+using WebApi.Service.Documentation;
+using static WebApi.Common.Web.ErrorHandling.Helper;
 using static WebApi.Service.ApiEndpoints;
+using DocumentInfoTransformer = WebApi.Service.Documentation.DocumentInfoTransformer;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 [assembly: SuppressMessage("Design", "CA1515", Justification = "Top-level Program generates a public class; safe to ignore")]
@@ -23,7 +28,7 @@ builder.Configuration.AddEnvironmentVariables();
 var secretPath = builder.Configuration["SECRET_PATH"];
 if (!Path.IsPathRooted(secretPath!))
 {
-    secretPath = Path.Combine(AppContext.BaseDirectory, secretPath!);
+    secretPath = Path.Combine(builder.Environment.ContentRootPath, secretPath!);
 }
 
 builder.Configuration.AddKeyPerFile(secretPath);
@@ -70,28 +75,22 @@ builder.Services
         {
             OnAuthenticationFailed = context =>
             {
-                var logger = context.HttpContext.RequestServices
-                    .GetRequiredService<ILogger<JwtBearerEvents>>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
                 JwtBearerLog.AuthenticationFailed(logger, context.Exception);
                 return Task.CompletedTask;
             },
-
             OnChallenge = context =>
             {
-                var logger = context.HttpContext.RequestServices
-                    .GetRequiredService<ILogger<JwtBearerEvents>>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
                 JwtBearerLog.ChallengeTriggered(logger, context.Error, context.ErrorDescription);
                 return Task.CompletedTask;
             },
-
             OnForbidden = context =>
             {
-                var logger = context.HttpContext.RequestServices
-                    .GetRequiredService<ILogger<JwtBearerEvents>>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
                 JwtBearerLog.Forbidden(logger, context.HttpContext.User.Identity?.Name);
                 return Task.CompletedTask;
             },
-
             OnMessageReceived = context =>
             {
                 var header = context.Request.Headers[HeaderNames.Authorization].ToString();
@@ -101,12 +100,10 @@ builder.Services
                     context.Token = auth.Parameter;
                 }
 
-                var logger = context.HttpContext.RequestServices
-                    .GetRequiredService<ILogger<JwtBearerEvents>>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
                 JwtBearerLog.MessageReceived(logger, context.Token);
                 return Task.CompletedTask;
             },
-
             OnTokenValidated = context =>
             {
                 var logger = context.HttpContext.RequestServices
@@ -129,25 +126,41 @@ builder.Services.AddAuthorization(authorizationOptions =>
         authorizationPolicyBuilder.RequireClaim("scope", "api.write");
     });
 });
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, ProblemDetailsAuthorizationHandler>();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddSingleton<CertificateHandler>();
     builder.Services.AddSingleton<IConfigureOptions<JwtBearerOptions>, JwtBearerOptionsConfigure>();
 }
 
-builder.Services.AddTransient(typeof(IHttpLoggingHandler<>), typeof(HttpLoggingHandler<>));
-builder.Services.AddOpenApi();
+builder.Services.AddTransient(typeof(IHttpPipelineLogger<>), typeof(HttpPipelineLogger<>));
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<DocumentInfoTransformer>();
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    options.AddDocumentTransformer<TagDescriptionTransformer>();
+    options.AddDocumentTransformer<ExtensionTransformer>();
+    options.AddOperationTransformer<ExampleTransformer>();
+    options.AddOperationTransformer<ProblemDetailsExampleTransformer>();
+});
+builder.Services.AddSingleton<ExampleFactory>();
+builder.Services.AddValidation();
+builder.Services.AddProblemDetails(config => { config.CustomizeProblemDetails = ConfigureProblemDetails; });
 
 var app = builder.Build();
+app.UseHttpsRedirection();
 app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<LoggingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseExceptionHandler(applicationBuilder => { applicationBuilder.Run(HandleExceptionAsync); });
-app.MapOpenApi();
 
-app.MapCommonRoot();
+app.MapCommonEndpoints();
 app.MapGame();
 app.MapDocument();
+
+app.Services.RegisterExamples();
+app.MapOpenApi();
+app.MapOpenApi("/openapi/{documentName}.yaml");
 
 app.Run();
