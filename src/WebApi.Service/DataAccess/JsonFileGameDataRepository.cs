@@ -10,14 +10,14 @@ internal sealed class JsonFileGameDataRepository : IGameDataRepository
 {
     private readonly string _dataFilePath;
 
-    public JsonFileGameDataRepository(IConfiguration configuration)
+    public JsonFileGameDataRepository(IConfiguration configuration, IHostEnvironment hostEnvironment)
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
         var path = Path.Combine(configuration["DATA_PATH"]!, "db.data");
         if (!Path.IsPathRooted(path))
         {
-            path = Path.Combine(AppContext.BaseDirectory, path);
+            path = Path.Combine(hostEnvironment.ContentRootPath, path);
         }
 
         _dataFilePath = path;

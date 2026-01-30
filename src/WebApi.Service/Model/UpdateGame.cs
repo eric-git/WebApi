@@ -1,20 +1,24 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.CodeAnalysis;
 using Entity = WebApi.Service.DataAccess.Entity;
 
 namespace WebApi.Service.Model;
 
-[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by service")]
 internal sealed class UpdateGame
 {
     [Description("The type of the game")]
+    [MaxLength(50)]
+    [Required]
     public required string Type { get; set; }
 
     [Description("The name of the game")]
+    [MaxLength(500)]
+    [Required]
     public required string Name { get; set; }
 
     [Description("The name of the game player")]
+    [MaxLength(255)]
+    [Required]
     public required string PlayerName { get; set; }
 
     [Description("The health of the game player")]

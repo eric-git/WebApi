@@ -1,17 +1,20 @@
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Entity = WebApi.Service.DataAccess.Entity;
 
 namespace WebApi.Service.Model;
 
-[SuppressMessage("Performance", "CA1812", Justification = "Instantiated by service")]
 internal sealed class CreateRelation
 {
     [Description("The type of the relation")]
+    [MaxLength(50)]
+    [Required]
     public required string Type { get; set; }
 
     [Description("The name of the relation")]
+    [MaxLength(500)]
+    [Required]
     public required string Name { get; set; }
 
     [Description("The attributes of the relation")]

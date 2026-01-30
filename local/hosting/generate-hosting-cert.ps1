@@ -71,7 +71,7 @@ begin {
             -keyout $keyPath `
             -days $ValidDays `
             -subj "/C=AU/ST=ACT/L=Canberra/O=Project ERIC/OU=Web API Suite/CN=$CommonName" `
-            -addext "subjectAltName=DNS:localhost,DNS:$AltName" `
+            -addext "subjectAltName=DNS:localhost,DNS:$AltName.webapisuite.projecteric.io" `
             -addext "extendedKeyUsage=serverAuth"
 
         # Copy into project secret folder

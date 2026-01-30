@@ -105,7 +105,7 @@ generate_cert() {
         -keyout "$key_path" \
         -days "$VALID_DAYS" \
         -subj "/C=AU/ST=ACT/L=Canberra/O=Project ERIC/OU=Web API Suite/CN=$common_name" \
-        -addext "subjectAltName=DNS:localhost,DNS:$alt_name" \
+        -addext "subjectAltName=DNS:localhost,DNS:$alt_name.webapisuite.projecteric.io" \
         -addext "extendedKeyUsage=serverAuth"
 
     mkdir -p "$secret_path"

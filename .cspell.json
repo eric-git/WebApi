@@ -19,9 +19,11 @@
     "**/bin/**",
     "**/obj/**",
     "**/node_modules/**",
-    "**/.git/**"
+    "**/.git/**",
+    "**/redoc.standalone.js"
   ],
   "words": [
+    "0HNIV5A3KTS4L",
     "addext",
     "appicon",
     "appsettings",
@@ -57,6 +59,7 @@
     "onconfiguring",
     "PGPASSWORD",
     "pkey",
+    "projecteric",
     "psql",
     "psqlrc",
     "pubout",
@@ -68,6 +71,7 @@
     "stty",
     "traceparent",
     "ttinclude",
-    "webapi"
+    "webapi",
+    "webapisuite"
   ]
 }
