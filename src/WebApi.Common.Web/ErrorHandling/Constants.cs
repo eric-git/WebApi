@@ -2,6 +2,6 @@
 
 public static class Constants
 {
-    public const string BaseErrorTypeUri = "https://webapi-suite.io/error";
+    public const string BaseErrorTypeUri = "https://webapisuite.projecteric.io/error";
     public const string TraceIdPropertyName = "traceId";
 }

@@ -1,0 +1,1654 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Sample Web API service",
+    "description": "Sample Web API service for processing game records.",
+    "termsOfService": "https://github.com/eric-git/WebApi?tab=security-ov-file",
+    "contact": {
+      "name": "Eric Wu",
+      "email": "wu_yuqing@hotmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/eric-git/WebApi?tab=MIT-1-ov-file"
+    },
+    "version": "v1",
+    "x-logo": {
+      "url": "/docs/logo.png",
+      "altText": "Project logo"
+    },
+    "summary": "Game Web API"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:5004/"
+    }
+  ],
+  "paths": {
+    "/games": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "List all games",
+        "description": "Returns all games stored in the system.",
+        "operationId": "ListGames",
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameListItem"
+                  }
+                },
+                "example": [
+                  {
+                    "Id": "df3d53f0-70c2-4a45-9550-d8e6b151d317",
+                    "Type": "game",
+                    "Name": "Mario Kart 8 Deluxe",
+                    "PlayerName": "Mario",
+                    "PlayerHealth": 100
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Create a new game",
+        "description": "Creates a new game and returns its identifier.",
+        "operationId": "CreateGame",
+        "requestBody": {
+          "description": "The data of the game to be created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGame"
+              },
+              "example": {
+                "Type": "game",
+                "Name": "Mario Kart 8 Deluxe",
+                "PlayerName": "Mario",
+                "PlayerHealth": 100
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/400",
+                  "title": "One or more validation errors occurred.",
+                  "status": 400,
+                  "instance": "games/",
+                  "errors": {
+                    "fieldName": [
+                      "The field is required."
+                    ]
+                  },
+                  "traceId": "0HNIV5A3KTS4L:00000002"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/games/{id}": {
+      "get": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Get a single game",
+        "description": "Returns a game by its unique identifier.",
+        "operationId": "GetGame",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the game",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Game"
+                },
+                "example": {
+                  "Id": "a4b9c0d4-79f1-4a2a-a41d-c97afec49832",
+                  "Type": "game",
+                  "Name": "Mario Kart 8 Deluxe",
+                  "PlayerName": "Mario",
+                  "PlayerHealth": 100,
+                  "Relations": [
+                    {
+                      "Id": "c27d6c04-95df-4146-88ef-e9ce701f4363",
+                      "Type": "Quest",
+                      "Name": "Win Rainbow Road",
+                      "Attributes": {
+                        "status": "In Progress",
+                        "reward": "Gold Trophy"
+                      }
+                    },
+                    {
+                      "Id": "de74b072-f3ed-4319-82ba-63eaf1b90563",
+                      "Type": "Quest",
+                      "Name": "Collect 50 Coins",
+                      "Attributes": {
+                        "status": "Completed",
+                        "reward": "Speed Boost"
+                      }
+                    },
+                    {
+                      "Id": "7dde21be-2702-436f-94d2-cdd6e87d4d9a",
+                      "Type": "Equipment",
+                      "Name": "Kart Setup",
+                      "Attributes": {
+                        "vehicle": "Standard Kart",
+                        "tires": "Monster Tires",
+                        "glider": "Super Glider"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Update a game",
+        "description": "Updates the specified game with new values.",
+        "operationId": "UpdateGame",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the game to be updated",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The data of the game to be updated",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGame"
+              },
+              "example": {
+                "Type": "game",
+                "Name": "Mario Kart 8 Deluxe",
+                "PlayerName": "Mario",
+                "PlayerHealth": 100
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/400",
+                  "title": "One or more validation errors occurred.",
+                  "status": 400,
+                  "instance": "games/{id:guid}",
+                  "errors": {
+                    "fieldName": [
+                      "The field is required."
+                    ]
+                  },
+                  "traceId": "0HNIV5A3KTS4L:00000002"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Games"
+        ],
+        "summary": "Delete a game",
+        "description": "Deletes the specified game.",
+        "operationId": "DeleteGame",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the game to be deleted",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/games/{gameId}/relations": {
+      "get": {
+        "tags": [
+          "Relations"
+        ],
+        "summary": "List relations for a game",
+        "description": "Returns all relations associated with the specified game.",
+        "operationId": "ListRelations",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "description": "The ID of the game",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RelationListItem"
+                  }
+                },
+                "example": [
+                  {
+                    "Id": "b4ec2c40-d010-4b2b-abc8-570acd9747b6",
+                    "Type": "Quest",
+                    "Name": "Win Rainbow Road"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Relations"
+        ],
+        "summary": "Create a relation",
+        "description": "Creates a new relation under the specified game.",
+        "operationId": "CreateRelation",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "description": "The ID of the game",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The data of the relation to be created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRelation"
+              },
+              "example": {
+                "Type": "Quest",
+                "Name": "Win Rainbow Road",
+                "Attributes": {
+                  "status": "In Progress",
+                  "reward": "Gold Trophy"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{gameId:guid}/relations/",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/400",
+                  "title": "One or more validation errors occurred.",
+                  "status": 400,
+                  "instance": "games/{gameId:guid}/relations/",
+                  "errors": {
+                    "fieldName": [
+                      "The field is required."
+                    ]
+                  },
+                  "traceId": "0HNIV5A3KTS4L:00000002"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/games/{gameId}/relations/{id}": {
+      "get": {
+        "tags": [
+          "Relations"
+        ],
+        "summary": "Get a relation",
+        "description": "Returns a relation belonging to a specific game.",
+        "operationId": "GetRelation",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "description": "The ID of the game",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the relation",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Relation"
+                },
+                "example": {
+                  "Id": "3392dc8a-9c87-418c-8b58-c294db5d6421",
+                  "Type": "Quest",
+                  "Name": "Win Rainbow Road",
+                  "Attributes": {
+                    "status": "In Progress",
+                    "reward": "Gold Trophy"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Relations"
+        ],
+        "summary": "Update a relation",
+        "description": "Updates the specified relation under the given game.",
+        "operationId": "UpdateRelation",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "description": "The ID of the game",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the relation to be updated",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The data of the relation to be updated",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRelation"
+              },
+              "example": {
+                "Type": "Quest",
+                "Name": "Win Rainbow Road",
+                "Attributes": {
+                  "status": "In Progress",
+                  "reward": "Gold Trophy"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/400",
+                  "title": "One or more validation errors occurred.",
+                  "status": 400,
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "errors": {
+                    "fieldName": [
+                      "The field is required."
+                    ]
+                  },
+                  "traceId": "0HNIV5A3KTS4L:00000002"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Relations"
+        ],
+        "summary": "Delete a relation",
+        "description": "Deletes the specified relation from the game.",
+        "operationId": "DeleteRelation",
+        "parameters": [
+          {
+            "name": "gameId",
+            "in": "path",
+            "description": "The ID of the game",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the relation to be deleted",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/500",
+                  "title": "Internal Server Error",
+                  "status": 500,
+                  "detail": "An unexpected error occurred.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000005"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/401",
+                  "title": "Unauthorized",
+                  "status": 401,
+                  "detail": "Authentication is required to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000001"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/403",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to access this resource.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000003"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                },
+                "example": {
+                  "type": "https://webapisuite.projecteric.io/error/404",
+                  "title": "Not Found",
+                  "status": 404,
+                  "detail": "The requested resource was not found.",
+                  "instance": "games/{gameId:guid}/relations/{id:guid}",
+                  "traceId": "0HNIV5A3KTS4L:00000004"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateGame": {
+        "required": [
+          "type",
+          "name",
+          "playerName"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The type of the game"
+          },
+          "name": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The name of the game"
+          },
+          "playerName": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "The name of the game player"
+          },
+          "playerHealth": {
+            "maximum": 100,
+            "minimum": 0,
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The health of the game player",
+            "format": "int32"
+          }
+        }
+      },
+      "CreateRelation": {
+        "required": [
+          "type",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The type of the relation"
+          },
+          "name": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The name of the relation"
+          },
+          "attributes": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The attributes of the relation"
+          }
+        }
+      },
+      "Game": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the game",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the game"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the game"
+          },
+          "playerName": {
+            "type": "string",
+            "description": "The name of the game player"
+          },
+          "playerHealth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The health of the game player",
+            "format": "int32"
+          },
+          "relations": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Relation"
+            },
+            "description": "The relations of the game"
+          }
+        }
+      },
+      "GameListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the game",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the game"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the game"
+          },
+          "playerName": {
+            "type": "string",
+            "description": "The name of the game player"
+          },
+          "playerHealth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The health of the game player",
+            "format": "int32"
+          }
+        }
+      },
+      "HttpValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "Relation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the relation",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the relation"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the relation"
+          },
+          "attributes": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The attributes of the relation"
+          }
+        }
+      },
+      "RelationListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the relation",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the relation"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the relation"
+          }
+        }
+      },
+      "UpdateGame": {
+        "required": [
+          "type",
+          "name",
+          "playerName"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The type of the game"
+          },
+          "name": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The name of the game"
+          },
+          "playerName": {
+            "maxLength": 255,
+            "type": "string",
+            "description": "The name of the game player"
+          },
+          "playerHealth": {
+            "maximum": 100,
+            "minimum": 0,
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The health of the game player",
+            "format": "int32"
+          }
+        }
+      },
+      "UpdateRelation": {
+        "required": [
+          "type",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "maxLength": 50,
+            "type": "string",
+            "description": "The type of the relation"
+          },
+          "name": {
+            "maxLength": 500,
+            "type": "string",
+            "description": "The name of the relation"
+          },
+          "attributes": {
+            "type": [
+              "null",
+              "object"
+            ],
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The attributes of the relation"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "description": "JWT Authorization header using the Bearer scheme.",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Games",
+      "description": "Endpoints for retrieving, creating, and managing games."
+    },
+    {
+      "name": "Relations",
+      "description": "Endpoints for retrieving, creating, and managing game relations."
+    }
+  ]
+}
