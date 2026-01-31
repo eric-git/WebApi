@@ -32,7 +32,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -45,7 +45,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -58,7 +58,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -73,7 +73,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/GameListItem'
               example:
-                - Id: 8cf365a8-1b98-44a6-b741-1cbf92484822
+                - Id: dde42348-1ef5-4595-b964-f6843f1333dd
                   Type: game
                   Name: Mario Kart 8 Deluxe
                   PlayerName: Mario
@@ -106,7 +106,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -119,7 +119,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -132,7 +132,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -152,7 +152,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HttpValidationProblemDetails'
               example:
-                type: https://webapi-suite.io/error/validation
+                type: https://webapisuite.projecteric.io/error/400
                 title: One or more validation errors occurred.
                 status: 400
                 instance: games/
@@ -185,7 +185,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -198,7 +198,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -211,7 +211,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -224,25 +224,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Game'
               example:
-                Id: 226d59ef-154f-4379-b688-4fbc239591be
+                Id: 91326b68-156d-4cee-a81c-037a2d7ff39c
                 Type: game
                 Name: Mario Kart 8 Deluxe
                 PlayerName: Mario
                 PlayerHealth: 100
                 Relations:
-                  - Id: ae2eb875-127d-4534-937f-de7d8e1333ec
+                  - Id: b1da5cd6-2ad5-49e4-9868-ab45c09f6032
                     Type: Quest
                     Name: Win Rainbow Road
                     Attributes:
                       status: In Progress
                       reward: Gold Trophy
-                  - Id: ccaba086-8406-4323-882b-4b86f129d9ea
+                  - Id: 81c7249a-89be-498c-8d37-d280c8866317
                     Type: Quest
                     Name: Collect 50 Coins
                     Attributes:
                       status: Completed
                       reward: Speed Boost
-                  - Id: 56f12e56-a339-4fda-ab91-55228b4b9bc1
+                  - Id: e2dd7986-cbed-4e39-b044-5c18b63bc14e
                     Type: Equipment
                     Name: Kart Setup
                     Attributes:
@@ -256,7 +256,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.
@@ -298,7 +298,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -311,7 +311,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -324,7 +324,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -339,7 +339,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.
@@ -352,7 +352,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HttpValidationProblemDetails'
               example:
-                type: https://webapi-suite.io/error/validation
+                type: https://webapisuite.projecteric.io/error/400
                 title: One or more validation errors occurred.
                 status: 400
                 instance: 'games/{id:guid}'
@@ -384,7 +384,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -397,7 +397,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -410,7 +410,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -425,7 +425,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.
@@ -456,7 +456,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -469,7 +469,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -482,7 +482,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -495,7 +495,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.
@@ -510,7 +510,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/RelationListItem'
               example:
-                - Id: 72bd9d61-d4d6-41d6-9817-c67df66d2f65
+                - Id: 28b71deb-d81f-4ecb-9ffb-52d15ce41c04
                   Type: Quest
                   Name: Win Rainbow Road
       security:
@@ -550,7 +550,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -563,7 +563,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -576,7 +576,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -589,7 +589,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.
@@ -609,7 +609,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HttpValidationProblemDetails'
               example:
-                type: https://webapi-suite.io/error/validation
+                type: https://webapisuite.projecteric.io/error/400
                 title: One or more validation errors occurred.
                 status: 400
                 instance: 'games/{gameId:guid}/relations/'
@@ -649,7 +649,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -662,7 +662,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -675,7 +675,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -688,7 +688,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.
@@ -701,7 +701,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Relation'
               example:
-                Id: 90ee9e87-897b-41d6-8abc-1d9a83af3b90
+                Id: 77c5e3cc-2a57-48fa-bd53-353522899f73
                 Type: Quest
                 Name: Win Rainbow Road
                 Attributes:
@@ -751,7 +751,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -764,7 +764,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -777,7 +777,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -790,7 +790,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.
@@ -805,7 +805,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HttpValidationProblemDetails'
               example:
-                type: https://webapi-suite.io/error/validation
+                type: https://webapisuite.projecteric.io/error/400
                 title: One or more validation errors occurred.
                 status: 400
                 instance: 'games/{gameId:guid}/relations/{id:guid}'
@@ -844,7 +844,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/500
+                type: https://webapisuite.projecteric.io/error/500
                 title: Internal Server Error
                 status: 500
                 detail: An unexpected error occurred.
@@ -857,7 +857,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/401
+                type: https://webapisuite.projecteric.io/error/401
                 title: Unauthorized
                 status: 401
                 detail: Authentication is required to access this resource.
@@ -870,7 +870,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/403
+                type: https://webapisuite.projecteric.io/error/403
                 title: Forbidden
                 status: 403
                 detail: You do not have permission to access this resource.
@@ -883,7 +883,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
               example:
-                type: https://webapi-suite.io/error/404
+                type: https://webapisuite.projecteric.io/error/404
                 title: Not Found
                 status: 404
                 detail: The requested resource was not found.

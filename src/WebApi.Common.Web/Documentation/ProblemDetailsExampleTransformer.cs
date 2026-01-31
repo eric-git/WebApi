@@ -30,7 +30,7 @@ public sealed class ProblemDetailsExampleTransformer : IOpenApiOperationTransfor
         {
             "400" => new JsonObject
             {
-                ["type"] = JsonValue.Create($"{BaseErrorTypeUri}/validation"),
+                ["type"] = JsonValue.Create($"{BaseErrorTypeUri}/{StatusCodes.Status400BadRequest}"),
                 ["title"] = JsonValue.Create("One or more validation errors occurred."),
                 ["status"] = JsonValue.Create(StatusCodes.Status400BadRequest),
                 ["instance"] = JsonValue.Create(path),
