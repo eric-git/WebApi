@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
 
+# ------------------------------------------------------------
 # Build: Solution
+# ------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /proj
-
-# Copy project files + MSBuild props/targets
 RUN --mount=type=bind,source=.,target=/context \
     find /context -name "*.csproj" -print0 | \
     xargs -0 -I {} sh -c " \
@@ -17,15 +17,13 @@ RUN --mount=type=bind,source=.,target=/context \
     if [ -f /context/Directory.Build.props ]; then cp /context/Directory.Build.props .; fi && \
     if [ -f /context/Directory.Build.targets ]; then cp /context/Directory.Build.targets .; fi && \
     if [ -f /context/Directory.Packages.props ]; then cp /context/Directory.Packages.props .; fi
-
-# Restore
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet restore WebApi.sln
-
-# Copy full source
 COPY --link . .
 
+# ------------------------------------------------------------
 # Publish: Issuer
+# ------------------------------------------------------------
 FROM build AS issuer-publish
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet publish \
@@ -34,7 +32,9 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
     -o /publish/issuer \
     -p:IsContainerBuild=true
 
+# ------------------------------------------------------------
 # Publish: API
+# ------------------------------------------------------------
 FROM build AS api-publish
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet publish \
@@ -43,7 +43,9 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
     -o /publish/api \
     -p:IsContainerBuild=true
 
+# ------------------------------------------------------------
 # Publish: Client
+# ------------------------------------------------------------
 FROM build AS client-publish
 RUN --mount=type=cache,target=/root/.nuget/packages \
     dotnet publish \
@@ -52,21 +54,27 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
     -o /publish/client \
     -p:IsContainerBuild=true
 
+# ------------------------------------------------------------
 # Runtime: Issuer
+# ------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine-composite AS issuer-runtime
 USER $APP_UID
 WORKDIR /app
 COPY --link --from=issuer-publish /publish/issuer .
 ENTRYPOINT ["dotnet", "WebApi.Issuer.dll"]
 
+# ------------------------------------------------------------
 # Runtime: API
+# ------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine-composite AS api-runtime
 USER $APP_UID
 WORKDIR /app
 COPY --link --from=api-publish /publish/api .
 ENTRYPOINT ["dotnet", "WebApi.Service.dll"]
 
+# ------------------------------------------------------------
 # Runtime: Client
+# ------------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/runtime:10.0-alpine AS client-runtime
 USER $APP_UID
 WORKDIR /app

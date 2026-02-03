@@ -1,64 +1,5 @@
 #!/usr/bin/env pwsh
 
-<#
-.SYNOPSIS
-  PowerShell equivalent of the Makefile for managing JSON and Postgres
-  Docker Compose stacks. Provides commands for building, running, loading,
-  resetting, inspecting, and destroying all related services.
-
-.DESCRIPTION
-  Available commands:
-
-  JSON MODE
-    json-build               Build all JSON services
-    json-build-api           Build API (json)
-    json-build-issuer        Build Issuer (json)
-    json-build-client        Build Client (json)
-    json-up                  Start JSON stack
-    json-down                Stop JSON stack
-    json-restart             Restart JSON stack
-    json-ps                  Show JSON container status
-    json-load                Run JSON loaders
-    json-init                Full JSON init (build + load + up)
-    json-init-up             Load then start JSON stack
-    json-reset               Reset JSON mode (destroy volumes + re-init)
-    json-logs                Tail JSON logs
-    json-sh                  Shell into JSON service (requires -svc)
-
-  POSTGRES MODE
-    postgres-build           Build all Postgres services
-    postgres-build-api       Build API (postgres)
-    postgres-build-issuer    Build Issuer (postgres)
-    postgres-build-client    Build Client (postgres)
-    postgres-up              Start Postgres stack
-    postgres-down            Stop Postgres stack
-    postgres-restart         Restart Postgres stack
-    postgres-ps              Show Postgres container status
-    postgres-load            Run SQL loaders
-    postgres-init            Full Postgres init (DBs + loaders + services)
-    postgres-reset           Reset Postgres mode
-    postgres-logs            Tail Postgres logs
-    postgres-sh              Shell into Postgres service (requires -svc)
-
-  UTILITIES
-    secrets-check            Validate required secrets exist
-    status                   Show system status (containers, volumes, networks)
-    nuke                     Destroy all containers, volumes, images, networks
-    help                     Show this help message
-
-.PARAMETER Command
-  The command to run (e.g., json-build, postgres-up, nuke, status).
-
-.PARAMETER svc
-  Optional service name for shell commands (json-sh, postgres-sh).
-
-.EXAMPLE
-  ./docker-build.ps1 json-build
-
-.EXAMPLE
-  ./docker-build.ps1 json-sh -svc api
-#>
-
 param(
     [Parameter(Mandatory = $true)]
     [string]$Command,
@@ -69,32 +10,43 @@ param(
 # =========================================
 # Colors
 # =========================================
-$GREEN = "`e[32m"
-$YELLOW = "`e[33m"
-$BLUE = "`e[34m"
-$RED = "`e[31m"
-$RESET = "`e[0m"
+$Color = @{
+    Green  = "`e[32m"
+    Yellow = "`e[33m"
+    Blue   = "`e[34m"
+    Red    = "`e[31m"
+    Reset  = "`e[0m"
+}
+
+function Write-Color($msg, $color = "Reset") {
+    Write-Host "$($Color[$color])$msg$($Color.Reset)"
+}
 
 # =========================================
 # Helpers
 # =========================================
 function Section($msg) {
-    Write-Host "$BLUE==> $msg$RESET"
+    Write-Color "==> $msg" Blue
     Write-Host ""
 }
 
-function Timed($scriptBlock) {
+function Timed([scriptblock]$Block) {
     $start = Get-Date
-    & $scriptBlock
-    $end = Get-Date
-    $elapsed = [int]($end - $start).TotalSeconds
-    Write-Host "$GREEN Completed in ${elapsed}s $RESET"
+    try {
+        & $Block
+    }
+    catch {
+        Write-Color "Command failed: $_" Red
+        exit 1
+    }
+    $elapsed = [int]((Get-Date) - $start).TotalSeconds
+    Write-Color "Completed in ${elapsed}s" Green
     Write-Host ""
 }
 
 function Assert-Secret($path) {
     if (-not (Test-Path $path)) {
-        Write-Host "$RED Missing secret: $path $RESET"
+        Write-Color "Missing secret: $path" Red
         exit 1
     }
 }
@@ -102,257 +54,243 @@ function Assert-Secret($path) {
 # =========================================
 # Compose wrapper
 # =========================================
-$COMPOSE = "docker compose"
+function Compose {
+    param(
+        [array]$Files,
+        [array]$Args
+    )
+    docker compose @Files @Args
+}
 
 # =========================================
-# Base compose file
+# Compose stacks
 # =========================================
 $BASE_FILE = "./docker/docker-compose.yml"
 
+$ComposeJson = @(
+    "-f", $BASE_FILE,
+    "-f", "docker/api/docker-compose.yml",
+    "-f", "docker/api/docker-compose.json.yml",
+    "-f", "docker/api/docker-compose.json.loader.yml",
+    "-f", "docker/issuer/docker-compose.yml",
+    "-f", "docker/issuer/docker-compose.json.yml",
+    "-f", "docker/issuer/docker-compose.json.loader.yml",
+    "-f", "docker/client/docker-compose.yml"
+)
+
+$ComposePg = @(
+    "-f", $BASE_FILE,
+    "-f", "docker/api/docker-compose.yml",
+    "-f", "docker/api/docker-compose.postgres.yml",
+    "-f", "docker/api/docker-compose.postgres.loader.yml",
+    "-f", "docker/issuer/docker-compose.yml",
+    "-f", "docker/issuer/docker-compose.postgres.yml",
+    "-f", "docker/issuer/docker-compose.postgres.loader.yml",
+    "-f", "docker/client/docker-compose.yml"
+)
+
+$ComposeJumpbox = @(
+    "-f", $BASE_FILE,
+    "-f", "docker/jumpbox/docker-compose.yml"
+)
+
 # =========================================
-# Consolidated compose stacks
+# JSON MODE
 # =========================================
-$COMPOSE_JSON = @(
-    "-f $BASE_FILE",
-    "-f docker/api/docker-compose.yml",
-    "-f docker/api/docker-compose.json.yml",
-    "-f docker/api/docker-compose.json.loader.yml",
-    "-f docker/issuer/docker-compose.yml",
-    "-f docker/issuer/docker-compose.json.yml",
-    "-f docker/issuer/docker-compose.json.loader.yml",
-    "-f docker/client/docker-compose.yml"
-) -join " "
+function json-build { Section "Building JSON stack..."; Timed { Compose $ComposeJson @("build") } }
+function json-build-api { Section "Building API (json)..."; Timed { Compose $ComposeJson @("build", "api") } }
+function json-build-issuer { Section "Building Issuer (json)..."; Timed { Compose $ComposeJson @("build", "issuer") } }
+function json-build-client { Section "Building Client (json)..."; Timed { Compose $ComposeJson @("build", "client") } }
 
-$COMPOSE_PG = @(
-    "-f $BASE_FILE",
-    "-f docker/api/docker-compose.yml",
-    "-f docker/api/docker-compose.postgres.yml",
-    "-f docker/api/docker-compose.postgres.loader.yml",
-    "-f docker/issuer/docker-compose.yml",
-    "-f docker/issuer/docker-compose.postgres.yml",
-    "-f docker/issuer/docker-compose.postgres.loader.yml",
-    "-f docker/client/docker-compose.yml"
-) -join " "
+function json-up { Section "Starting JSON stack..."; Timed { Compose $ComposeJson @("up", "-d", "issuer", "api", "client") } }
+function json-down { Section "Stopping JSON stack..."; Compose $ComposeJson @("down"); Write-Host "" }
+function json-restart { json-down; json-up }
+
+function json-ps { Compose $ComposeJson @("ps"); Write-Host "" }
+
+function json-load {
+    Section "Running JSON loaders..."
+    Timed { Compose $ComposeJson @("up", "--abort-on-container-exit", "issuer-json-loader", "api-json-loader") }
+    Compose $ComposeJson @("rm", "-f", "issuer-json-loader", "api-json-loader")
+    Write-Host ""
+}
+
+function json-init { json-build; json-load; json-up }
+function json-init-up { json-load; json-up }
+
+function json-reset {
+    Section "Resetting JSON mode..."
+    Compose $ComposeJson @("down", "-v")
+    json-init
+}
+
+function json-logs { Section "Aggregated logs (json)..."; Compose $ComposeJson @("logs", "-f") }
+
+function json-sh {
+    if (-not $svc) { Write-Color "Usage: ./docker-build.ps1 json-sh -svc api" Red; exit 1 }
+    Compose $ComposeJson @("exec", $svc, "sh")
+}
 
 # =========================================
-# Command Implementations
+# POSTGRES MODE
 # =========================================
-switch ($Command) {
+function postgres-build { Section "Building Postgres stack..."; Timed { Compose $ComposePg @("build") } }
+function postgres-build-api { Section "Building API (postgres)..."; Timed { Compose $ComposePg @("build", "api") } }
+function postgres-build-issuer { Section "Building Issuer (postgres)..."; Timed { Compose $ComposePg @("build", "issuer") } }
+function postgres-build-client { Section "Building Client (postgres)..."; Timed { Compose $ComposePg @("build", "client") } }
 
-    # ---------------- JSON MODE ----------------
-    "json-build" {
-        Section "Building JSON stack..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build" }
-    }
+function postgres-up { Section "Starting Postgres stack..."; Timed { Compose $ComposePg @("up", "-d", "postgres-issuer", "postgres-api", "issuer", "api", "client") } }
+function postgres-down { Section "Stopping Postgres stack..."; Compose $ComposePg @("down"); Write-Host "" }
+function postgres-restart { postgres-down; postgres-up }
 
-    "json-build-api" {
-        Section "Building API (json)..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build api" }
-    }
+function postgres-ps { Compose $ComposePg @("ps"); Write-Host "" }
 
-    "json-build-issuer" {
-        Section "Building Issuer (json)..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build issuer" }
-    }
+function postgres-load {
+    Section "Running SQL loaders..."
+    Timed { Compose $ComposePg @("up", "--abort-on-container-exit", "issuer-postgres-loader", "api-postgres-loader") }
+    Compose $ComposePg @("rm", "-f", "issuer-postgres-loader", "api-postgres-loader")
+    Write-Host ""
+}
 
-    "json-build-client" {
-        Section "Building Client (json)..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON build client" }
-    }
+function postgres-init {
+    Section "Postgres full initialization..."
+    Compose $ComposePg @("up", "-d", "postgres-issuer", "postgres-api")
+    postgres-load
+    Compose $ComposePg @("up", "-d", "issuer", "api", "client")
+    Write-Color "Postgres mode fully initialized" Green
+}
 
-    "json-up" {
-        Section "Starting JSON stack..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON up -d issuer api client" }
-    }
+function postgres-reset {
+    Section "Resetting Postgres mode..."
+    Compose $ComposePg @("down", "-v")
+    postgres-init
+}
 
-    "json-down" {
-        Section "Stopping JSON stack..."
-        Invoke-Expression "$COMPOSE $COMPOSE_JSON down"
-        Write-Host ""
-    }
+function postgres-logs { Section "Aggregated logs (postgres)..."; Compose $ComposePg @("logs", "-f") }
 
-    "json-restart" {
-        & $PSCommandPath json-down
-        & $PSCommandPath json-up
-    }
+function postgres-sh {
+    if (-not $svc) { Write-Color "Usage: ./docker-build.ps1 postgres-sh -svc postgres-api" Red; exit 1 }
+    Compose $ComposePg @("exec", $svc, "sh")
+}
 
-    "json-ps" {
-        Invoke-Expression "$COMPOSE $COMPOSE_JSON ps"
-        Write-Host ""
-    }
+# =========================================
+# JUMPBOX
+# =========================================
+function jumpbox-up { Section "Starting Jumpbox..."; Timed { Compose $ComposeJumpbox @("up", "-d", "jumpbox") } }
+function jumpbox-down { Section "Stopping Jumpbox..."; Compose $ComposeJumpbox @("down"); Write-Host "" }
+function jumpbox-restart { jumpbox-down; jumpbox-up }
+function jumpbox-ps { Compose $ComposeJumpbox @("ps"); Write-Host "" }
+function jumpbox-logs { Section "Jumpbox logs..."; Compose $ComposeJumpbox @("logs", "-f", "jumpbox") }
+function jumpbox-sh { Section "Opening shell in Jumpbox..."; Compose $ComposeJumpbox @("exec", "jumpbox", "sh") }
 
-    "json-load" {
-        Section "Running JSON loaders..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_JSON up --abort-on-container-exit issuer-json-loader api-json-loader" }
-        Invoke-Expression "$COMPOSE $COMPOSE_JSON rm -f issuer-json-loader api-json-loader"
-        Write-Host ""
-    }
+# =========================================
+# UTILITIES
+# =========================================
+function secrets-check {
+    Section "Validating secrets..."
+    Assert-Secret "./secrets/db-manager-password.txt"
+    Assert-Secret "./secrets/svc-issuer-password.txt"
+    Assert-Secret "./secrets/svc-api-password.txt"
+    Write-Color "All required secrets are present" Green
+    Write-Host ""
+}
 
-    "json-init" {
-        & $PSCommandPath json-build
-        & $PSCommandPath json-load
-        & $PSCommandPath json-up
-    }
+function status {
+    Section "System status..."
+    docker ps
+    Write-Host ""
+    docker volume ls
+    Write-Host ""
+    docker network ls
+    Write-Host ""
+    Write-Color "Status summary complete" Green
+    Write-Host ""
+}
 
-    "json-init-up" {
-        & $PSCommandPath json-load
-        & $PSCommandPath json-up
-    }
+function nuke {
+    Section "NUKING environment..."
 
-    "json-reset" {
-        Section "Resetting JSON mode..."
-        Invoke-Expression "$COMPOSE $COMPOSE_JSON down -v"
-        & $PSCommandPath json-init
-    }
-
-    "json-logs" {
-        Section "Aggregated logs (json)..."
-        Invoke-Expression "$COMPOSE $COMPOSE_JSON logs -f"
-    }
-
-    "json-sh" {
-        if (-not $svc) {
-            Write-Host "$RED Usage: ./docker-build.ps1 json-sh -svc api $RESET"
-            exit 1
+    Write-Color "Removing containers..." Yellow
+    docker ps -aq --filter "label=project=webapi-suite" | ForEach-Object { docker rm -f $_ }
+    docker ps -a --format "{{.Names}}" | Select-String "^webapi-suite" | ForEach-Object { docker rm -f $_ }
+    docker ps -aq | ForEach-Object {
+        if (docker inspect $_ | Select-String '"webapi-suite-"' -Quiet) {
+            docker rm -f $_
         }
-        Invoke-Expression "$COMPOSE $COMPOSE_JSON exec $svc sh"
     }
 
-    # ---------------- POSTGRES MODE ----------------
-    "postgres-build" {
-        Section "Building Postgres stack..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build" }
-    }
+    Write-Color "Removing volumes..." Yellow
+    docker volume ls -q | Select-String "^webapi-suite_" | ForEach-Object { docker volume rm -f $_ }
 
-    "postgres-build-api" {
-        Section "Building API (postgres)..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build api" }
-    }
+    Write-Color "Removing images..." Yellow
+    docker images "webapi-suite/*" -q | ForEach-Object { docker rmi -f $_ }
 
-    "postgres-build-issuer" {
-        Section "Building Issuer (postgres)..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build issuer" }
-    }
+    Write-Color "Pruning dangling images, volumes, build cache..." Yellow
+    docker image prune -f
+    docker volume prune -f
+    docker builder prune -f
 
-    "postgres-build-client" {
-        Section "Building Client (postgres)..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG build client" }
-    }
+    Write-Color "Pruning unused networks..." Yellow
+    docker network prune -f
 
-    "postgres-up" {
-        Section "Starting Postgres stack..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG up -d postgres-issuer postgres-api issuer api client" }
-    }
+    Write-Color "Environment fully destroyed" Green
+    Write-Host ""
+}
 
-    "postgres-down" {
-        Section "Stopping Postgres stack..."
-        Invoke-Expression "$COMPOSE $COMPOSE_PG down"
-        Write-Host ""
-    }
+function help {
+    Write-Color "Available commands:" Yellow
+    Write-Host ""
+    Write-Color "JSON MODE" Blue
+    "json-build", "json-build-api", "json-build-issuer", "json-build-client",
+    "json-up", "json-down", "json-restart", "json-ps", "json-load",
+    "json-init", "json-init-up", "json-reset", "json-logs", "json-sh" |
+    ForEach-Object { "  $_" }
+    Write-Host ""
+    Write-Color "POSTGRES MODE" Blue
+    "postgres-build", "postgres-build-api", "postgres-build-issuer", "postgres-build-client",
+    "postgres-up", "postgres-down", "postgres-restart", "postgres-ps",
+    "postgres-load", "postgres-init", "postgres-reset", "postgres-logs", "postgres-sh" |
+    ForEach-Object { "  $_" }
+    Write-Host ""
+    Write-Color "JUMPBOX" Blue
+    "jumpbox-up", "jumpbox-down", "jumpbox-restart", "jumpbox-ps", "jumpbox-logs", "jumpbox-sh" |
+    ForEach-Object { "  $_" }
+    Write-Host ""
+    Write-Color "UTILITIES" Blue
+    "secrets-check", "status", "nuke", "help" |
+    ForEach-Object { "  $_" }
+    Write-Host ""
+}
 
-    "postgres-restart" {
-        & $PSCommandPath postgres-down
-        & $PSCommandPath postgres-up
-    }
+# =========================================
+# DISPATCHER
+# =========================================
+$Commands = @{
+    # JSON
+    "json-build" = "json-build"; "json-build-api" = "json-build-api"; "json-build-issuer" = "json-build-issuer"; "json-build-client" = "json-build-client";
+    "json-up" = "json-up"; "json-down" = "json-down"; "json-restart" = "json-restart"; "json-ps" = "json-ps";
+    "json-load" = "json-load"; "json-init" = "json-init"; "json-init-up" = "json-init-up"; "json-reset" = "json-reset";
+    "json-logs" = "json-logs"; "json-sh" = "json-sh";
 
-    "postgres-ps" {
-        Invoke-Expression "$COMPOSE $COMPOSE_PG ps"
-        Write-Host ""
-    }
+    # POSTGRES
+    "postgres-build" = "postgres-build"; "postgres-build-api" = "postgres-build-api"; "postgres-build-issuer" = "postgres-build-issuer"; "postgres-build-client" = "postgres-build-client";
+    "postgres-up" = "postgres-up"; "postgres-down" = "postgres-down"; "postgres-restart" = "postgres-restart"; "postgres-ps" = "postgres-ps";
+    "postgres-load" = "postgres-load"; "postgres-init" = "postgres-init"; "postgres-reset" = "postgres-reset";
+    "postgres-logs" = "postgres-logs"; "postgres-sh" = "postgres-sh";
 
-    "postgres-load" {
-        Section "Running SQL loaders..."
-        Timed { Invoke-Expression "$COMPOSE $COMPOSE_PG up --abort-on-container-exit issuer-postgres-loader api-postgres-loader" }
-        Invoke-Expression "$COMPOSE $COMPOSE_PG rm -f issuer-postgres-loader api-postgres-loader"
-        Write-Host ""
-    }
+    # JUMPBOX
+    "jumpbox-up" = "jumpbox-up"; "jumpbox-down" = "jumpbox-down"; "jumpbox-restart" = "jumpbox-restart";
+    "jumpbox-ps" = "jumpbox-ps"; "jumpbox-logs" = "jumpbox-logs"; "jumpbox-sh" = "jumpbox-sh";
 
-    "postgres-init" {
-        Section "Postgres full initialization..."
-        Invoke-Expression "$COMPOSE $COMPOSE_PG up -d postgres-issuer postgres-api"
-        & $PSCommandPath postgres-load
-        Invoke-Expression "$COMPOSE $COMPOSE_PG up -d issuer api client"
-        Write-Host "$GREEN Postgres mode fully initialized $RESET"
-    }
+    # UTILITIES
+    "secrets-check" = "secrets-check"; "status" = "status"; "nuke" = "nuke"; "help" = "help"
+}
 
-    "postgres-reset" {
-        Section "Resetting Postgres mode..."
-        Invoke-Expression "$COMPOSE $COMPOSE_PG down -v"
-        & $PSCommandPath postgres-init
-    }
-
-    "postgres-logs" {
-        Section "Aggregated logs (postgres)..."
-        Invoke-Expression "$COMPOSE $COMPOSE_PG logs -f"
-    }
-
-    "postgres-sh" {
-        if (-not $svc) {
-            Write-Host "$RED Usage: ./docker-build.ps1 postgres-sh -svc postgres-api $RESET"
-            exit 1
-        }
-        Invoke-Expression "$COMPOSE $COMPOSE_PG exec $svc sh"
-    }
-
-    # ---------------- UTILITIES ----------------
-    "secrets-check" {
-        Section "Validating secrets..."
-        Assert-Secret "./secrets/db-manager-password.txt"
-        Assert-Secret "./secrets/svc-issuer-password.txt"
-        Assert-Secret "./secrets/svc-api-password.txt"
-        Write-Host "$GREEN All required secrets are present $RESET"
-        Write-Host ""
-    }
-
-    "status" {
-        Section "System status..."
-        docker ps
-        Write-Host ""
-        docker volume ls
-        Write-Host ""
-        docker network ls
-        Write-Host ""
-        Write-Host "$GREEN Status summary complete $RESET"
-        Write-Host ""
-    }
-
-    "nuke" {
-        Section "NUKING environment..."
-
-        Write-Host "$YELLOW Removing containers... $RESET"
-        docker ps -aq --filter "label=project=webapi-suite" | ForEach-Object { docker rm -f $_ }
-        docker ps -a --format "{{.Names}}" | Select-String "^webapi-suite" | ForEach-Object { docker rm -f $_ }
-        docker ps -aq | ForEach-Object {
-            if (docker inspect $_ | Select-String '"webapi-suite-"' -Quiet) {
-                docker rm -f $_
-            }
-        }
-
-        Write-Host "$YELLOW Removing volumes... $RESET"
-        docker volume ls -q | Select-String "^webapi-suite_" | ForEach-Object { docker volume rm -f $_ }
-
-        Write-Host "$YELLOW Removing images... $RESET"
-        docker images "webapi-suite/*" -q | ForEach-Object { docker rmi -f $_ }
-
-        Write-Host "$YELLOW Pruning dangling images, volumes, build cache... $RESET"
-        docker image prune -f
-        docker volume prune -f
-        docker builder prune -f
-
-        Write-Host "$YELLOW Pruning unused networks... $RESET"
-        docker network prune -f
-
-        Write-Host "$GREEN Environment fully destroyed $RESET"
-        Write-Host ""
-    }
-
-    "help" {
-        Get-Help $PSCommandPath -Full
-    }
-
-    default {
-        Write-Host "$RED Unknown command: $Command $RESET"
-        Write-Host "Run: ./docker-build.ps1 help"
-        exit 1
-    }
+if ($Commands.ContainsKey($Command)) {
+    & $Commands[$Command]
+}
+else {
+    Write-Color "Unknown command: $Command" Red
+    Write-Color "Run: ./docker-build.ps1 help" Yellow
+    exit 1
 }

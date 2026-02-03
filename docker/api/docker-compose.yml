@@ -15,13 +15,14 @@ services:
       dockerfile: ../docker/Dockerfile
       target: api-runtime
     image: webapi-suite/api:latest
+    hostname: api.webapisuite.projecteric.io
     pull_policy: never
     ports:
       - "5002:443"
     environment:
       SSL_CERT_FILE: /run/secrets/ca-bundle
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: https://+:443
+      ASPNETCORE_URLS: http://+:80;https://+:443
       ASPNETCORE_Kestrel__Certificates__Default__Path: /run/secrets/hosting-cert.crt
       ASPNETCORE_Kestrel__Certificates__Default__KeyPath: /run/secrets/hosting-key.pem
       ISSUER_BASE_URL: https://issuer.webapisuite.projecteric.io/connect
@@ -41,11 +42,7 @@ services:
         target: hosting-key.pem
       - ca-bundle
     networks:
-      public:
-        ipv4_address: 172.20.0.11
-    extra_hosts:
-      - "issuer.webapisuite.projecteric.io:172.20.0.10"
-      - "api.webapisuite.projecteric.io:172.20.0.11"
+      - public
     restart: always
 
 secrets:

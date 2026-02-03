@@ -12,6 +12,7 @@ services:
       lifecycle: persistent
       mode: postgres
     image: postgres:18.1-alpine
+    hostname: apidb.webapisuite.projecteric.io
     environment:
       POSTGRES_USER: db_manager
       POSTGRES_PASSWORD_FILE: /run/secrets/db-manager-password
@@ -39,7 +40,7 @@ services:
       - postgres-api
     environment:
       Persistence__Mode: postgres
-      ConnectionStrings__Default: Host=postgres-api;Database=api_db;Username=svc_api
+      ConnectionStrings__Default: Host=apidb.webapisuite.projecteric.io;Database=api_db;Username=svc_api
     secrets:
       - source: svc-api-password
         target: connection-default.password

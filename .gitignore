@@ -487,3 +487,4 @@ $RECYCLE.BIN/
 *.pem
 *.password
 *.data
+local/data/json/issuer-db.json

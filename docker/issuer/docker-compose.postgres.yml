@@ -12,6 +12,7 @@ services:
       lifecycle: persistent
       mode: postgres
     image: postgres:18.1-alpine
+    hostname: issuerdb.webapisuite.projecteric.io
     environment:
       POSTGRES_USER: db_manager
       POSTGRES_PASSWORD_FILE: /run/secrets/db-manager-password
@@ -40,7 +41,7 @@ services:
     environment:
       Persistence__Mode: postgres
       SECRET_PATH: /run/secrets/
-      ConnectionStrings__Default: Host=postgres-issuer;Database=issuer_db;Username=svc_issuer
+      ConnectionStrings__Default: Host=issuerdb.webapisuite.projecteric.io;Database=issuer_db;Username=svc_issuer
     secrets:
       - source: svc-issuer-password
         target: connection-default.password

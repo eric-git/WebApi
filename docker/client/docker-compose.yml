@@ -15,6 +15,7 @@ services:
       dockerfile: ../docker/Dockerfile
       target: client-runtime
     image: webapi-suite/client:latest
+    hostname: client.webapisuite.projecteric.io
     pull_policy: never
     environment:
       SSL_CERT_FILE: /run/secrets/ca-bundle
@@ -39,11 +40,7 @@ services:
         target: private-signing-key.pem
       - ca-bundle
     networks:
-      public:
-        ipv4_address: 172.20.0.12
-    extra_hosts:
-      - "issuer.webapisuite.projecteric.io:172.20.0.10"
-      - "api.webapisuite.projecteric.io:172.20.0.11"
+      - public
     restart: always
 
 secrets:
