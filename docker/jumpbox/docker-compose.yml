@@ -1,0 +1,52 @@
+name: webapi-suite
+
+services:
+  jumpbox:
+    labels:
+      app: jumpbox
+      tier: tools
+      role: internal-desktop
+      purpose: secure-admin-ui
+      managed-by: compose
+      lifecycle: persistent
+      security: internal-only
+      owner: projecteric.io
+      component: webtop-xfce
+      environment: production
+      compliance: internal-network-only
+      visibility: private
+      backup: required
+    build:
+      context: ..
+      dockerfile: docker/jumpbox/Dockerfile
+      target: jumpbox
+    image: webapi-suite/jumpbox:latest
+    pull_policy: never
+    hostname: jumpbox.webapisuite.projecteric.io
+    networks:
+      - public
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Australia/Canberra
+    volumes:
+      - jumpbox-config:/config
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - "3000:3000"
+    shm_size: "1gb"
+    restart: unless-stopped
+
+volumes:
+  jumpbox-config:
+    labels:
+      app: jumpbox
+      role: config-storage
+      purpose: persistent-user-data
+      managed-by: compose
+      lifecycle: persistent
+      security: internal-only
+      backup: required
+      owner: projecteric.io
+      component: webtop-xfce

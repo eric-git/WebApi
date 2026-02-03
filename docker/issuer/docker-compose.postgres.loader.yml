@@ -11,7 +11,7 @@ services:
       sh -c "
         set -e
         apk update && apk add --no-cache postgresql-client
-        /provisioning/provision.sh ISSUER --host=postgres-issuer --bootstrap-user=db_manager --bootstrap-password-file=/provisioning/db-manager-password.txt
+        /provisioning/provision.sh ISSUER --host=issuerdb.webapisuite.projecteric.io --bootstrap-user=db_manager --bootstrap-password-file=/provisioning/db-manager-password.txt
       "
     volumes:
       - ../local/data/postgres:/provisioning:ro

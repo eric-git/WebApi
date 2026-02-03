@@ -18,7 +18,7 @@ endef
 define timed
 	@set -eu; \
 	start=$$(date +%s); \
-	{ $(1); }; \
+	{ $(1); } || { echo "$(RED)Command failed$(RESET)"; exit 1; }; \
 	end=$$(date +%s); \
 	echo "$(GREEN)Completed in $$((end-start))s$(RESET)"; \
 	echo ""
@@ -66,6 +66,11 @@ COMPOSE_PG = \
   -f docker/issuer/docker-compose.postgres.yml \
   -f docker/issuer/docker-compose.postgres.loader.yml \
   -f docker/client/docker-compose.yml
+
+# JUMPBOX STACK
+COMPOSE_JUMPBOX = \
+  -f $(BASE_FILE) \
+  -f docker/jumpbox/docker-compose.yml
 
 .DEFAULT_GOAL := help
 
@@ -202,6 +207,35 @@ postgres-sh: ## Open a shell in a Postgres service (svc=name)
 	$(COMPOSE) $(COMPOSE_PG) exec $(svc) sh
 
 # =========================================
+# JUMPBOX (XFCE Desktop)
+# =========================================
+
+jumpbox-up: ## Start the Jumpbox desktop
+	$(call section,Starting Jumpbox...)
+	$(call timed,$(COMPOSE) $(COMPOSE_JUMPBOX) up -d jumpbox)
+
+jumpbox-down: ## Stop the Jumpbox desktop
+	$(call section,Stopping Jumpbox...)
+	$(COMPOSE) $(COMPOSE_JUMPBOX) down
+	@echo ""
+
+jumpbox-restart: ## Restart the Jumpbox desktop
+	$(MAKE) jumpbox-down
+	$(MAKE) jumpbox-up
+
+jumpbox-ps: ## Show Jumpbox container status
+	$(COMPOSE) -f $(JUMPBOX_FILE) ps
+	@echo ""
+
+jumpbox-logs: ## Tail logs for Jumpbox
+	$(call section,Jumpbox logs...)
+	$(COMPOSE) $(COMPOSE_JUMPBOX) logs -f jumpbox
+
+jumpbox-sh: ## Open a shell inside Jumpbox
+	$(call section,Opening shell in Jumpbox...)
+	$(COMPOSE) $(COMPOSE_JUMPBOX) exec jumpbox sh
+
+# =========================================
 # UTILITIES
 # =========================================
 
@@ -228,14 +262,8 @@ nuke: ## Destroy all containers, volumes, images, networks for this project
 	$(call section,NUKING environment...)
 
 	@echo "$(YELLOW)Removing containers...$(RESET)"
-
-	# Remove containers with project label
 	-@docker ps -aq --filter "label=project=webapi-suite" | xargs -r docker rm -f
-
-	# Remove containers whose NAMES start with the project prefix
 	-@docker ps -a --format '{{.Names}}' | grep '^webapi-suite' | xargs -r docker rm -f
-
-	# Remove containers whose DNS ALIASES start with the project prefix
 	-@docker ps -aq | while read cid; do \
 		if docker inspect "$$cid" | grep -q '"webapi-suite-'; then \
 			docker rm -f "$$cid"; \
@@ -248,7 +276,7 @@ nuke: ## Destroy all containers, volumes, images, networks for this project
 	@echo "$(YELLOW)Removing images...$(RESET)"
 	-@docker images "webapi-suite/*" -q | xargs -r docker rmi -f
 
-	@echo "$(YELLOW)Pruning dangling images volumes and build cache...$(RESET)"
+	@echo "$(YELLOW)Pruning dangling images, volumes, and build cache...$(RESET)"
 	-@docker image prune -f
 	-@docker volume prune -f
 	-@docker builder prune -f
@@ -279,3 +307,14 @@ help: ## Show this help message
 	@echo "$(BLUE)UTILITIES$(RESET)"
 	@awk 'BEGIN {FS=":.*##"} /^(secrets-check|status|nuke|help):.*##/ {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 	@echo ""
+
+# =========================================
+# PHONY TARGETS
+# =========================================
+.PHONY: \
+	json-build json-build-api json-build-issuer json-build-client \
+	json-up json-down json-restart json-ps json-load json-init json-init-up json-reset json-logs json-sh \
+	postgres-build postgres-build-api postgres-build-issuer postgres-build-client \
+	postgres-up postgres-down postgres-restart postgres-ps postgres-load postgres-init postgres-reset postgres-logs postgres-sh \
+	jumpbox-up jumpbox-down jumpbox-restart jumpbox-ps jumpbox-logs jumpbox-sh \
+	secrets-check status nuke help
