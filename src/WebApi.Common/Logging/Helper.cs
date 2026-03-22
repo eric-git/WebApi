@@ -26,9 +26,9 @@ public static class Helper
             Method = request.Method.Method,
             Uri = request.RequestUri!,
             Headers = request.Headers
-                .Select(h => new KeyValuePair<string, string>(h.Key, string.Join(",", h.Value)))
-                .OrderBy(h => h.Key, StringComparer.OrdinalIgnoreCase)
-                .ToList(),
+                             .Select(h => new KeyValuePair<string, string>(h.Key, string.Join(",", h.Value)))
+                             .OrderBy(h => h.Key, StringComparer.OrdinalIgnoreCase)
+                             .ToList(),
             ContentType = request.Content?.Headers.ContentType?.MediaType,
             Body = request.Content?.ReadAsStream()
         };
@@ -41,14 +41,14 @@ public static class Helper
         {
             StatusCode = (int)response.StatusCode,
             Headers = response.Headers
-                .Select(h => new KeyValuePair<string, string>(h.Key, string.Join(",", h.Value)))
-                .Concat(
-                    response.Content?.Headers.Select(h =>
-                        new KeyValuePair<string, string>(h.Key, string.Join(",", h.Value)))
-                    ?? Enumerable.Empty<KeyValuePair<string, string>>()
-                )
-                .OrderBy(h => h.Key, StringComparer.OrdinalIgnoreCase)
-                .ToList(),
+                              .Select(h => new KeyValuePair<string, string>(h.Key, string.Join(",", h.Value)))
+                              .Concat(
+                                  response.Content?.Headers.Select(h =>
+                                      new KeyValuePair<string, string>(h.Key, string.Join(",", h.Value)))
+                                  ?? Enumerable.Empty<KeyValuePair<string, string>>()
+                              )
+                              .OrderBy(h => h.Key, StringComparer.OrdinalIgnoreCase)
+                              .ToList(),
             ContentType = response.Content?.Headers.ContentType?.MediaType,
             Body = buffer
         };

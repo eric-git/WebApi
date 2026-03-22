@@ -33,79 +33,79 @@ builder.Services.AddSingleton<IConfidentialClientApplication>(serviceProvider =>
     var apiId = configuration["API_ID"]!;
     var keyId = configuration["KEY_ID"]!;
     return ConfidentialClientApplicationBuilder
-        .Create(clientId)
-        .WithOidcAuthority(issuer)
-        .WithHttpClientFactory(msalHttpClientFactory)
-        .WithClientAssertion(cancellationToken =>
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var privateSigningKey = configuration["private-signing-key.pem"];
-            var (_, rsaSecurityKey) = CreateRsaSecurityKeyFromPem(privateSigningKey!, keyId);
-            var now = DateTime.UtcNow;
-            SecurityTokenDescriptor securityTokenDescriptor = new()
-            {
-                Issuer = issuer,
-                Audience = apiId,
-                Claims = new Dictionary<string, object>
-                {
-                    [JwtRegisteredClaimNames.Sub] = clientId,
-                    [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString("N")
-                },
-                NotBefore = now,
-                Expires = now.AddMinutes(5),
-                SigningCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
-            };
-            JsonWebTokenHandler jsonWebTokenHandler = new();
-            var jwt = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
-            return Task.FromResult(jwt);
-        })
-        .WithLogging((level, message, containsPii) =>
-        {
-            var formatted = containsPii ? $"[PII] {message}" : message;
-            switch (level)
-            {
-                case IdentityLogLevel.Error:
-                    MsalLog.Error(logger, formatted);
-                    break;
-                case IdentityLogLevel.Warning:
-                    MsalLog.Warning(logger, formatted);
-                    break;
-                case IdentityLogLevel.Info:
-                    MsalLog.Info(logger, formatted);
-                    break;
-                default:
-                    MsalLog.Debug(logger, formatted);
-                    break;
-            }
-        })
-        .Build();
+           .Create(clientId)
+           .WithOidcAuthority(issuer)
+           .WithHttpClientFactory(msalHttpClientFactory)
+           .WithClientAssertion(cancellationToken =>
+           {
+               cancellationToken.ThrowIfCancellationRequested();
+               var privateSigningKey = configuration["private-signing-key.pem"];
+               var (_, rsaSecurityKey) = CreateRsaSecurityKeyFromPem(privateSigningKey!, keyId);
+               var now = DateTime.UtcNow;
+               SecurityTokenDescriptor securityTokenDescriptor = new()
+               {
+                   Issuer = issuer,
+                   Audience = apiId,
+                   Claims = new Dictionary<string, object>
+                   {
+                       [JwtRegisteredClaimNames.Sub] = clientId,
+                       [JwtRegisteredClaimNames.Jti] = Guid.NewGuid().ToString("N")
+                   },
+                   NotBefore = now,
+                   Expires = now.AddMinutes(5),
+                   SigningCredentials = new SigningCredentials(rsaSecurityKey, SecurityAlgorithms.RsaSha256)
+               };
+               JsonWebTokenHandler jsonWebTokenHandler = new();
+               var jwt = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
+               return Task.FromResult(jwt);
+           })
+           .WithLogging((level, message, containsPii) =>
+           {
+               var formatted = containsPii ? $"[PII] {message}" : message;
+               switch (level)
+               {
+                   case IdentityLogLevel.Error:
+                       MsalLog.Error(logger, formatted);
+                       break;
+                   case IdentityLogLevel.Warning:
+                       MsalLog.Warning(logger, formatted);
+                       break;
+                   case IdentityLogLevel.Info:
+                       MsalLog.Info(logger, formatted);
+                       break;
+                   default:
+                       MsalLog.Debug(logger, formatted);
+                       break;
+               }
+           })
+           .Build();
 });
 
 builder.Services.AddHttpClient(GameServiceClient.HttpClientName, (serviceProvider, httpClient) =>
-    {
-        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
-        httpClient.BaseAddress = new Uri($"{configuration["API_BASE_URL"]}/");
-        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-    })
-    .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
-    {
-        var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
-        return hostEnvironment.IsDevelopment()
-            ? serviceProvider.GetRequiredService<CertificateHandler>()
-            : new HttpClientHandler();
-    })
-    .AddHttpMessageHandler<CorrelationHandler>()
-    .AddHttpMessageHandler<AccessTokenHandler>()
-    .AddHttpMessageHandler<LoggingHandler>();
+       {
+           var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+           httpClient.BaseAddress = new Uri($"{configuration["API_BASE_URL"]}/");
+           httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+       })
+       .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+       {
+           var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
+           return hostEnvironment.IsDevelopment()
+               ? serviceProvider.GetRequiredService<CertificateHandler>()
+               : new HttpClientHandler();
+       })
+       .AddHttpMessageHandler<CorrelationHandler>()
+       .AddHttpMessageHandler<AccessTokenHandler>()
+       .AddHttpMessageHandler<LoggingHandler>();
 builder.Services.AddHttpClient(MsalHttpClientFactory.HttpClientName)
-    .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
-    {
-        var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
-        return hostEnvironment.IsDevelopment()
-            ? serviceProvider.GetRequiredService<CertificateHandler>()
-            : new HttpClientHandler();
-    })
-    .AddHttpMessageHandler<LoggingHandler>();
+       .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
+       {
+           var hostEnvironment = serviceProvider.GetRequiredService<IHostEnvironment>();
+           return hostEnvironment.IsDevelopment()
+               ? serviceProvider.GetRequiredService<CertificateHandler>()
+               : new HttpClientHandler();
+       })
+       .AddHttpMessageHandler<LoggingHandler>();
 
 builder.Services.AddSingleton<ITokenService, MsalTokenService>();
 builder.Services.AddSingleton<IMsalHttpClientFactory, MsalHttpClientFactory>();

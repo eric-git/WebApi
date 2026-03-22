@@ -10,16 +10,16 @@ public sealed class TagDescriptionTransformer : IOpenApiDocumentTransformer
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(context);
         var tagDescriptions = context.DescriptionGroups
-            .SelectMany(g => g.Items)
-            .SelectMany(d => d.ActionDescriptor.EndpointMetadata)
-            .OfType<TagDescription>()
-            .Distinct()
-            .ToList();
+                                     .SelectMany(g => g.Items)
+                                     .SelectMany(d => d.ActionDescriptor.EndpointMetadata)
+                                     .OfType<TagDescription>()
+                                     .Distinct()
+                                     .ToList();
         foreach (var tag in document.Tags!)
         {
             var description = tagDescriptions
-                .FirstOrDefault(td => td.Name.Equals(tag.Name, StringComparison.OrdinalIgnoreCase))
-                ?.Description;
+                              .FirstOrDefault(td => td.Name.Equals(tag.Name, StringComparison.OrdinalIgnoreCase))
+                              ?.Description;
             if (!string.IsNullOrWhiteSpace(description))
             {
                 tag.Description = description;

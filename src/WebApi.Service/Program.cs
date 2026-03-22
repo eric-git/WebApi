@@ -60,59 +60,59 @@ switch (persistenceMode)
 }
 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtBearerOptions =>
-    {
-        var configurationManager = builder.Configuration;
-        jwtBearerOptions.Authority = configurationManager["ISSUER_BASE_URL"];
-        jwtBearerOptions.Audience = configurationManager["API_ID"];
-        jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
-        {
-            NameClaimType = JwtRegisteredClaimNames.Name,
-            AuthenticationType = JwtBearerDefaults.AuthenticationScheme
-        };
-        jwtBearerOptions.Events = new JwtBearerEvents
-        {
-            OnAuthenticationFailed = context =>
-            {
-                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
-                JwtBearerLog.AuthenticationFailed(logger, context.Exception);
-                return Task.CompletedTask;
-            },
-            OnChallenge = context =>
-            {
-                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
-                JwtBearerLog.ChallengeTriggered(logger, context.Error, context.ErrorDescription);
-                return Task.CompletedTask;
-            },
-            OnForbidden = context =>
-            {
-                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
-                JwtBearerLog.Forbidden(logger, context.HttpContext.User.Identity?.Name);
-                return Task.CompletedTask;
-            },
-            OnMessageReceived = context =>
-            {
-                var header = context.Request.Headers[HeaderNames.Authorization].ToString();
-                if (AuthenticationHeaderValue.TryParse(header, out var auth) &&
-                    auth.Scheme.Equals(JwtBearerDefaults.AuthenticationScheme, StringComparison.OrdinalIgnoreCase))
-                {
-                    context.Token = auth.Parameter;
-                }
+       .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+       .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtBearerOptions =>
+       {
+           var configurationManager = builder.Configuration;
+           jwtBearerOptions.Authority = configurationManager["ISSUER_BASE_URL"];
+           jwtBearerOptions.Audience = configurationManager["API_ID"];
+           jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
+           {
+               NameClaimType = JwtRegisteredClaimNames.Name,
+               AuthenticationType = JwtBearerDefaults.AuthenticationScheme
+           };
+           jwtBearerOptions.Events = new JwtBearerEvents
+           {
+               OnAuthenticationFailed = context =>
+               {
+                   var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                   JwtBearerLog.AuthenticationFailed(logger, context.Exception);
+                   return Task.CompletedTask;
+               },
+               OnChallenge = context =>
+               {
+                   var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                   JwtBearerLog.ChallengeTriggered(logger, context.Error, context.ErrorDescription);
+                   return Task.CompletedTask;
+               },
+               OnForbidden = context =>
+               {
+                   var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                   JwtBearerLog.Forbidden(logger, context.HttpContext.User.Identity?.Name);
+                   return Task.CompletedTask;
+               },
+               OnMessageReceived = context =>
+               {
+                   var header = context.Request.Headers[HeaderNames.Authorization].ToString();
+                   if (AuthenticationHeaderValue.TryParse(header, out var auth) &&
+                       auth.Scheme.Equals(JwtBearerDefaults.AuthenticationScheme, StringComparison.OrdinalIgnoreCase))
+                   {
+                       context.Token = auth.Parameter;
+                   }
 
-                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
-                JwtBearerLog.MessageReceived(logger, context.Token);
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = context =>
-            {
-                var logger = context.HttpContext.RequestServices
-                    .GetRequiredService<ILogger<JwtBearerEvents>>();
-                JwtBearerLog.TokenValidated(logger, context.Principal?.Identity?.Name);
-                return Task.CompletedTask;
-            }
-        };
-    });
+                   var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                   JwtBearerLog.MessageReceived(logger, context.Token);
+                   return Task.CompletedTask;
+               },
+               OnTokenValidated = context =>
+               {
+                   var logger = context.HttpContext.RequestServices
+                                       .GetRequiredService<ILogger<JwtBearerEvents>>();
+                   JwtBearerLog.TokenValidated(logger, context.Principal?.Identity?.Name);
+                   return Task.CompletedTask;
+               }
+           };
+       });
 builder.Services.AddAuthorization(authorizationOptions =>
 {
     authorizationOptions.AddPolicy(ReadPolicyName, authorizationPolicyBuilder =>
