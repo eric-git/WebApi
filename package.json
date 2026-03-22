@@ -1,9 +1,11 @@
 {
   "type": "module",
   "scripts": {
-    "check-spell": "cspell \"**/*\" --no-progress",
+    "spell-check": "cspell \"**/*\" --no-progress",
     "serve-redoc-api": "serve ./src/redoc/WebApi.Service -l 2026",
-    "deploy-redoc": "node ./src/redoc/deploy-redoc.mjs"
+    "deploy-redoc": "node ./src/redoc/deploy-redoc.mjs",
+    "init-local-shell": "sh ./local/ensure-runtime.sh",
+    "init-local-pwsh": "pwsh ./local/ensure-runtime.ps1"
   },
   "devDependencies": {
     "@cspell/dict-dotnet": "^5.0.11",

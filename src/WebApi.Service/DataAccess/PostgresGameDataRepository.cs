@@ -11,9 +11,9 @@ internal sealed class PostgresGameDataRepository(AppDbContext appDbContext) : IG
     {
         cancellationToken.ThrowIfCancellationRequested();
         var result = await appDbContext.Games
-            .AsNoTracking()
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+                                       .AsNoTracking()
+                                       .ToListAsync(cancellationToken)
+                                       .ConfigureAwait(false);
         var model = result.Select(GameListItem.FromEntity).ToList();
         return model;
     }
@@ -64,10 +64,10 @@ internal sealed class PostgresGameDataRepository(AppDbContext appDbContext) : IG
         }
 
         var result = await appDbContext.Relations
-            .AsNoTracking()
-            .Where(x => x.GameId == gameId)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
+                                       .AsNoTracking()
+                                       .Where(x => x.GameId == gameId)
+                                       .ToListAsync(cancellationToken)
+                                       .ConfigureAwait(false);
         var model = result.Select(RelationListItem.FromEntity).ToList();
         return model;
     }
@@ -138,15 +138,15 @@ internal sealed class PostgresGameDataRepository(AppDbContext appDbContext) : IG
         if (includeRelations)
         {
             entity = await appDbContext.Games
-                .Include(x => x.Relations)
-                .SingleOrDefaultAsync(x => x.Id == id, cancellationToken)
-                .ConfigureAwait(false);
+                                       .Include(x => x.Relations)
+                                       .SingleOrDefaultAsync(x => x.Id == id, cancellationToken)
+                                       .ConfigureAwait(false);
         }
         else
         {
             entity = await appDbContext.Games
-                .FindAsync([id], cancellationToken)
-                .ConfigureAwait(false);
+                                       .FindAsync([id], cancellationToken)
+                                       .ConfigureAwait(false);
         }
 
         return entity;
@@ -155,15 +155,15 @@ internal sealed class PostgresGameDataRepository(AppDbContext appDbContext) : IG
     private async Task<bool> GameExistsAsync(Guid id, CancellationToken cancellationToken)
     {
         return await appDbContext.Games
-            .AnyAsync(x => x.Id == id, cancellationToken)
-            .ConfigureAwait(false);
+                                 .AnyAsync(x => x.Id == id, cancellationToken)
+                                 .ConfigureAwait(false);
     }
 
     private async Task<Entity.Relation?> InternalGetRelationByIdAsync(Guid gameId, Guid id, CancellationToken cancellationToken)
     {
         var entity = await appDbContext.Relations
-            .SingleOrDefaultAsync(x => x.GameId == gameId && x.Id == id, cancellationToken)
-            .ConfigureAwait(false);
+                                       .SingleOrDefaultAsync(x => x.GameId == gameId && x.Id == id, cancellationToken)
+                                       .ConfigureAwait(false);
         return entity;
     }
 }

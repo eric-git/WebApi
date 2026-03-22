@@ -25,14 +25,15 @@ services:
     hostname: jumpbox.webapisuite.projecteric.io
     networks:
       - public
+    privileged: false
+    devices: []
     environment:
       PUID: 1000
       PGID: 1000
       TZ: Australia/Canberra
+      LIBVA_DRIVER_NAME: dummy
     volumes:
       - jumpbox-config:/config
-    devices:
-      - /dev/dri:/dev/dri
     ports:
       - "3000:3000"
     shm_size: "1gb"

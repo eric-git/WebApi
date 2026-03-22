@@ -18,33 +18,33 @@ public static class ApiEndpoints
     public static IEndpointRouteBuilder MapCommonEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet("/", (IConfiguration configuration, CancellationToken cancellationToken) =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var runInContainer = bool.TryParse(configuration["DOTNET_RUNNING_IN_CONTAINER"], out var value) && value;
-                var assembly = Assembly.GetEntryAssembly()!;
-                return Results.Json(new
-                {
-                    status = $"Running{(runInContainer ? " in container" : null)}",
-                    title = assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title,
-                    product = assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product,
-                    company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company,
-                    informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion,
-                    version = assembly.GetName().Version?.ToString(),
-                    timestamp = DateTime.UtcNow
-                }, DataSerializationOptions);
-            })
-            .WithName(RootRouteName)
-            .ExcludeFromDescription();
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+                                var runInContainer = bool.TryParse(configuration["DOTNET_RUNNING_IN_CONTAINER"], out var value) && value;
+                                var assembly = Assembly.GetEntryAssembly()!;
+                                return Results.Json(new
+                                {
+                                    status = $"Running{(runInContainer ? " in container" : null)}",
+                                    title = assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title,
+                                    product = assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product,
+                                    company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company,
+                                    informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion,
+                                    version = assembly.GetName().Version?.ToString(),
+                                    timestamp = DateTime.UtcNow
+                                }, DataSerializationOptions);
+                            })
+                            .WithName(RootRouteName)
+                            .ExcludeFromDescription();
 
         endpointRouteBuilder.MapGet("/favicon.ico", (CancellationToken cancellationToken) =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var env = endpointRouteBuilder.ServiceProvider.GetRequiredService<IHostEnvironment>();
-                var filePath = Path.Combine(env.ContentRootPath, "favicon.ico");
-                return Results.File(filePath, "image/x-icon");
-            })
-            .WithName(FavIconRouteName)
-            .ExcludeFromDescription();
+                            {
+                                cancellationToken.ThrowIfCancellationRequested();
+                                var env = endpointRouteBuilder.ServiceProvider.GetRequiredService<IHostEnvironment>();
+                                var filePath = Path.Combine(env.ContentRootPath, "favicon.ico");
+                                return Results.File(filePath, "image/x-icon");
+                            })
+                            .WithName(FavIconRouteName)
+                            .ExcludeFromDescription();
         return endpointRouteBuilder;
     }
 

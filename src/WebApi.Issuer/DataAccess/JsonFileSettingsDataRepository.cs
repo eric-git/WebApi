@@ -27,25 +27,25 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
         cancellationToken.ThrowIfCancellationRequested();
         var rootElement = GetJsonRootElement();
         var client = rootElement.GetProperty("Clients")
-            .EnumerateArray()
-            .FirstOrDefault(c => c.GetProperty("Id").GetGuid() == clientId);
+                                .EnumerateArray()
+                                .FirstOrDefault(c => c.GetProperty("Id").GetGuid() == clientId);
         if (client.ValueKind is JsonValueKind.Undefined)
         {
             return Task.FromResult(false);
         }
 
         var service = client.GetProperty("Services")
-            .EnumerateArray()
-            .FirstOrDefault(s => s.GetProperty("Id").GetGuid() == serviceId);
+                            .EnumerateArray()
+                            .FirstOrDefault(s => s.GetProperty("Id").GetGuid() == serviceId);
         if (service.ValueKind is JsonValueKind.Undefined)
         {
             return Task.FromResult(false);
         }
 
         var scopesInJson = service.GetProperty("Scopes")
-            .EnumerateArray()
-            .Select(s => s.GetString())
-            .ToList();
+                                  .EnumerateArray()
+                                  .Select(s => s.GetString())
+                                  .ToList();
         var result = scopes.All(scopesInJson.Contains);
         return Task.FromResult(result);
     }
@@ -55,20 +55,20 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
         cancellationToken.ThrowIfCancellationRequested();
         var root = GetJsonRootElement();
         var client = root.GetProperty("Clients")
-            .EnumerateArray()
-            .FirstOrDefault(c =>
-                c.TryGetProperty("Id", out var id) &&
-                id.GetGuid() == clientId);
+                         .EnumerateArray()
+                         .FirstOrDefault(c =>
+                             c.TryGetProperty("Id", out var id) &&
+                             id.GetGuid() == clientId);
         if (client.ValueKind is JsonValueKind.Undefined)
         {
             return Task.FromResult<string?>(null);
         }
 
         var serviceEntry = client.GetProperty("Services")
-            .EnumerateArray()
-            .FirstOrDefault(s =>
-                s.TryGetProperty("Id", out var id) &&
-                id.GetGuid() == serviceId);
+                                 .EnumerateArray()
+                                 .FirstOrDefault(s =>
+                                     s.TryGetProperty("Id", out var id) &&
+                                     id.GetGuid() == serviceId);
         if (serviceEntry.ValueKind is JsonValueKind.Undefined ||
             !serviceEntry.TryGetProperty("KeyId", out var keyIdProp) ||
             keyIdProp.GetGuid() != keyId)
@@ -77,10 +77,10 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
         }
 
         var key = root.GetProperty("Keys")
-            .EnumerateArray()
-            .FirstOrDefault(k =>
-                k.TryGetProperty("Id", out var id) &&
-                id.GetGuid() == keyId);
+                      .EnumerateArray()
+                      .FirstOrDefault(k =>
+                          k.TryGetProperty("Id", out var id) &&
+                          id.GetGuid() == keyId);
         if (key.ValueKind is JsonValueKind.Undefined)
         {
             return Task.FromResult<string?>(null);
@@ -97,10 +97,10 @@ internal sealed class JsonFileSettingsDataRepository : ISettingsDataRepository
         cancellationToken.ThrowIfCancellationRequested();
         var root = GetJsonRootElement();
         var client = root.GetProperty("Clients")
-            .EnumerateArray()
-            .FirstOrDefault(c =>
-                c.TryGetProperty("Id", out var id) &&
-                id.GetGuid() == clientId);
+                         .EnumerateArray()
+                         .FirstOrDefault(c =>
+                             c.TryGetProperty("Id", out var id) &&
+                             id.GetGuid() == clientId);
         if (client.ValueKind is JsonValueKind.Undefined)
         {
             return Task.FromResult<Client?>(null);

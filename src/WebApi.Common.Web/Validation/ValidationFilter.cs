@@ -23,8 +23,8 @@ public sealed class ValidationFilter : IEndpointFilter
         }
 
         var errors = results
-            .GroupBy(r => r.MemberNames.FirstOrDefault() ?? string.Empty)
-            .ToDictionary(g => g.Key, g => g.Select(r => r.ErrorMessage!).ToArray());
+                     .GroupBy(r => r.MemberNames.FirstOrDefault() ?? string.Empty)
+                     .ToDictionary(g => g.Key, g => g.Select(r => r.ErrorMessage!).ToArray());
         return Results.ValidationProblem(errors);
     }
 }

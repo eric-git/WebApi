@@ -21,9 +21,9 @@ public sealed class ExampleTransformer : IOpenApiOperationTransformer
     private static void ApplyRequestExample(OpenApiOperation operation, OpenApiOperationTransformerContext context)
     {
         var requestType = context.Description.ParameterDescriptions
-            .Where(p => p.Source.Id == "Body")
-            .Select(p => p.Type)
-            .FirstOrDefault();
+                                 .Where(p => p.Source.Id == "Body")
+                                 .Select(p => p.Type)
+                                 .FirstOrDefault();
         if (requestType is null || operation.RequestBody is null)
         {
             return;
@@ -45,13 +45,13 @@ public sealed class ExampleTransformer : IOpenApiOperationTransformer
     private static void ApplyResponseExample(OpenApiOperation operation, OpenApiOperationTransformerContext context)
     {
         var responseType = context.Description.SupportedResponseTypes
-            .Select(r => r.Type)
-            .FirstOrDefault(t =>
-                t is not null &&
-                t != typeof(void) &&
-                t != typeof(ProblemDetails) &&
-                t != typeof(HttpValidationProblemDetails) &&
-                t != typeof(ValidationProblemDetails));
+                                  .Select(r => r.Type)
+                                  .FirstOrDefault(t =>
+                                      t is not null &&
+                                      t != typeof(void) &&
+                                      t != typeof(ProblemDetails) &&
+                                      t != typeof(HttpValidationProblemDetails) &&
+                                      t != typeof(ValidationProblemDetails));
         if (responseType is null)
         {
             return;
@@ -67,8 +67,8 @@ public sealed class ExampleTransformer : IOpenApiOperationTransformer
         foreach (var (statusCode, response) in operation.Responses!)
         {
             var declaredType = context.Description.SupportedResponseTypes
-                .FirstOrDefault(r => r.StatusCode.ToString(CultureInfo.InvariantCulture) == statusCode)?
-                .Type;
+                                      .FirstOrDefault(r => r.StatusCode.ToString(CultureInfo.InvariantCulture) == statusCode)?
+                                      .Type;
             if (declaredType != responseType || !response.Content!.TryGetValue("application/json", out var jsonContent))
             {
                 continue;

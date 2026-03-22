@@ -1,5 +1,7 @@
 #!/usr/bin/env pwsh
 
+using namespace System.Diagnostics.CodeAnalysis
+
 param(
     [Parameter(Mandatory = $true)]
     [string]$Command,
@@ -56,8 +58,10 @@ function Assert-Secret($path) {
 # =========================================
 function Compose {
     param(
+        [Parameter(Mandatory)]
         [array]$Files,
-        [array]$Args
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Args
     )
     docker compose @Files @Args
 }
@@ -97,55 +101,205 @@ $ComposeJumpbox = @(
 # =========================================
 # JSON MODE
 # =========================================
-function json-build { Section "Building JSON stack..."; Timed { Compose $ComposeJson @("build") } }
-function json-build-api { Section "Building API (json)..."; Timed { Compose $ComposeJson @("build", "api") } }
-function json-build-issuer { Section "Building Issuer (json)..."; Timed { Compose $ComposeJson @("build", "issuer") } }
-function json-build-client { Section "Building Client (json)..."; Timed { Compose $ComposeJson @("build", "client") } }
+function json-build {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
 
-function json-up { Section "Starting JSON stack..."; Timed { Compose $ComposeJson @("up", "-d", "issuer", "api", "client") } }
-function json-down { Section "Stopping JSON stack..."; Compose $ComposeJson @("down"); Write-Host "" }
-function json-restart { json-down; json-up }
+    Section "Building JSON stack..."
+    Timed {
+        Compose $ComposeJson @("build") 
+    } 
+}
 
-function json-ps { Compose $ComposeJson @("ps"); Write-Host "" }
+function json-build-api {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    Section "Building API (json)..."
+    Timed {
+        Compose $ComposeJson @("build", "api")
+    } 
+}
+
+function json-build-issuer {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    Section "Building Issuer (json)..."
+    Timed {
+        Compose $ComposeJson @("build", "issuer")
+    } 
+}
+
+function json-build-client {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    Section "Building Client (json)..."
+    Timed { Compose $ComposeJson @("build", "client")
+    } 
+}
+
+function json-up {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+   
+    Section "Starting JSON stack..."
+    Timed { Compose $ComposeJson @("up", "-d", "issuer", "api", "client") } 
+}
+
+function json-down {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    Section "Stopping JSON stack..."
+    Compose $ComposeJson @("down")
+    Write-Host ""
+}
+
+function json-restart {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    json-down
+    json-up 
+}
+
+function json-ps {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    Compose $ComposeJson @("ps")
+    Write-Host "" 
+}
 
 function json-load {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    
     Section "Running JSON loaders..."
     Timed { Compose $ComposeJson @("up", "--abort-on-container-exit", "issuer-json-loader", "api-json-loader") }
     Compose $ComposeJson @("rm", "-f", "issuer-json-loader", "api-json-loader")
     Write-Host ""
 }
 
-function json-init { json-build; json-load; json-up }
-function json-init-up { json-load; json-up }
+function json-init {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    json-build
+    json-load
+    json-up 
+}
+
+function json-init-up {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+   
+    json-load
+    json-up 
+}
 
 function json-reset {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
     Section "Resetting JSON mode..."
     Compose $ComposeJson @("down", "-v")
     json-init
 }
 
-function json-logs { Section "Aggregated logs (json)..."; Compose $ComposeJson @("logs", "-f") }
+function json-logs {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    Section "Aggregated logs (json)..."
+    Compose $ComposeJson @("logs", "-f") 
+}
 
 function json-sh {
-    if (-not $svc) { Write-Color "Usage: ./docker-build.ps1 json-sh -svc api" Red; exit 1 }
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    if (-not $svc) {
+        Write-Color "Usage: ./docker-build.ps1 json-sh -svc api" Red
+        exit 1
+    }
     Compose $ComposeJson @("exec", $svc, "sh")
 }
 
 # =========================================
 # POSTGRES MODE
 # =========================================
-function postgres-build { Section "Building Postgres stack..."; Timed { Compose $ComposePg @("build") } }
-function postgres-build-api { Section "Building API (postgres)..."; Timed { Compose $ComposePg @("build", "api") } }
-function postgres-build-issuer { Section "Building Issuer (postgres)..."; Timed { Compose $ComposePg @("build", "issuer") } }
-function postgres-build-client { Section "Building Client (postgres)..."; Timed { Compose $ComposePg @("build", "client") } }
+function postgres-build {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
 
-function postgres-up { Section "Starting Postgres stack..."; Timed { Compose $ComposePg @("up", "-d", "postgres-issuer", "postgres-api", "issuer", "api", "client") } }
-function postgres-down { Section "Stopping Postgres stack..."; Compose $ComposePg @("down"); Write-Host "" }
-function postgres-restart { postgres-down; postgres-up }
+    Section "Building Postgres stack..."
+    Timed {
+        Compose $ComposePg @("build") } 
+}
 
-function postgres-ps { Compose $ComposePg @("ps"); Write-Host "" }
+function postgres-build-api {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+   
+    Section "Building API (postgres)..."
+    Timed {
+        Compose $ComposePg @("build", "api") } 
+}
+
+function postgres-build-issuer {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    Section "Building Issuer (postgres)..."
+    Timed {
+        Compose $ComposePg @("build", "issuer") 
+    } 
+}
+
+function postgres-build-client {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    Section "Building Client (postgres)..."
+    Timed { Compose $ComposePg @("build", "client")
+    }
+}
+
+function postgres-up {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    
+    Section "Starting Postgres stack..."
+    Timed {
+        Compose $ComposePg @("up", "-d", "postgres-issuer", "postgres-api", "issuer", "api", "client")
+    }
+}
+
+function postgres-down {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+   
+    Section "Stopping Postgres stack..."
+    Compose $ComposePg @("down")
+    Write-Host "" 
+}
+
+function postgres-restart {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    postgres-down
+    postgres-up 
+}
+
+function postgres-ps {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    Compose $ComposePg @("ps")
+    Write-Host "" 
+}
 
 function postgres-load {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
     Section "Running SQL loaders..."
     Timed { Compose $ComposePg @("up", "--abort-on-container-exit", "issuer-postgres-loader", "api-postgres-loader") }
     Compose $ComposePg @("rm", "-f", "issuer-postgres-loader", "api-postgres-loader")
@@ -153,6 +307,9 @@ function postgres-load {
 }
 
 function postgres-init {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
     Section "Postgres full initialization..."
     Compose $ComposePg @("up", "-d", "postgres-issuer", "postgres-api")
     postgres-load
@@ -161,32 +318,90 @@ function postgres-init {
 }
 
 function postgres-reset {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
     Section "Resetting Postgres mode..."
     Compose $ComposePg @("down", "-v")
     postgres-init
 }
 
-function postgres-logs { Section "Aggregated logs (postgres)..."; Compose $ComposePg @("logs", "-f") }
+function postgres-logs {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    Section "Aggregated logs (postgres)..."
+    Compose $ComposePg @("logs", "-f") 
+}
 
 function postgres-sh {
-    if (-not $svc) { Write-Color "Usage: ./docker-build.ps1 postgres-sh -svc postgres-api" Red; exit 1 }
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    if (-not $svc) {
+        Write-Color "Usage: ./docker-build.ps1 postgres-sh -svc postgres-api" Red
+        exit 1
+    }
     Compose $ComposePg @("exec", $svc, "sh")
 }
 
 # =========================================
 # JUMPBOX
 # =========================================
-function jumpbox-up { Section "Starting Jumpbox..."; Timed { Compose $ComposeJumpbox @("up", "-d", "jumpbox") } }
-function jumpbox-down { Section "Stopping Jumpbox..."; Compose $ComposeJumpbox @("down"); Write-Host "" }
-function jumpbox-restart { jumpbox-down; jumpbox-up }
-function jumpbox-ps { Compose $ComposeJumpbox @("ps"); Write-Host "" }
-function jumpbox-logs { Section "Jumpbox logs..."; Compose $ComposeJumpbox @("logs", "-f", "jumpbox") }
-function jumpbox-sh { Section "Opening shell in Jumpbox..."; Compose $ComposeJumpbox @("exec", "jumpbox", "sh") }
+function jumpbox-up {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    
+    Section "Starting Jumpbox..."
+    Timed {
+        Compose $ComposeJumpbox @("up", "-d", "jumpbox")
+    }
+}
+function jumpbox-down {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    Section "Stopping Jumpbox..."
+    Compose $ComposeJumpbox @("down")
+    Write-Host "" 
+}
+
+function jumpbox-restart {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+    jumpbox-down
+    jumpbox-up 
+}
+
+function jumpbox-ps {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+   
+    Compose $ComposeJumpbox @("ps")
+    Write-Host "" 
+}
+
+function jumpbox-logs {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    Section "Jumpbox logs..."
+    Compose $ComposeJumpbox @("logs", "-f", "jumpbox") 
+}
+function jumpbox-sh {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
+    Section "Opening shell in Jumpbox..."
+    Compose $ComposeJumpbox @("exec", "jumpbox", "sh") 
+}
 
 # =========================================
 # UTILITIES
 # =========================================
 function secrets-check {
+    [SuppressMessage("PSUseApprovedVerbs", "", Justification = "Command name intentionally matches CLI pattern")]
+    param()
+
     Section "Validating secrets..."
     Assert-Secret "./secrets/db-manager-password.txt"
     Assert-Secret "./secrets/svc-issuer-password.txt"
@@ -209,7 +424,6 @@ function status {
 
 function nuke {
     Section "NUKING environment..."
-
     Write-Color "Removing containers..." Yellow
     docker ps -aq --filter "label=project=webapi-suite" | ForEach-Object { docker rm -f $_ }
     docker ps -a --format "{{.Names}}" | Select-String "^webapi-suite" | ForEach-Object { docker rm -f $_ }
