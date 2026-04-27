@@ -1,4 +1,12 @@
 {
+  "name": "web-api-suite",
+  "version": "1.0.0",
+  "description": "A sample Web API suite project.",
+  "author": {
+    "name": "Eric Wu",
+    "email": "wu_yuqing@hotmail.com",
+    "url": "https://github.com/eric-git"
+  },
   "type": "module",
   "scripts": {
     "spell-check": "cspell \"**/*\" --no-progress",
@@ -8,9 +16,26 @@
     "init-local-pwsh": "pwsh ./local/ensure-runtime.ps1"
   },
   "devDependencies": {
-    "@cspell/dict-dotnet": "^5.0.11",
-    "cspell": "^9.6.0",
-    "fast-glob": "^3.3.3",
-    "serve": "^14.2.5"
+    "@cspell/dict-dotnet": "5.0.12",
+    "cspell": "9.7.0",
+    "fast-glob": "3.3.3",
+    "serve": "14.2.6"
+  },
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
+  "license": "MIT",
+  "keywords": [
+    "Web API",
+    "B2C",
+    "Docker",
+    "PostgreSQL",
+    "Dotnet",
+    "Redoc"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eric-git/WebApi"
   }
 }

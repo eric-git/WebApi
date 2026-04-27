@@ -102,6 +102,24 @@ else
 fi
 
 # ------------------------------------------------------------
+# check if database exists
+# ------------------------------------------------------------
+db_exists() {
+    local target_db="$1"
+    PGPASSWORD="$bootstrap_password" \
+    psql \
+        --no-psqlrc \
+        --quiet \
+        --host "$host" \
+        --port "$port" \
+        --username "$bootstrap_user" \
+        --dbname "$bootstrap_db" \
+        --tuples-only \
+        --command "SELECT 1 FROM pg_database WHERE datname = '$target_db';" |
+        grep -q 1
+}
+
+# ------------------------------------------------------------
 # psql execution with variable substitution
 # ------------------------------------------------------------
 invoke_psql_file() {
@@ -110,6 +128,11 @@ invoke_psql_file() {
     user="$3"
     password="$4"
     shift 4
+
+    # Check DB exists
+    if ! db_exists "$db"; then
+        return 0
+    fi
 
     # Build --set args
     set_args=""

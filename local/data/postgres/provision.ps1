@@ -4,13 +4,10 @@
 param(
     [string] $PgHost = "localhost",
     [int]    $Port = 5432,
-
     [ValidateSet("ISSUER", "API", "ALL")]
     [string] $Mode = "ALL",
-
     [string] $BootstrapDbName = "postgres",
     [string] $BootstrapUser = "postgres",
-
     [string] $BootstrapPasswordFile
 )
 
@@ -18,26 +15,50 @@ begin {
     Set-StrictMode -Version Latest
     $ErrorActionPreference = "Stop"
 
+    # ------------------------------------------------------------
+    # check if database exists
+    # ------------------------------------------------------------
+    function Test-DatabaseExists {
+        param(
+            [string] $Database
+        )
+        $query = "SELECT 1 FROM pg_database WHERE datname = '$Database';"
+        $env:PGPASSWORD = $BootstrapPassword
+        $output = & psql `
+            --no-psqlrc `
+            --quiet `
+            --host=$PgHost `
+            --port=$Port `
+            --username=$BootstrapUser `
+            --dbname=$BootstrapDbName `
+            --tuples-only `
+            --command=$query 2>$null
+        Remove-Item $env:PGPASSWORD -ErrorAction Ignore
+        return ($output -match "1")
+    }
+
     #
     # --- Helper: run SQL file with psql variables
     #
     function Invoke-PsqlFile {
         param(
-            [Parameter(Mandatory)] [string] $File,
-            [Parameter(Mandatory)] [hashtable] $Vars,
-            [Parameter(Mandatory)] [string] $Database,
-            [Parameter(Mandatory)] [string] $User,
-            [Parameter(Mandatory)] [string] $Password
+            [string] $File,
+            [hashtable] $Vars,
+            [string] $Database,
+            [string] $User,
+            [string] $Password
         )
         $File = (Resolve-Path $File).ProviderPath
-        $env:PGPASSWORD = $Password
         try {
             $setArgs = @()
             foreach ($k in $Vars.Keys) {
                 $setArgs += "--set"
                 $setArgs += "$k=$($Vars[$k])"
             }
-
+            if (-not (Test-DatabaseExists -Database $Database)) {
+                return
+            }
+            $env:PGPASSWORD = $Password
             psql `
                 --no-psqlrc `
                 --quiet `
@@ -73,18 +94,18 @@ begin {
     $dbManagerPassword = (Get-Content -Raw -Path $dbManagerPasswordFile).Trim()
     $clientPublicSigningKeyFile = Join-Path $PSScriptRoot "client-public.pem"
     $clientPublicSigningKey = (
-            Get-Content $clientPublicSigningKeyFile |
-            Where-Object {
-                $_ -notmatch "^-----BEGIN PUBLIC KEY-----$" -and
-                $_ -notmatch "^-----END PUBLIC KEY-----$"
-            }
-        ) -join ""
+        Get-Content $clientPublicSigningKeyFile |
+        Where-Object {
+            $_ -notmatch "^-----BEGIN PUBLIC KEY-----$" -and
+            $_ -notmatch "^-----END PUBLIC KEY-----$"
+        }
+    ) -join ""
     $Apps = @()
     if ($Mode -eq "API" -or $Mode -eq "ALL") {
-        $Apps += $Api 
+        $Apps += $Api
     }
-    if ($Mode -eq "ISSUER" -or $Mode -eq "ALL") { 
-        $Apps += $Issuer 
+    if ($Mode -eq "ISSUER" -or $Mode -eq "ALL") {
+        $Apps += $Issuer
     }
     if (-not $BootstrapPasswordFile) {
         $BootstrapPassword = Read-Host -Prompt "Enter password for bootstrap user '$BootstrapUser'" -MaskInput
