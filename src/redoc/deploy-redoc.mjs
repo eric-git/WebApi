@@ -14,7 +14,9 @@ const redocSourceFolders = fg.sync(path.join(__dirname, "WebApi.*"), {
   deep: 1,
 });
 
-console.log(`📂 Found ${redocSourceFolders.length} source folders in /src/redoc:`);
+console.log(
+  `📂 Found ${redocSourceFolders.length} source folders in /src/redoc:`,
+);
 redocSourceFolders.forEach((f) => console.log(`   • ${f}`));
 
 const projectNames = redocSourceFolders.map((p) => path.basename(p));
@@ -24,7 +26,9 @@ projectNames.forEach((projectName) => {
   const docsFolder = path.join(projectPath, "docs");
 
   if (!fs.existsSync(projectPath)) {
-    console.log(`⚠️ Skipping ${projectName} — no matching target project found`);
+    console.log(
+      `⚠️ Skipping ${projectName} — no matching target project found`,
+    );
     return;
   }
 
@@ -36,7 +40,9 @@ projectNames.forEach((projectName) => {
   console.log(`📁 Ensured docs folder exists: ${docsFolder}`);
 
   const existingFiles = fg.sync(["*.*"], { cwd: docsFolder });
-  console.log(`🧹 Clearing ${existingFiles.length} file(s) from ${projectName}/docs`);
+  console.log(
+    `🧹 Clearing ${existingFiles.length} file(s) from ${projectName}/docs`,
+  );
   existingFiles.forEach((file) => {
     fs.rmSync(path.join(docsFolder, file));
     console.log(`   ❌ Removed: ${file}`);
@@ -48,7 +54,9 @@ projectNames.forEach((projectName) => {
   const assetFiles = fg.sync(["*.*"], { cwd: docsSourceFolder });
 
   console.log(`📄 Found ${htmlFiles.length} HTML file(s) in ${projectName}/`);
-  console.log(`🎨 Found ${assetFiles.length} asset file(s) in ${projectName}/docs`);
+  console.log(
+    `🎨 Found ${assetFiles.length} asset file(s) in ${projectName}/docs`,
+  );
 
   htmlFiles.forEach((filename) => {
     const src = path.join(sourceFolder, filename);

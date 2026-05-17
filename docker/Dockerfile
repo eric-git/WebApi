@@ -13,12 +13,12 @@ RUN --mount=type=bind,source=.,target=/context \
     mkdir -p \"\$dir\"; \
     cp {} \"\$dir\"; \
     " && \
-    cp /context/WebApi.sln . && \
+    cp /context/WebApi.slnx . && \
     if [ -f /context/Directory.Build.props ]; then cp /context/Directory.Build.props .; fi && \
     if [ -f /context/Directory.Build.targets ]; then cp /context/Directory.Build.targets .; fi && \
     if [ -f /context/Directory.Packages.props ]; then cp /context/Directory.Packages.props .; fi
 RUN --mount=type=cache,target=/root/.nuget/packages \
-    dotnet restore WebApi.sln
+    dotnet restore WebApi.slnx
 COPY --link . .
 
 # ------------------------------------------------------------
@@ -30,7 +30,9 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
     WebApi.Issuer/WebApi.Issuer.csproj \
     -c Release \
     -o /publish/issuer \
-    -p:IsContainerBuild=true
+    -p:IsContainerBuild=true \
+    /graph /m \
+    --nologo
 
 # ------------------------------------------------------------
 # Publish: API
@@ -41,7 +43,9 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
     WebApi.Service/WebApi.Service.csproj \
     -c Release \
     -o /publish/api \
-    -p:IsContainerBuild=true
+    -p:IsContainerBuild=true \
+    /graph /m \
+    --nologo
 
 # ------------------------------------------------------------
 # Publish: Client
@@ -52,7 +56,9 @@ RUN --mount=type=cache,target=/root/.nuget/packages \
     WebApi.Client/WebApi.Client.csproj \
     -c Release \
     -o /publish/client \
-    -p:IsContainerBuild=true
+    -p:IsContainerBuild=true \
+    /graph /m \
+    --nologo
 
 # ------------------------------------------------------------
 # Runtime: Issuer

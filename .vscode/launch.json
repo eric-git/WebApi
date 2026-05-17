@@ -166,20 +166,12 @@
     {
       "name": "All - JSON",
       "preLaunchTask": "build-all",
-      "configurations": [
-        "Issuer - JSON",
-        "API - JSON",
-        "Client"
-      ]
+      "configurations": ["Issuer - JSON", "API - JSON", "Client"]
     },
     {
       "name": "All - Postgres",
       "preLaunchTask": "build-all",
-      "configurations": [
-        "Issuer - Postgres",
-        "API - Postgres",
-        "Client"
-      ]
+      "configurations": ["Issuer - Postgres", "API - Postgres", "Client"]
     }
   ]
 }

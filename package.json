@@ -9,7 +9,8 @@
   },
   "type": "module",
   "scripts": {
-    "spell-check": "cspell \"**/*\" --no-progress",
+    "spell-check": "npx cspell **/*",
+    "format": "npx prettier --write .",
     "serve-redoc-api": "serve ./src/redoc/WebApi.Service -l 2026",
     "deploy-redoc": "node ./src/redoc/deploy-redoc.mjs",
     "init-local-shell": "sh ./local/ensure-runtime.sh",

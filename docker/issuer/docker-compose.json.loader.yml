@@ -1,7 +1,6 @@
 name: webapi-suite
 
 services:
-
   issuer-json-loader:
     labels:
       app: loader
