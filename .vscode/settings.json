@@ -1,9 +1,10 @@
 {
-  "workbench.colorTheme": "Abyss",
+  "workbench.colorTheme": "Monokai",
   "workbench.iconTheme": "material-icon-theme",
   "debug.hideSlowPreLaunchWarning": true,
   "git.decorations.enabled": true,
   "makefile.configureOnOpen": true,
   "editor.formatOnSave": true,
-  "editor.trimAutoWhitespace": true
+  "editor.trimAutoWhitespace": true,
+  "editor.linkedEditing": true
 }

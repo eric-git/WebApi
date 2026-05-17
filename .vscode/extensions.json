@@ -8,6 +8,7 @@
     "ms-vscode.powershell",
     "mads-hartmann.bash-ide-vscode",
     "bierner.markdown-mermaid",
-    "ms-vscode.makefile-tools"
+    "ms-vscode.makefile-tools",
+    "esbenp.prettier-vscode"
   ]
 }

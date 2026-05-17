@@ -7,9 +7,12 @@
       "command": "dotnet",
       "args": [
         "build",
-        "${workspaceFolder}/src/WebApi.sln",
+        "${workspaceFolder}/src/WebApi.slnx",
         "--configuration",
-        "Debug"
+        "Debug",
+        "/graph",
+        "/m",
+        "--nologo"
       ],
       "problemMatcher": "$msCompile",
       "group": "build",
@@ -30,7 +33,10 @@
         "publish",
         "WebApi.Issuer/WebApi.Issuer.csproj",
         "-c",
-        "Release"
+        "Release",
+        "/graph",
+        "/m",
+        "--nologo"
       ],
       "problemMatcher": "$msCompile",
       "presentation": {
@@ -50,11 +56,12 @@
         "publish",
         "WebApi.Service/WebApi.Service.csproj",
         "-c",
-        "Release"
+        "Release",
+        "/graph",
+        "/m",
+        "--nologo"
       ],
-      "dependsOn": [
-        "_publish-local-issuer"
-      ],
+      "dependsOn": ["_publish-local-issuer"],
       "dependsOrder": "sequence",
       "problemMatcher": "$msCompile",
       "presentation": {
@@ -74,11 +81,12 @@
         "publish",
         "WebApi.Client/WebApi.Client.csproj",
         "-c",
-        "Release"
+        "Release",
+        "/graph",
+        "/m",
+        "--nologo"
       ],
-      "dependsOn": [
-        "_publish-local-api"
-      ],
+      "dependsOn": ["_publish-local-api"],
       "dependsOrder": "sequence",
       "problemMatcher": "$msCompile",
       "presentation": {
@@ -89,9 +97,7 @@
     },
     {
       "label": "publish-local",
-      "dependsOn": [
-        "_publish-local-client"
-      ],
+      "dependsOn": ["_publish-local-client"],
       "dependsOrder": "sequence",
       "problemMatcher": [],
       "group": "build",
@@ -113,7 +119,10 @@
         "WebApi.Issuer/WebApi.Issuer.csproj",
         "-c",
         "Release",
-        "-p:IsContainerBuild=true"
+        "-p:IsContainerBuild=true",
+        "/graph",
+        "/m",
+        "--nologo"
       ],
       "problemMatcher": "$msCompile",
       "presentation": {
@@ -134,11 +143,12 @@
         "WebApi.Service/WebApi.Service.csproj",
         "-c",
         "Release",
-        "-p:IsContainerBuild=true"
+        "-p:IsContainerBuild=true",
+        "/graph",
+        "/m",
+        "--nologo"
       ],
-      "dependsOn": [
-        "_publish-container-issuer"
-      ],
+      "dependsOn": ["_publish-container-issuer"],
       "dependsOrder": "sequence",
       "problemMatcher": "$msCompile",
       "presentation": {
@@ -159,11 +169,12 @@
         "WebApi.Client/WebApi.Client.csproj",
         "-c",
         "Release",
-        "-p:IsContainerBuild=true"
+        "-p:IsContainerBuild=true",
+        "/graph",
+        "/m",
+        "--nologo"
       ],
-      "dependsOn": [
-        "_publish-container-api"
-      ],
+      "dependsOn": ["_publish-container-api"],
       "dependsOrder": "sequence",
       "problemMatcher": "$msCompile",
       "presentation": {
@@ -174,9 +185,7 @@
     },
     {
       "label": "publish-container",
-      "dependsOn": [
-        "_publish-container-client"
-      ],
+      "dependsOn": ["_publish-container-client"],
       "dependsOrder": "sequence",
       "problemMatcher": [],
       "group": "build",

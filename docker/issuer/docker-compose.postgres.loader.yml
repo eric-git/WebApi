@@ -1,7 +1,6 @@
 name: webapi-suite
 
 services:
-
   issuer-postgres-loader:
     image: alpine:latest
     depends_on:

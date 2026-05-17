@@ -1,7 +1,6 @@
 name: webapi-suite
 
 services:
-
   postgres-issuer:
     labels:
       app: issuer
@@ -47,7 +46,6 @@ services:
         target: connection-default.password
 
 secrets:
-
   db-manager-password:
     file: ../local/data/postgres/db-manager-password.txt
     labels:

@@ -1,7 +1,6 @@
 name: webapi-suite
 
 services:
-
   client:
     labels:
       app: client
@@ -30,7 +29,7 @@ services:
       Logging__LogLevel__WebApi: Information
       Logging__Console__FormatterName: simple
       Logging__Console__FormatterOptions__IncludeTimestamp: true
-      Logging__Console__FormatterOptions__TimestampFormat: 'yyyy-MM-dd HH:mm:ss.fff '
+      Logging__Console__FormatterOptions__TimestampFormat: "yyyy-MM-dd HH:mm:ss.fff "
     secrets:
       - source: issuer-hosting-cert
         target: issuer-hosting-cert.crt
@@ -44,7 +43,6 @@ services:
     restart: always
 
 secrets:
-
   client-private-signing-key:
     labels:
       app: issuer

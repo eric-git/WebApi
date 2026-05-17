@@ -1,7 +1,6 @@
 name: webapi-suite
 
 services:
-
   issuer:
     environment:
       Persistence__Mode: json
@@ -10,7 +9,6 @@ services:
       - issuer-json-data:/lib/var/api/:rw
 
 volumes:
-
   issuer-json-data:
     labels:
       app: issuer

@@ -1,14 +1,8 @@
 {
   "version": "0.2",
   "language": "en",
-  "files": [
-    "**/*"
-  ],
-  "dictionaries": [
-    "powershell",
-    "softwareTerms",
-    "dotnet"
-  ],
+  "files": ["**/*"],
+  "dictionaries": ["powershell", "softwareTerms", "dotnet"],
   "dictionaryDefinitions": [
     {
       "name": "dotnet",
@@ -87,6 +81,7 @@
     "Ruta",
     "seccomp",
     "Segoe",
+    "slnx",
     "stty",
     "traceparent",
     "ttinclude",
