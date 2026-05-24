@@ -2,8 +2,23 @@
   <PropertyGroup>
     <AssemblyTitle>Sample Web API service</AssemblyTitle>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectSummary>Game Web API</ProjectSummary>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="docs\description.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectSummary</_Parameter1>
+      <_Parameter2>$(ProjectSummary)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="docs\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="docs\description.md" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />

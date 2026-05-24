@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static WebApi.Common.Web.ErrorHandling.Constants;
 
 namespace WebApi.Common.Web.ErrorHandling;
 
@@ -28,7 +29,7 @@ public sealed class ProblemDetailsAuthorizationHandler(IProblemDetailsService pr
                 : "Authentication is required to access this resource."
         };
         context.Response.StatusCode = problemDetails.Status!.Value;
-        context.Response.ContentType = "application/problem+json";
+        context.Response.ContentType = ProblemContentType;
         ProblemDetailsContext problemDetailsContext = new()
         {
             HttpContext = context,

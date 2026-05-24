@@ -10,6 +10,42 @@
     <AssemblyOriginatorKeyFile>..\web-api-suite.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
+  <!-- Metadata -->
+  <PropertyGroup>
+    <ProjectContactName>Eric Wu</ProjectContactName>
+    <ProjectContactEmail>wu_yuqing@hotmail.com</ProjectContactEmail>
+    <ProjectContactUrl>https://github.com/eric-git/WebApi</ProjectContactUrl>
+    <ProjectLicenseName>MIT</ProjectLicenseName>
+    <ProjectLicenseUrl>https://github.com/eric-git/WebApi?tab=MIT-1-ov-file</ProjectLicenseUrl>
+    <ProjectTermsUrl>https://github.com/eric-git/WebApi?tab=security-ov-file</ProjectTermsUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectContactName</_Parameter1>
+      <_Parameter2>$(ProjectContactName)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectContactEmail</_Parameter1>
+      <_Parameter2>$(ProjectContactEmail)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectContactUrl</_Parameter1>
+      <_Parameter2>$(ProjectContactUrl)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectLicenseName</_Parameter1>
+      <_Parameter2>$(ProjectLicenseName)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectLicenseUrl</_Parameter1>
+      <_Parameter2>$(ProjectLicenseUrl)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectTermsUrl</_Parameter1>
+      <_Parameter2>$(ProjectTermsUrl)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <!-- CI -->
   <PropertyGroup Condition="'$(Configuration)'=='Release' AND ('$(GITHUB_ACTIONS)'=='true' OR '$(TF_BUILD)'=='True')">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>

@@ -1,4 +1,3 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -6,7 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using System.Net.Mime;
 using static WebApi.Common.Constants;
+using static WebApi.Common.Metadata.AssemblyMetadata;
 
 namespace WebApi.Common.Web;
 
@@ -21,15 +22,14 @@ public static class ApiEndpoints
                             {
                                 cancellationToken.ThrowIfCancellationRequested();
                                 var runInContainer = bool.TryParse(configuration["DOTNET_RUNNING_IN_CONTAINER"], out var value) && value;
-                                var assembly = Assembly.GetEntryAssembly()!;
                                 return Results.Json(new
                                 {
                                     status = $"Running{(runInContainer ? " in container" : null)}",
-                                    title = assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title,
-                                    product = assembly.GetCustomAttribute<AssemblyProductAttribute>()?.Product,
-                                    company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company,
-                                    informationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion,
-                                    version = assembly.GetName().Version?.ToString(),
+                                    title = GetTitle(),
+                                    product = GetProduct(),
+                                    company = GetCompany(),
+                                    informationalVersion = GetInformationalVersion(),
+                                    version = GetVersion(),
                                     timestamp = DateTime.UtcNow
                                 }, DataSerializationOptions);
                             })
@@ -41,7 +41,7 @@ public static class ApiEndpoints
                                 cancellationToken.ThrowIfCancellationRequested();
                                 var env = endpointRouteBuilder.ServiceProvider.GetRequiredService<IHostEnvironment>();
                                 var filePath = Path.Combine(env.ContentRootPath, "favicon.ico");
-                                return Results.File(filePath, "image/x-icon");
+                                return Results.File(filePath, MediaTypeNames.Image.Icon);
                             })
                             .WithName(FavIconRouteName)
                             .ExcludeFromDescription();

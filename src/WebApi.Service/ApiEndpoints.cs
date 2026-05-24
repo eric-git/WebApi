@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Net.Mime;
 using WebApi.Common.Web.Documentation;
 using WebApi.Common.Web.Validation;
 using WebApi.Service.DataAccess;
@@ -8,12 +9,14 @@ namespace WebApi.Service;
 
 internal static class ApiEndpoints
 {
+    private const string GamesPrefix = "games";
     private const string GetGameRouteName = "GetGame";
     private const string CreateGameRouteName = "CreateGame";
     private const string UpdateGameRouteName = "UpdateGame";
     private const string DeleteGameRouteName = "DeleteGame";
     private const string ListGamesRouteName = "ListGames";
 
+    private const string RelationsPrefix = "{gameId:guid}/relations";
     private const string GetRelationRouteName = "GetRelation";
     private const string CreateRelationRouteName = "CreateRelation";
     private const string UpdateRelationRouteName = "UpdateRelation";
@@ -25,7 +28,7 @@ internal static class ApiEndpoints
 
     public static IEndpointRouteBuilder MapGame(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var games = endpointRouteBuilder.MapGroup("/games")
+        var games = endpointRouteBuilder.MapGroup($"/{GamesPrefix}")
                                         .AddEndpointFilter<ValidationFilter>()
                                         .WithTags("Games")
                                         .WithSummary("Game operations")
@@ -82,8 +85,9 @@ internal static class ApiEndpoints
              .WithDisplayName("Create a new game")
              .WithSummary("Create a new game")
              .WithDescription("Creates a new game and returns its identifier.")
-             .Accepts<CreateGame>("application/json")
+             .Accepts<CreateGame>(MediaTypeNames.Application.Json)
              .Produces<Guid>(StatusCodes.Status201Created)
+             .WithMetadata(new CreatedLocation("The URL of the newly created game."))
              .ProducesValidationProblem()
              .RequireAuthorization(WritePolicyName);
 
@@ -109,7 +113,7 @@ internal static class ApiEndpoints
              .WithDisplayName("Update a game")
              .WithSummary("Update a game")
              .WithDescription("Updates the specified game with new values.")
-             .Accepts<UpdateGame>("application/json")
+             .Accepts<UpdateGame>(MediaTypeNames.Application.Json)
              .Produces(StatusCodes.Status204NoContent)
              .ProducesProblem(StatusCodes.Status404NotFound)
              .ProducesValidationProblem()
@@ -139,7 +143,7 @@ internal static class ApiEndpoints
              .ProducesProblem(StatusCodes.Status404NotFound)
              .RequireAuthorization(WritePolicyName);
 
-        var relations = games.MapGroup("/{gameId:guid}/relations")
+        var relations = games.MapGroup($"/{RelationsPrefix}")
                              .WithTags("Relations")
                              .WithSummary("Game relation operations")
                              .WithDescription("Endpoints for retrieving, creating, and managing game relations.")
@@ -214,8 +218,9 @@ internal static class ApiEndpoints
                  .WithDisplayName("Create a relation")
                  .WithSummary("Create a relation")
                  .WithDescription("Creates a new relation under the specified game.")
-                 .Accepts<CreateRelation>("application/json")
+                 .Accepts<CreateRelation>(MediaTypeNames.Application.Json)
                  .Produces<Guid>(StatusCodes.Status201Created)
+                 .WithMetadata(new CreatedLocation("The URL of the newly created relation."))
                  .ProducesValidationProblem()
                  .RequireAuthorization(WritePolicyName);
 
@@ -242,7 +247,7 @@ internal static class ApiEndpoints
                  .WithDisplayName("Update a relation")
                  .WithSummary("Update a relation")
                  .WithDescription("Updates the specified relation under the given game.")
-                 .Accepts<UpdateRelation>("application/json")
+                 .Accepts<UpdateRelation>(MediaTypeNames.Application.Json)
                  .Produces(StatusCodes.Status204NoContent)
                  .ProducesValidationProblem()
                  .RequireAuthorization(WritePolicyName);

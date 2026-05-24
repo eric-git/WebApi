@@ -2,10 +2,11 @@
   "openapi": "3.1.1",
   "info": {
     "title": "Sample Web API service",
-    "description": "Sample Web API service for processing game records.",
+    "description": "---\r\nThis Web API provides a minimal, modern ASP.NET Core service for managing a collection of games. It demonstrates clean endpoint design, lightweight configuration, and a straightforward CRUD workflow suitable for small services or as a foundation for larger systems.\r\n\r\nTo run the service locally or in a container:\r\n\r\n- Clone the repository to your development machine.\r\n- Open the solution using Visual Studio, Rider, or your preferred IDE.\r\n- Run the project directly, or build and deploy it using Docker to start the API service.\r\n\r\nToken issuer deatils:\r\n- Authority: `https://localhost:5003/connect`\r\n- OIDC configuration: `https://localhost:5003/connect/.well-known/openid-configuration`\r\n",
     "termsOfService": "https://github.com/eric-git/WebApi?tab=security-ov-file",
     "contact": {
       "name": "Eric Wu",
+      "url": "https://github.com/eric-git/WebApi",
       "email": "wu_yuqing@hotmail.com"
     },
     "license": {
@@ -100,7 +101,7 @@
                 },
                 "example": [
                   {
-                    "Id": "df3d53f0-70c2-4a45-9550-d8e6b151d317",
+                    "Id": "76269915-5f87-4ab0-9d8a-4312b6157967",
                     "Type": "game",
                     "Name": "Mario Kart 8 Deluxe",
                     "PlayerName": "Mario",
@@ -198,6 +199,15 @@
           },
           "201": {
             "description": "Created",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created game.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -320,14 +330,14 @@
                   "$ref": "#/components/schemas/Game"
                 },
                 "example": {
-                  "Id": "a4b9c0d4-79f1-4a2a-a41d-c97afec49832",
+                  "Id": "8d8bdfc4-9631-48c2-853f-f83b5fc984ec",
                   "Type": "game",
                   "Name": "Mario Kart 8 Deluxe",
                   "PlayerName": "Mario",
                   "PlayerHealth": 100,
                   "Relations": [
                     {
-                      "Id": "c27d6c04-95df-4146-88ef-e9ce701f4363",
+                      "Id": "a6c79c20-6edb-4a7e-bc82-7cab0aadd2d3",
                       "Type": "Quest",
                       "Name": "Win Rainbow Road",
                       "Attributes": {
@@ -336,7 +346,7 @@
                       }
                     },
                     {
-                      "Id": "de74b072-f3ed-4319-82ba-63eaf1b90563",
+                      "Id": "0084ec6f-a862-4f1c-9229-b9f528dea7e1",
                       "Type": "Quest",
                       "Name": "Collect 50 Coins",
                       "Attributes": {
@@ -345,7 +355,7 @@
                       }
                     },
                     {
-                      "Id": "7dde21be-2702-436f-94d2-cdd6e87d4d9a",
+                      "Id": "984399e3-79f0-4abd-b8ee-b38b1ef05c69",
                       "Type": "Equipment",
                       "Name": "Kart Setup",
                       "Attributes": {
@@ -733,7 +743,7 @@
                 },
                 "example": [
                   {
-                    "Id": "b4ec2c40-d010-4b2b-abc8-570acd9747b6",
+                    "Id": "89d39c40-5f18-43a5-8f2b-47154c8e36a2",
                     "Type": "Quest",
                     "Name": "Win Rainbow Road"
                   }
@@ -861,6 +871,15 @@
           },
           "201": {
             "description": "Created",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created relation.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            },
             "content": {
               "application/json": {
                 "schema": {
@@ -1011,7 +1030,7 @@
                   "$ref": "#/components/schemas/Relation"
                 },
                 "example": {
-                  "Id": "3392dc8a-9c87-418c-8b58-c294db5d6421",
+                  "Id": "43704caa-913e-4f81-a458-53c5e4a0fab7",
                   "Type": "Quest",
                   "Name": "Win Rainbow Road",
                   "Attributes": {
@@ -1635,7 +1654,7 @@
     "securitySchemes": {
       "Bearer": {
         "type": "http",
-        "description": "JWT Authorization header using the Bearer scheme.",
+        "description": "JWT authorization header using the bearer scheme.",
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }

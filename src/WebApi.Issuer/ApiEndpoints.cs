@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Issuer.DataAccess;
@@ -149,7 +150,7 @@ internal static class ApiEndpoints
                        var accessToken = jsonWebTokenHandler.CreateToken(descriptor);
                        return Results.Json(new
                        {
-                           token_type = "Bearer",
+                           token_type = JwtBearerDefaults.AuthenticationScheme,
                            expires_in = tokenLifeTimeInMinutes * 60,
                            access_token = accessToken
                        });
@@ -179,7 +180,7 @@ internal static class ApiEndpoints
                    (HttpContext context, LinkGenerator linkGenerator, CancellationToken cancellationToken) =>
                    {
                        cancellationToken.ThrowIfCancellationRequested();
-                       var signingAlgorithms = ImmutableArray.Create("RS256");
+                       var signingAlgorithms = ImmutableArray.Create(SecurityAlgorithms.RsaSha256);
                        var responseTypes = ImmutableArray.Create("client_credentials");
                        var grantTypes = ImmutableArray.Create("client_credentials");
                        var claimsSupported = ImmutableArray.Create(

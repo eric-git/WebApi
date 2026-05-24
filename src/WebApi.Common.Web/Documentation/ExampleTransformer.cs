@@ -1,9 +1,10 @@
-﻿using System.Globalization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
+using System.Globalization;
+using System.Net.Mime;
 
 namespace WebApi.Common.Web.Documentation;
 
@@ -69,7 +70,7 @@ public sealed class ExampleTransformer : IOpenApiOperationTransformer
             var declaredType = context.Description.SupportedResponseTypes
                                       .FirstOrDefault(r => r.StatusCode.ToString(CultureInfo.InvariantCulture) == statusCode)?
                                       .Type;
-            if (declaredType != responseType || !response.Content!.TryGetValue("application/json", out var jsonContent))
+            if (declaredType != responseType || !response.Content!.TryGetValue(MediaTypeNames.Application.Json, out var jsonContent))
             {
                 continue;
             }

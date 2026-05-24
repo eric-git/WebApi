@@ -15,7 +15,7 @@ public sealed class ProblemDetailsExampleTransformer : IOpenApiOperationTransfor
         ArgumentNullException.ThrowIfNull(context);
         foreach (var (statusCode, response) in operation.Responses!)
         {
-            if (response.Content?.TryGetValue("application/problem+json", out var mediaType) == true)
+            if (response.Content?.TryGetValue(ProblemContentType, out var mediaType) == true)
             {
                 mediaType.Example = CreateExample(statusCode, context.Description.RelativePath);
             }

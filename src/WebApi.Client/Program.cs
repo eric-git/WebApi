@@ -1,11 +1,12 @@
-﻿using System.Net.Http.Headers;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System.Net.Http.Headers;
+using System.Net.Mime;
 using WebApi.Client.Client;
 using WebApi.Common.Logging;
 using WebApi.Common.Security;
@@ -85,7 +86,7 @@ builder.Services.AddHttpClient(GameServiceClient.HttpClientName, (serviceProvide
        {
            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
            httpClient.BaseAddress = new Uri($"{configuration["API_BASE_URL"]}/");
-           httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+           httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
        })
        .ConfigurePrimaryHttpMessageHandler(serviceProvider =>
        {
