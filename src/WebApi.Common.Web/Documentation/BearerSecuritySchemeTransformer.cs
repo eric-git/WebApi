@@ -13,19 +13,18 @@ public sealed class BearerSecuritySchemeTransformer(IAuthenticationSchemeProvide
         var authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync().ConfigureAwait(false);
         if (authenticationSchemes.Any(authScheme => authScheme.Name == JwtBearerDefaults.AuthenticationScheme))
         {
-            var securitySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+            document.Components ??= new OpenApiComponents();
+            document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>
             {
                 [JwtBearerDefaults.AuthenticationScheme] = new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
+                    Scheme = OpenApiConstants.Bearer,
                     In = ParameterLocation.Header,
-                    BearerFormat = "JWT",
-                    Description = $"JWT Authorization header using the {JwtBearerDefaults.AuthenticationScheme} scheme."
+                    BearerFormat = OpenApiConstants.Jwt,
+                    Description = $"{OpenApiConstants.Jwt} authorization header using the {OpenApiConstants.Bearer} scheme."
                 }
             };
-            document.Components ??= new OpenApiComponents();
-            document.Components.SecuritySchemes = securitySchemes;
             foreach (var operation in document.Paths.Values.SelectMany(path => path.Operations!))
             {
                 operation.Value.Security ??= [];

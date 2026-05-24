@@ -26,7 +26,7 @@ public static class Helper
         logCallback(LogLevel.Error, new EventId(ErrorOccurred, nameof(ErrorOccurred)), exception?.Message);
 
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/problem+json";
+        context.Response.ContentType = ProblemContentType;
         ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status500InternalServerError,

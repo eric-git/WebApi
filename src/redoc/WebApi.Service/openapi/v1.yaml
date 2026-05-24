@@ -1,10 +1,11 @@
 openapi: '3.1.1'
 info:
   title: Sample Web API service
-  description: Sample Web API service for processing game records.
+  description: "---\r\nThis Web API provides a minimal, modern ASP.NET Core service for managing a collection of games. It demonstrates clean endpoint design, lightweight configuration, and a straightforward CRUD workflow suitable for small services or as a foundation for larger systems.\r\n\r\nTo run the service locally or in a container:\r\n\r\n- Clone the repository to your development machine.\r\n- Open the solution using Visual Studio, Rider, or your preferred IDE.\r\n- Run the project directly, or build and deploy it using Docker to start the API service.\r\n\r\nToken issuer deatils:\r\n- Authority: `https://localhost:5003/connect`\r\n- OIDC configuration: `https://localhost:5003/connect/.well-known/openid-configuration`\r\n"
   termsOfService: https://github.com/eric-git/WebApi?tab=security-ov-file
   contact:
     name: Eric Wu
+    url: https://github.com/eric-git/WebApi
     email: wu_yuqing@hotmail.com
   license:
     name: MIT
@@ -73,7 +74,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/GameListItem'
               example:
-                - Id: dde42348-1ef5-4595-b964-f6843f1333dd
+                - Id: cbeaf0cd-f2bd-4b95-9e73-9851c41723b8
                   Type: game
                   Name: Mario Kart 8 Deluxe
                   PlayerName: Mario
@@ -140,6 +141,12 @@ paths:
                 traceId: 0HNIV5A3KTS4L:00000003
         '201':
           description: Created
+          headers:
+            Location:
+              description: The URL of the newly created game.
+              schema:
+                type: string
+                format: uri
           content:
             application/json:
               schema:
@@ -224,25 +231,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Game'
               example:
-                Id: 91326b68-156d-4cee-a81c-037a2d7ff39c
+                Id: 9b9bb4f1-eb06-48de-a0a8-de3603e6a7b3
                 Type: game
                 Name: Mario Kart 8 Deluxe
                 PlayerName: Mario
                 PlayerHealth: 100
                 Relations:
-                  - Id: b1da5cd6-2ad5-49e4-9868-ab45c09f6032
+                  - Id: e0e03206-b2b0-48ac-ae2a-c8fc12f02aa7
                     Type: Quest
                     Name: Win Rainbow Road
                     Attributes:
                       status: In Progress
                       reward: Gold Trophy
-                  - Id: 81c7249a-89be-498c-8d37-d280c8866317
+                  - Id: 83b95bf1-fc91-4448-8b3e-7b420ba99bec
                     Type: Quest
                     Name: Collect 50 Coins
                     Attributes:
                       status: Completed
                       reward: Speed Boost
-                  - Id: e2dd7986-cbed-4e39-b044-5c18b63bc14e
+                  - Id: 06af28f7-b9ff-4d6a-9d89-2817524aa555
                     Type: Equipment
                     Name: Kart Setup
                     Attributes:
@@ -510,7 +517,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/RelationListItem'
               example:
-                - Id: 28b71deb-d81f-4ecb-9ffb-52d15ce41c04
+                - Id: dbe807bb-d2ae-458d-8d3b-3ad58ae301cb
                   Type: Quest
                   Name: Win Rainbow Road
       security:
@@ -597,6 +604,12 @@ paths:
                 traceId: 0HNIV5A3KTS4L:00000004
         '201':
           description: Created
+          headers:
+            Location:
+              description: The URL of the newly created relation.
+              schema:
+                type: string
+                format: uri
           content:
             application/json:
               schema:
@@ -701,7 +714,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Relation'
               example:
-                Id: 77c5e3cc-2a57-48fa-bd53-353522899f73
+                Id: 10ed24fc-6801-474c-a1d0-5d04ca46dd93
                 Type: Quest
                 Name: Win Rainbow Road
                 Attributes:
@@ -1140,7 +1153,7 @@ components:
   securitySchemes:
     Bearer:
       type: http
-      description: JWT Authorization header using the Bearer scheme.
+      description: JWT authorization header using the bearer scheme.
       scheme: bearer
       bearerFormat: JWT
 tags:

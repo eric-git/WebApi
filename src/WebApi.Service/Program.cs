@@ -140,6 +140,7 @@ builder.Services.AddOpenApi(options =>
     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
     options.AddDocumentTransformer<TagDescriptionTransformer>();
     options.AddDocumentTransformer<ExtensionTransformer>();
+    options.AddOperationTransformer<CreatedLocationHeaderTransformer>();
     options.AddOperationTransformer<ExampleTransformer>();
     options.AddOperationTransformer<ProblemDetailsExampleTransformer>();
 });

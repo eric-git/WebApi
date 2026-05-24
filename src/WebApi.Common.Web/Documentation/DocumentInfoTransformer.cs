@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
+using static WebApi.Common.Metadata.AssemblyMetadata;
 
 namespace WebApi.Common.Web.Documentation;
 
@@ -11,18 +12,19 @@ public abstract class DocumentInfoTransformer : IOpenApiDocumentTransformer
         ArgumentNullException.ThrowIfNull(document);
         ArgumentNullException.ThrowIfNull(context);
         var assembly = Assembly.GetEntryAssembly()!;
-        document.Info.Title = assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title;
+        document.Info.Title = GetTitle();
         document.Info.Contact = new OpenApiContact
         {
-            Name = "Eric Wu",
-            Email = "wu_yuqing@hotmail.com"
+            Name = Get("ProjectContactName"),
+            Email = Get("ProjectContactEmail"),
+            Url = new Uri(Get("ProjectContactUrl")!)
         };
         document.Info.License = new OpenApiLicense
         {
-            Name = "MIT",
-            Url = new Uri("https://github.com/eric-git/WebApi?tab=MIT-1-ov-file")
+            Name = Get("ProjectLicenseName"),
+            Url = new Uri(Get("ProjectLicenseUrl")!)
         };
-        document.Info.TermsOfService = new Uri("https://github.com/eric-git/WebApi?tab=security-ov-file");
+        document.Info.TermsOfService = new Uri(Get("ProjectTermsUrl")!);
         return Task.CompletedTask;
     }
 }
