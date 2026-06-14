@@ -9,6 +9,7 @@
     "mads-hartmann.bash-ide-vscode",
     "bierner.markdown-mermaid",
     "ms-vscode.makefile-tools",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "mermaidchart.vscode-mermaid-chart"
   ]
 }

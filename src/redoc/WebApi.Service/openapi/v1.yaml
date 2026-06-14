@@ -1,7 +1,7 @@
 openapi: '3.1.1'
 info:
   title: Sample Web API service
-  description: "---\r\nThis Web API provides a minimal, modern ASP.NET Core service for managing a collection of games. It demonstrates clean endpoint design, lightweight configuration, and a straightforward CRUD workflow suitable for small services or as a foundation for larger systems.\r\n\r\nTo run the service locally or in a container:\r\n\r\n- Clone the repository to your development machine.\r\n- Open the solution using Visual Studio, Rider, or your preferred IDE.\r\n- Run the project directly, or build and deploy it using Docker to start the API service.\r\n\r\nToken issuer deatils:\r\n- Authority: `https://localhost:5003/connect`\r\n- OIDC configuration: `https://localhost:5003/connect/.well-known/openid-configuration`\r\n"
+  description: "---\r\nThis Web API provides a minimal, modern ASP.NET Core service for managing a collection of games. It demonstrates clean endpoint design, lightweight configuration, and a straightforward CRUD workflow suitable for small services or as a foundation for larger systems.\r\n\r\nTo run the service locally or in a container:\r\n\r\n- Clone the repository to your development machine.\r\n- Open the solution using Visual Studio, Rider, or your preferred IDE.\r\n- Run the project directly, or build and deploy it using Docker to start the API service.\r\n\r\nToken issuer details:\r\n- Authority: `https://localhost:5003/connect`\r\n- OIDC configuration: `https://localhost:5003/connect/.well-known/openid-configuration`\r\n"
   termsOfService: https://github.com/eric-git/WebApi?tab=security-ov-file
   contact:
     name: Eric Wu

@@ -17,10 +17,11 @@
     "init-local-pwsh": "pwsh ./local/ensure-runtime.ps1"
   },
   "devDependencies": {
-    "@cspell/dict-dotnet": "5.0.12",
-    "cspell": "9.7.0",
-    "fast-glob": "3.3.3",
-    "serve": "14.2.6"
+    "@cspell/dict-dotnet": "latest",
+    "cspell": "latest",
+    "fast-glob": "latest",
+    "serve": "latest",
+    "prettier": "latest"
   },
   "engines": {
     "node": ">=24",
